@@ -51,5 +51,5 @@ app.use("/api/user", apiRoutes);
 app.use(errorHandler);
 
 app.listen(port, () => {
-	console.log(`Server listening at http://0.0.0.0:${port}`);
+	console.log(`Server listening at http://${process.env.HTTP}:${port}`);
 });
