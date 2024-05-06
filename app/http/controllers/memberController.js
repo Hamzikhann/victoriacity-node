@@ -73,7 +73,7 @@ class MemberController {
 		}
 		try {
 			const addMember = await Member.create({
-				Mem_Reg_Code: null,
+				Mem_Reg_Code: 1,
 				BuyerName,
 				BuyerContact,
 				BuyerAddress,
