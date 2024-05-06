@@ -45,7 +45,7 @@ app.use(express.urlencoded({ extended: true }));
 // app.use(express.json())
 app.use("/uploads", express.static("uploads"));
 //load routes
-app.use("/api/user", apiRoutes);
+app.use("/api", apiRoutes);
 
 //Error Handler Middleware
 app.use(errorHandler);
