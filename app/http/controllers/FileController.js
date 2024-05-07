@@ -61,7 +61,8 @@ class FileController {
 						res.status(200).send({
 							status: 200,
 							message: "Add Files successfully",
-							file: response
+							file: response,
+							froms: froms
 						});
 					}
 				})
