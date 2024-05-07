@@ -50,7 +50,7 @@ class FileController {
 
 		try {
 			let maxCodeId = await OpenFile.max("OF_MaxCode");
-			checkConsecutiveTenMonthUnpaidInstallments.log(req.body);
+			console.log(req.body);
 			maxCodeId = maxCodeId + 1;
 
 			const froms = await FileService.createFileFroms(req.body, maxCodeId, req.user.id);
