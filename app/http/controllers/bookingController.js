@@ -264,15 +264,27 @@ class BookingController {
 				Address
 			});
 			console.log("RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR", responce);
-			return res.status(200).send({
-				status: 200,
-				message: responce
-					? responce
-					: receipt_head == "transfer_fee"
-					? "Transfer Fee added successfully"
-					: "Transfer Tax added successfully",
-				data: responce
-			});
+			if (responce) {
+				return res.status(200).send({
+					status: 200,
+					message: responce
+						? responce
+						: receipt_head == "transfer_fee"
+						? "Transfer Fee added successfully"
+						: "Transfer Tax added successfully",
+					data: responce
+				});
+			} else {
+				return res.status(500).send({
+					status: 500,
+					message: responce
+						? responce
+						: receipt_head == "transfer_fee"
+						? "Transfer Fee not added"
+						: "Transfer Tax not added",
+					data: responce
+				});
+			}
 		}
 
 		// USER_ID = req.user.id;
