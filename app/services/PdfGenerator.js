@@ -7224,7 +7224,7 @@ class pdfGenerator {
 			const dateFromTimeStamp = new Date(timestamp);
 			const monthsArr = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
 
-			dateFromTimeStamp.setDate(dateFromTimeStamp.getDate() + 1);
+			dateFromTimeStamp.setDate(dateFromTimeStamp.getDate());
 			let timestampDay = dateFromTimeStamp.getDate();
 
 			// if(typeof simple != "undefined" && simple == 1) {
@@ -11080,7 +11080,7 @@ class pdfGenerator {
 			const dateFromTimeStamp = new Date(timestamp);
 			const monthsArr = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
 
-			dateFromTimeStamp.setDate(dateFromTimeStamp.getDate() + 1);
+			dateFromTimeStamp.setDate(dateFromTimeStamp.getDate());
 			let timestampDay = dateFromTimeStamp.getDate();
 
 			// if(typeof simple != "undefined" && simple == 1) {
