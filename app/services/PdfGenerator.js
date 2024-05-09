@@ -8376,7 +8376,7 @@ class pdfGenerator {
 				// if(typeof simple != "undefined" && simple == 1) {
 				//     timestampDay = dateFromTimeStamp.getDate();
 				// }
-				const timestampMonth = monthsArr[dateFromTimeStamp.getMonth() + 1]; // Months are zero-based, so we add 1
+				const timestampMonth = monthsArr[dateFromTimeStamp.getMonth()]; // Months are zero-based, so we add 1
 				const timestampYear = dateFromTimeStamp.getFullYear();
 
 				const formattedStampDate = `${timestampDay}-${timestampMonth}-${timestampYear}`;
