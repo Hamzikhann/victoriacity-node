@@ -65,8 +65,7 @@ class MemberController {
 				DOB &&
 				Email &&
 				Relation &&
-				Rmarks &&
-				IsActive
+				Rmarks
 			)
 		) {
 			return next(CustomErrorHandler.wrongCredentials("All fields are required!"));
