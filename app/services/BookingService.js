@@ -150,7 +150,7 @@ class BookingService {
 			}
 			const OST = await this.outStandingAmount(body.BK_ID);
 			console.log("Out standing amount", OST);
-			if (OST > 0 && body.amount > OST) {
+			if (OST > 0 && body.amount == true) {
 				return `Out Standing Amount not Paid!`;
 			}
 
