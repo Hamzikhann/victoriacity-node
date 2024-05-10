@@ -599,7 +599,7 @@ class BookingController {
 			Date.prototype.addMonths = function (value) {
 				var n = this.getDate();
 				this.setDate(1);
-				this.setMonth(this.getMonth());
+				this.setMonth(this.getMonth() + value);
 				this.setDate(Math.min(n, this.getDaysInMonth()));
 				return this;
 			};
