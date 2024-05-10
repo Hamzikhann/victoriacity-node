@@ -1272,7 +1272,20 @@ class BookingController {
 					where: { BK_ID: booking.BK_ID, BKI_TYPE: "DC" }
 				});
 			}
-
+			console.log(
+				"BOOKINGS",
+				booking,
+				"INSTALLMENTRECIPTS",
+				installmentReceipts,
+				"INSTAKKMENT RECIPT",
+				installmentReceipt,
+				"RECIPT HEAD",
+				receipt_head,
+				"TRSData",
+				TRSData,
+				"devInsReceipts",
+				devInsReceipts
+			);
 			const pdf = await pdfGenerator.paymentPlanGenerator(
 				booking,
 				installmentReceipts,
