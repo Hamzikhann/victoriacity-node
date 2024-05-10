@@ -679,7 +679,7 @@ class BookingController {
 					amount = ppObj.downPayment;
 					instType = 8;
 
-					var dueDate = myDate.addMonths(1);
+					var dueDate = myDate.addMonths(0);
 
 					let maxInstallment_Code = await BookingInstallmentDetails.max("Installment_Code");
 					maxInstallment_Code = maxInstallment_Code + 1;
