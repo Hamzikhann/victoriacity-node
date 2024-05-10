@@ -1213,7 +1213,8 @@ class BookingController {
 					include: [{ as: "Member", model: Member }]
 				});
 			}
-			const booking = await Booking.findByPk(id, {
+			const booking = await Booking.findOne({
+				where: { BK_ID: id },
 				include: [
 					{ as: "Member", model: Member },
 					{ as: "Phase", model: Phase },
