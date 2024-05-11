@@ -765,7 +765,7 @@ class BookingController {
 
 					if (ppObj && ppObj.DC_START_DATE && ppObj.IncludeDC == 1) {
 						const myDate = new Date(ppObj.DC_START_DATE);
-						const dueDate = myDate.addMonths(1);
+						const dueDate = myDate.addMonths(1, i);
 						let totalAmount = 0;
 						let BookingInstallmentDetailsO = [];
 						let maxInstallment_Code = await BookingInstallmentDetails.max("Installment_Code");
@@ -780,8 +780,8 @@ class BookingController {
 
 							totalAmount = totalAmount + +ppObj.DC_INSTALLMENT_AMOUNT;
 							BookingInstallmentDetailsO.push({
-								Due_Date: getDateOfEveryTenth(dueDate, 10).addMonths(i, i),
-								Installment_Month: getDateOfEveryTenth(dueDate, 1).addMonths(i, i),
+								Due_Date: getDateOfEveryTenth(dueDate, 10).addMonths(i - 1),
+								Installment_Month: getDateOfEveryTenth(dueDate, 1).addMonths(i - 1),
 								Installment_Code: maxInstallment_Code,
 								BK_ID: row.BK_ID,
 								BK_Reg_Code: row.BK_ID,
