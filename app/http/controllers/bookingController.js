@@ -765,12 +765,13 @@ class BookingController {
 				}
 				if (ppObj && ppObj.DC_START_DATE && ppObj.IncludeDC == 1) {
 					const myDate = new Date(ppObj.DC_START_DATE);
-					const dueDate = myDate.addMonths(1, i);
 					let totalAmount = 0;
 					let BookingInstallmentDetailsO = [];
 					let maxInstallment_Code = await BookingInstallmentDetails.max("Installment_Code");
 
 					for (let j = 1; j <= 18; j++) {
+						const dueDate = myDate.addMonths(1, j);
+
 						let amount = ppObj.DC_INSTALLMENT_AMOUNT;
 						maxInstallment_Code = maxInstallment_Code + 1;
 
