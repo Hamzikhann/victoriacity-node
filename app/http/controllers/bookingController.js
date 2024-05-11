@@ -521,7 +521,7 @@ class BookingController {
 	};
 
 	static addBooking = async (req, res, next) => {
-		const plotId = await PlotSize.findOne({});
+		// const plotId = await PlotSize.findOne({});
 		const {
 			SRForm_No,
 			Form_Code,
@@ -730,7 +730,7 @@ class BookingController {
 					if (type !== "By Annual") {
 						var dueDate = myDate.addMonths(1);
 					}
-
+					console.log("Dueeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee DATEEEEEEEEEEE", dueDate);
 					let maxInstallment_Code = await BookingInstallmentDetails.max("Installment_Code");
 					maxInstallment_Code = maxInstallment_Code + 1;
 
