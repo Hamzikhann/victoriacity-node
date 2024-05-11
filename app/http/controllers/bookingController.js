@@ -780,8 +780,8 @@ class BookingController {
 
 							totalAmount = totalAmount + +ppObj.DC_INSTALLMENT_AMOUNT;
 							BookingInstallmentDetailsO.push({
-								Due_Date: getDateOfEveryTenth(dueDate, 10).addMonths(i - 1, i),
-								Installment_Month: getDateOfEveryTenth(dueDate, 1).addMonths(i - 1, i),
+								Due_Date: getDateOfEveryTenth(dueDate, 10).addMonths(i, i),
+								Installment_Month: getDateOfEveryTenth(dueDate, 1).addMonths(i, i),
 								Installment_Code: maxInstallment_Code,
 								BK_ID: row.BK_ID,
 								BK_Reg_Code: row.BK_ID,
