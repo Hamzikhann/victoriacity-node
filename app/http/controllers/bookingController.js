@@ -596,12 +596,20 @@ class BookingController {
 			Date.prototype.getDaysInMonth = function () {
 				return Date.getDaysInMonth(this.getFullYear(), this.getMonth());
 			};
-			Date.prototype.addMonths = function (value) {
-				var n = this.getDate();
-				this.setDate(1);
-				this.setMonth(this.getMonth() + value);
-				this.setDate(Math.min(n, this.getDaysInMonth()));
-				return this;
+			Date.prototype.addMonths = function (value, iteration = 0) {
+				if (iteration === 1) {
+					var n = this.getDate();
+					this.setDate(1);
+					this.setMonth(this.getMonth());
+					this.setDate(Math.min(n, this.getDaysInMonth()));
+					return this;
+				} else {
+					var n = this.getDate();
+					this.setDate(1);
+					this.setMonth(this.getMonth() + value);
+					this.setDate(Math.min(n, this.getDaysInMonth()));
+					return this;
+				}
 			};
 
 			function getDateOfEveryTenth(currentDate, day) {
@@ -673,6 +681,7 @@ class BookingController {
 				// console.log('ppObj.INS_Start_Date',(typeof ppObj.INS_Start_Date));
 
 				var myDate = new Date(ppObj.INS_Start_Date);
+				console.log("myDate myDate myDate myDate", myDate);
 				// dueDate = myDate.addMonths(-1);
 
 				if (ppObj.downPayment != null) {
@@ -728,7 +737,7 @@ class BookingController {
 					}
 
 					if (type !== "By Annual") {
-						var dueDate = myDate.addMonths(1);
+						var dueDate = myDate.addMonths(1, i);
 					}
 					console.log("Dueeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee DATEEEEEEEEEEE", dueDate);
 					let maxInstallment_Code = await BookingInstallmentDetails.max("Installment_Code");
