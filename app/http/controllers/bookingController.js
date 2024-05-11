@@ -770,18 +770,18 @@ class BookingController {
 						let BookingInstallmentDetailsO = [];
 						let maxInstallment_Code = await BookingInstallmentDetails.max("Installment_Code");
 
-						for (let i = 1; i <= ppObj.DC_NO_OF_INSTALLMENT; i++) {
+						for (let j = 1; j <= 18; j++) {
 							let amount = ppObj.DC_INSTALLMENT_AMOUNT;
 							maxInstallment_Code = maxInstallment_Code + 1;
 
-							if (i == ppObj.DC_NO_OF_INSTALLMENT) {
+							if (j == ppObj.DC_NO_OF_INSTALLMENT) {
 								amount = +ppObj.DC_TOTAL_AMOUNT - totalAmount;
 							}
 
 							totalAmount = totalAmount + +ppObj.DC_INSTALLMENT_AMOUNT;
 							BookingInstallmentDetailsO.push({
-								Due_Date: getDateOfEveryTenth(dueDate, 10).addMonths(i - 1),
-								Installment_Month: getDateOfEveryTenth(dueDate, 1).addMonths(i - 1),
+								Due_Date: getDateOfEveryTenth(dueDate, 10).addMonths(j - 1),
+								Installment_Month: getDateOfEveryTenth(dueDate, 1).addMonths(j - 1),
 								Installment_Code: maxInstallment_Code,
 								BK_ID: row.BK_ID,
 								BK_Reg_Code: row.BK_ID,
