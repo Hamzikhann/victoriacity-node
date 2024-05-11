@@ -762,44 +762,43 @@ class BookingController {
 					});
 
 					await BookingInstallmentDetailsO.save();
+				}
+				if (ppObj && ppObj.DC_START_DATE && ppObj.IncludeDC == 1) {
+					const myDate = new Date(ppObj.DC_START_DATE);
+					const dueDate = myDate.addMonths(1, i);
+					let totalAmount = 0;
+					let BookingInstallmentDetailsO = [];
+					let maxInstallment_Code = await BookingInstallmentDetails.max("Installment_Code");
 
-					if (ppObj && ppObj.DC_START_DATE && ppObj.IncludeDC == 1) {
-						const myDate = new Date(ppObj.DC_START_DATE);
-						const dueDate = myDate.addMonths(1, i);
-						let totalAmount = 0;
-						let BookingInstallmentDetailsO = [];
-						let maxInstallment_Code = await BookingInstallmentDetails.max("Installment_Code");
+					for (let j = 1; j <= 18; j++) {
+						let amount = ppObj.DC_INSTALLMENT_AMOUNT;
+						maxInstallment_Code = maxInstallment_Code + 1;
 
-						for (let j = 1; j <= 18; j++) {
-							let amount = ppObj.DC_INSTALLMENT_AMOUNT;
-							maxInstallment_Code = maxInstallment_Code + 1;
-
-							if (j == ppObj.DC_NO_OF_INSTALLMENT) {
-								amount = +ppObj.DC_TOTAL_AMOUNT - totalAmount;
-							}
-
-							totalAmount = totalAmount + +ppObj.DC_INSTALLMENT_AMOUNT;
-							BookingInstallmentDetailsO.push({
-								Due_Date: getDateOfEveryTenth(dueDate, 10).addMonths(j - 1),
-								Installment_Month: getDateOfEveryTenth(dueDate, 1).addMonths(j - 1),
-								Installment_Code: maxInstallment_Code,
-								BK_ID: row.BK_ID,
-								BK_Reg_Code: row.BK_ID,
-								InsType_ID: 1,
-								Installment_Due: amount,
-								Installment_Paid: 0,
-								Remaining_Amount: amount,
-								IsCompleted: null,
-								BKI_TYPE: "DC",
-								USER_ID: USER_ID,
-								TIME_STAMP: new Date(),
-								LAST_UPDATE: new Date(),
-								Status: true,
-								IsDeleted: 0
-							});
+						if (j == ppObj.DC_NO_OF_INSTALLMENT) {
+							amount = +ppObj.DC_TOTAL_AMOUNT - totalAmount;
 						}
-						await BookingInstallmentDetails.bulkCreate(BookingInstallmentDetailsO);
+
+						totalAmount = totalAmount + +ppObj.DC_INSTALLMENT_AMOUNT;
+						BookingInstallmentDetailsO.push({
+							Due_Date: getDateOfEveryTenth(dueDate, 10).addMonths(j - 1),
+							Installment_Month: getDateOfEveryTenth(dueDate, 1).addMonths(j - 1),
+							Installment_Code: maxInstallment_Code,
+							BK_ID: row.BK_ID,
+							BK_Reg_Code: row.BK_ID,
+							InsType_ID: 1,
+							Installment_Due: amount,
+							Installment_Paid: 0,
+							Remaining_Amount: amount,
+							IsCompleted: null,
+							BKI_TYPE: "DC",
+							USER_ID: USER_ID,
+							TIME_STAMP: new Date(),
+							LAST_UPDATE: new Date(),
+							Status: true,
+							IsDeleted: 0
+						});
 					}
+					await BookingInstallmentDetails.bulkCreate(BookingInstallmentDetailsO);
 				}
 
 				// for ($i = 1; $i <= $package->no_of_installments+2; $i++) {
