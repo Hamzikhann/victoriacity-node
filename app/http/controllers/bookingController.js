@@ -679,7 +679,7 @@ class BookingController {
 					amount = ppObj.downPayment;
 					instType = 8;
 
-					var dueDate = myDate.addMonths(0);
+					var dueDate = myDate.addMonths(1);
 
 					let maxInstallment_Code = await BookingInstallmentDetails.max("Installment_Code");
 					maxInstallment_Code = maxInstallment_Code + 1;
@@ -728,7 +728,7 @@ class BookingController {
 					}
 
 					if (type !== "By Annual") {
-						var dueDate = myDate.addMonths(0);
+						var dueDate = myDate.addMonths(1);
 					}
 					console.log("Dueeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee DATEEEEEEEEEEE", dueDate);
 					let maxInstallment_Code = await BookingInstallmentDetails.max("Installment_Code");
@@ -756,7 +756,7 @@ class BookingController {
 
 					if (ppObj && ppObj.DC_START_DATE && ppObj.IncludeDC == 1) {
 						const myDate = new Date(ppObj.DC_START_DATE);
-						const dueDate = myDate.addMonths(0);
+						const dueDate = myDate.addMonths(1);
 						let totalAmount = 0;
 						let BookingInstallmentDetailsO = [];
 						let maxInstallment_Code = await BookingInstallmentDetails.max("Installment_Code");
@@ -1272,7 +1272,7 @@ class BookingController {
 					where: { BK_ID: booking.BK_ID, BKI_TYPE: "DC" }
 				});
 			}
-			console.log("INSTALLMENTRECIPTS", installmentReceipts, "RECIPT HEAD", receipt_head, "TRSData", TRSData);
+			// console.log("INSTALLMENTRECIPTS", installmentReceipts, "RECIPT HEAD", receipt_head, "TRSData", TRSData);
 			const pdf = await pdfGenerator.paymentPlanGenerator(
 				booking,
 				installmentReceipts,
