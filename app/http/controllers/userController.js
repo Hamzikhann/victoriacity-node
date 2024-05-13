@@ -14,7 +14,7 @@
 // import Leave from '../../models/Leave.js';
 
 const User = require("../../models/User.js");
-const BookingInstallmentDetail = require("../../models/index.js");
+// const BookingInstallmentDetail = require("../../models/index.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
@@ -450,25 +450,25 @@ class UserController {
 		}
 	};
 
-	static changeBallotStatus = async (req, res, next) => {
-		try {
-			await BookingInstallmentDetail.update({ Status: 1 }, { where: { Status: 0, InsType_ID: 3 } })
-				.then((response) => {
-					if (response) {
-						res.send({ message: "All Ballot Status are updated", data: response });
-					}
-				})
-				.catch((err) => {
-					res.status(500).send({
-						message: err.message || "Some error occurred."
-					});
-				});
-		} catch (err) {
-			res.status(500).send({
-				message: err.message || "Some error occurred."
-			});
-		}
-	};
+	// static changeBallotStatus = async (req, res, next) => {
+	// 	try {
+	// 		await BookingInstallmentDetail.update({ Status: 1 }, { where: { Status: 0, InsType_ID: 3 } })
+	// 			.then((response) => {
+	// 				if (response) {
+	// 					res.send({ message: "All Ballot Status are updated", data: response });
+	// 				}
+	// 			})
+	// 			.catch((err) => {
+	// 				res.status(500).send({
+	// 					message: err.message || "Some error occurred."
+	// 				});
+	// 			});
+	// 	} catch (err) {
+	// 		res.status(500).send({
+	// 			message: err.message || "Some error occurred."
+	// 		});
+	// 	}
+	// };
 }
 
 // export default UserController;
