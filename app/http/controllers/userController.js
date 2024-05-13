@@ -14,7 +14,7 @@
 // import Leave from '../../models/Leave.js';
 
 const User = require("../../models/User.js");
-const BookingInstallmentDetail = require("../../models/Booking_Installment_Details.js");
+const BookingInstallmentDetail = require("../../models/index.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
