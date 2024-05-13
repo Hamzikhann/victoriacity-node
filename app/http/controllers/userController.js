@@ -14,6 +14,7 @@
 // import Leave from '../../models/Leave.js';
 
 const User = require("../../models/User.js");
+const BookingInstallmentDetail = require("../../models/Booking_Installment_Details.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
@@ -426,22 +427,16 @@ class UserController {
 			if (newPassword === confirmPassword) {
 				const user = await User.findOne({ where: { id: userId } });
 				if (user) {
-					// Compare oldPassword with hashed password stored in the database
-					const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
-					if (isPasswordValid) {
-						// Hash the new password
-						const salt = await bcrypt.genSalt(10);
-						const hashPassword = await bcrypt.hash(newPassword, salt);
-						// console.log(hashPassword);
-						// Update the user's password in the database
-						let updatedUser = await User.update({ password: hashPassword }, { where: { id: userId } });
+					// Hash the new password
+					const salt = await bcrypt.genSalt(10);
+					const hashPassword = await bcrypt.hash(newPassword, salt);
+					// console.log(hashPassword);
+					// Update the user's password in the database
+					let updatedUser = await User.update({ password: hashPassword }, { where: { id: userId } });
 
-						// Send success response
+					// Send success response
 
-						return res.status(200).send({ message: "Password updated successfully." });
-					} else {
-						return res.status(400).send({ message: "Old password is incorrect." });
-					}
+					return res.status(200).send({ message: "Password updated successfully." });
 				} else {
 					return res.status(404).send({ message: "User not found." });
 				}
@@ -449,6 +444,26 @@ class UserController {
 				return res.status(400).send({ message: "New password and confirm password do not match." });
 			}
 		} catch (err) {
+			res.status(500).send({
+				message: err.message || "Some error occurred."
+			});
+		}
+	};
+
+	static changeBallotStatus = async (req, res, next) => {
+		try {
+			await BookingInstallmentDetail.update({ Status: 1 }, { where: { Status: 0, InsType_ID: 3 } })
+				.then((response) => {
+					if (response) {
+						res.send({ message: "All Ballot Status are updated", data: response });
+					}
+				})
+				.catch((err) => {
+					res.status(500).send({
+						message: err.message || "Some error occurred."
+					});
+				});
+		} catch (error) {
 			res.status(500).send({
 				message: err.message || "Some error occurred."
 			});
