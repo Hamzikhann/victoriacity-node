@@ -463,7 +463,7 @@ class UserController {
 						message: err.message || "Some error occurred."
 					});
 				});
-		} catch (error) {
+		} catch (err) {
 			res.status(500).send({
 				message: err.message || "Some error occurred."
 			});
