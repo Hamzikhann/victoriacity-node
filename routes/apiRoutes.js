@@ -123,7 +123,7 @@ const router = express.Router();
 router.post("/register", UserController.Register);
 router.post("/login", UserController.Login);
 router.post("/change", UserController.changePassword);
-router.post("/change/status/ballot", UserController.changeBallotStatus);
+// router.post("/change/status/ballot", UserController.changeBallotStatus);
 router.get("/job/active/list", JobController.getAllActiveJobs);
 router.get("/job/details/:id", JobController.getJobDetailsById);
 router.get("/dashboard/data", UserController.dashboardData);
