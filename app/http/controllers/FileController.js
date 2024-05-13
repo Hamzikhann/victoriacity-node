@@ -50,7 +50,7 @@ class FileController {
 
 		try {
 			let maxCodeId = await OpenFile.max("OF_MaxCode");
-			console.log(req.body);
+			// console.log(req.body);
 			maxCodeId = maxCodeId + 1;
 
 			const froms = await FileService.createFileFroms(req.body, maxCodeId, req.user.id);
@@ -78,7 +78,7 @@ class FileController {
 	// SEARCH file BY ID
 	static getFileById = async (req, res, next) => {
 		const fileId = req.query.id;
-		console.log("sss", fileId);
+		// console.log("sss", fileId);
 		try {
 			const allFile = await OpenFile.findByPk(fileId, {
 				include: [

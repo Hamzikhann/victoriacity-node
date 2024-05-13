@@ -15,7 +15,7 @@ class NomineeController {
 
 		try {
 			// Create the MemNominee entry
-			console.log("AAAAAAAAAAAAAAAA", req.body);
+			// console.log("AAAAAAAAAAAAAAAA",req.body)
 			const row = await MemNominee.create({
 				MEMBER_ID: MEMBER_ID,
 				NomineeName: NomineeName,
@@ -48,7 +48,7 @@ class NomineeController {
 	// SEARCH Nominee BY ID
 	static getNomineeById = async (req, res, next) => {
 		const nomineeId = req.query.id;
-		console.log("helo");
+		// console.log("helo");
 
 		try {
 			const nominee = await MemNominee.findOne({
@@ -97,7 +97,14 @@ class NomineeController {
 	///UPDATE Nominee
 	static updateNominee = async (req, res, next) => {
 		const { MEMBER_ID, NomineeName, NomineeFatherName, NomineeRealtion, NomineeCNIC, RelationToOwner } = req.body;
-		console.log(MEMBER_ID, NomineeName, NomineeFatherName, NomineeRealtion, NomineeCNIC, RelationToOwner);
+		// console.log(
+		//   MEMBER_ID,
+		//   NomineeName,
+		//   NomineeFatherName,
+		//   NomineeRealtion,
+		//   NomineeCNIC,
+		//   RelationToOwner
+		// );
 		const nomineeId = req.query.id;
 		try {
 			const result = await MemNominee.findAll({ where: { MN_ID: nomineeId } });
@@ -141,7 +148,7 @@ class NomineeController {
 	static getNomineeByName = async (req, res, next) => {
 		const { search } = req.query;
 
-		console.log("ooooooooooooooooooo", search);
+		// console.log("ooooooooooooooooooo", search);
 		if (!search) {
 			return res.status(400).json({ status: 400, message: "Name required" });
 		}

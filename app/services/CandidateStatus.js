@@ -176,7 +176,7 @@ class CandidateStatus {
 						if (error) {
 							console.log(error);
 						} else {
-							console.log("Email sent: " + info.response);
+							// console.log("Email sent: " + info.response);
 						}
 					});
 					res.status(200).send({
@@ -189,10 +189,10 @@ class CandidateStatus {
 			}
 		} else if (body.hasOwnProperty("candId") && body.hasOwnProperty("status")) {
 			const { candId, status } = body;
-			console.log(body);
+			// console.log(body);
 			try {
 				const cand = await JobCandidate.update({ status: status }, { where: { id: candId } });
-				console.log(cand[0]);
+				// console.log(cand[0]);
 				if (cand[0] === 0) {
 					return next(CustomErrorHandler.notFound());
 				} else {

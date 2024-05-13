@@ -126,7 +126,7 @@ class BookingService {
 				return "NDC fee already paid!";
 			}
 		} catch (error) {
-			console.log("EEEEEEEEEEEEEEEEEE", error);
+			// console.log("EEEEEEEEEEEEEEEEEE", error);
 			return error;
 		}
 	};
@@ -149,8 +149,8 @@ class BookingService {
 				}
 			}
 			const OST = await this.outStandingAmount(body.BK_ID);
-			console.log("Out standing amount", OST);
-			console.log("Out standing amount", OST > 0 && body.amount == true);
+			// console.log("Out standing amount", OST);
+			// console.log("Out standing amount", OST > 0 && body.amount == true);
 			if (OST > 0) {
 				return `Out Standing Amount not Paid!`;
 			}
@@ -333,7 +333,7 @@ class BookingService {
 			return false;
 		} catch (error) {
 			return error;
-			console.log("EEEEEEEEEEEEEEEEEE", error);
+			// console.log("EEEEEEEEEEEEEEEEEE", error);
 		}
 	};
 
@@ -666,7 +666,7 @@ class BookingService {
 		const distinctBK_IDs = data;
 		for (let i = 0; i < distinctBK_IDs.length; i++) {
 			const { BK_ID, PS_ID, UnitType, ...rest } = distinctBK_IDs[i];
-			console.log("OOOOOOOOOOOOOOOO", UnitType.Name);
+			// console.log("OOOOOOOOOOOOOOOO", UnitType.Name);
 			// const groupedData = data.reduce(async(result, item) => {
 			//   const {BK_ID, PS_ID, ...rest } = item; // Extract plotSize and the rest of the item
 

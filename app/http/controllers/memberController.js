@@ -15,7 +15,7 @@ dotenv.config();
 
 class MemberController {
 	static addMember = async (req, res, next) => {
-		console.log("hello");
+		// console.log("hello");
 		const {
 			Mem_Reg_Code,
 			BuyerName,
@@ -33,26 +33,26 @@ class MemberController {
 			TRSR_ID,
 			memberType
 		} = req.body;
-		console.log(
-			Mem_Reg_Code,
-			BuyerName,
-			BuyerContact,
-			BuyerAddress,
-			BuyerCNIC,
-			FathersName,
-			PermanantAddress,
-			DOB,
-			Email,
-			Relation,
-			Rmarks,
-			IsActive
-		);
+		// console.log(
+		// 	Mem_Reg_Code,
+		// 	BuyerName,
+		// 	BuyerContact,
+		// 	BuyerAddress,
+		// 	BuyerCNIC,
+		// 	FathersName,
+		// 	PermanantAddress,
+		// 	DOB,
+		// 	Email,
+		// 	Relation,
+		// 	Rmarks,
+		// 	IsActive
+		// );
 
 		let Image = "";
 		if (req.file) {
 			Image = req.file.filename;
 		}
-		console.log("Image", Image);
+		// console.log("Image", Image);
 		if (
 			!(
 				Mem_Reg_Code &&
@@ -121,7 +121,7 @@ class MemberController {
 
 	// Search Member by Id
 	static getMemberById = async (req, res, next) => {
-		console.log("helo");
+		// console.log("helo");
 		const MemberId = req.query.id;
 
 		try {
@@ -209,9 +209,9 @@ class MemberController {
 	};
 
 	static getMemberByName = async (req, res, next) => {
-		console.log("hello");
+		// console.log("hello");
 		const { search } = req.query;
-		console.log("ooooooooooooooooooo", search);
+		// console.log("ooooooooooooooooooo", search);
 		if (!search) {
 			return res.status(400).json({ status: 400, message: "Name required" });
 		}
@@ -240,7 +240,7 @@ class MemberController {
 		}
 	};
 	static getMemberByCNIC = async (req, res, next) => {
-		console.log("hello");
+		// console.log("hello");
 		const { search } = req.query;
 		if (!search) {
 			return res.status(400).json({ status: 400, message: "CNIC required" });

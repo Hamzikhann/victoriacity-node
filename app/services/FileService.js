@@ -67,7 +67,7 @@ class FileService {
 				OF_MaxCode: maxCodeId,
 				USER_ID: userId
 			};
-			console.log(createFile);
+			// console.log(createFile);
 			arr.push(createFile);
 			Code_StartInc++;
 			maxCodeId++;
@@ -111,7 +111,7 @@ class FileService {
 		var currentDate = date1.getDate(); // Get the current date value
 		var newDate = currentDate + 10;
 		date1.setDate(newDate); // Set the new date value
-		console.log(date1);
+		// console.log(date1);
 
 		// Increment the month by 1 while keeping the same day
 
@@ -125,7 +125,7 @@ class FileService {
 			if (myDate.getMonth() === 11) {
 				myDate.setFullYear(myDate.getFullYear() + 1);
 			}
-			console.log(myDate);
+			// console.log(myDate);
 			// const date = new Date(myDate);
 			// const options = { day: '2-digit', month: 'long', year: 'numeric' };
 			// const Installment_Month = date.toLocaleDateString('en-US', options).replace(/ /g, '-').toLowerCase();
@@ -159,7 +159,7 @@ class FileService {
 			const duedate = new Date(Date.now());
 
 			const formattedDate = duedate.toISOString().substring(0, 10);
-			console.log(formattedDate); // Output: 2022-08-01
+			// console.log(formattedDate); // Output: 2022-08-01
 			let createFile = {
 				IRC_NO: ++maxId || 1,
 				IRC_Date: formattedDate,
@@ -173,7 +173,7 @@ class FileService {
 			};
 			paymentpdf.push(createFile);
 		}
-		console.log("createFile", paymentpdf);
+		// console.log("createFile", paymentpdf);
 		return paymentpdf;
 	};
 

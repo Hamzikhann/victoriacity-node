@@ -88,12 +88,12 @@ class FileSubmissionController {
 						}
 					});
 
-					console.log("created456", created);
+					// console.log("created456", created);
 					// if (!created) {
 					//     return next(CustomErrorHandler.alreadyExist());
 					// }
 
-					console.log("created456789", created);
+					// console.log("created456789", created);
 					if (created) {
 						OpenFile.update(
 							{ LAST_Verified: Date.now(), Verify_Count: 1 },
