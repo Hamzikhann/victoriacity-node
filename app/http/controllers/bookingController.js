@@ -718,12 +718,12 @@ class BookingController {
 						type = "Possession";
 						instType = 4;
 						amount = Possession_Amt;
-						status = false;
+						status = true;
 					} else if (i == No_Of_Installments + 3 + ByAnnual_TimePeriod) {
 						type = "Ballot";
 						amount = Ballot_Amt;
 						instType = 3;
-						status = false;
+						status = true;
 					} else if (i != 0 && i % (ByAnnual_TimePeriod + 1) == 0) {
 						type = "By Annual";
 						amount = ByAnnual_Charges;

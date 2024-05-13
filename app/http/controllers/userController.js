@@ -434,9 +434,10 @@ class UserController {
 						const hashPassword = await bcrypt.hash(newPassword, salt);
 						// console.log(hashPassword);
 						// Update the user's password in the database
-						// await User.update({ password: hashPassword }, { where: { id: userId } });
+						let updatedUser = await User.update({ password: hashPassword }, { where: { id: userId } });
 
 						// Send success response
+
 						return res.status(200).send({ message: "Password updated successfully." });
 					} else {
 						return res.status(400).send({ message: "Old password is incorrect." });
