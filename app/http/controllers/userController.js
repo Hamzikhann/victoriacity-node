@@ -35,7 +35,7 @@ const Menu = require("../../models/Menu.js");
 class UserController {
 	static Register = async (req, res) => {
 		const { name, email, password, password_confirm, role } = req.body;
-		console.log(req.body);
+		// console.log(req.body);
 		const user = await User.findOne({ where: { email: email } });
 		if (user) {
 			res.status(409).send({
@@ -91,7 +91,7 @@ class UserController {
 
 	static Login = async (req, res, next) => {
 		try {
-			console.log(req.body);
+			// console.log(req.body);
 			const { email, password } = req.body;
 			if (email && password) {
 				let user = await User.findOne({
@@ -101,7 +101,7 @@ class UserController {
 					],
 					where: { email: email }
 				});
-				console.log("hamza");
+				// console.log("hamza");
 				// if (user) {
 				// 	const userJSON = user.toJSON();
 				// }
@@ -218,7 +218,7 @@ class UserController {
 	static getUserById = async (req, res, next) => {
 		// const userId = req.body.id
 		const userId = req.query.id;
-		console.log(req.query);
+		// console.log(req.query);
 		try {
 			const userById = await User.findAll({
 				include: [
@@ -227,7 +227,7 @@ class UserController {
 				],
 				where: { id: userId }
 			});
-			console.log("iiiiiiiiiiiiiii", userById);
+			// console.log("iiiiiiiiiiiiiii", userById);
 			if (userById.length >= 1) {
 				res.status(200).send({
 					status: 200,
@@ -349,7 +349,7 @@ class UserController {
 
 		try {
 			const result = await User.findAll({ where: { id: userId } });
-			console.log(result, "Before Result");
+			// console.log(result, "Before Result");
 
 			if (result.length > 0) {
 				const userById = await User.update(
@@ -366,10 +366,10 @@ class UserController {
 					},
 					{ where: { id: userId } }
 				);
-				console.log(`${appRoot}/uploads${result[0].image.split("/uploads")[7]}`, "After Result");
+				// console.log(`${appRoot}/uploads${result[0].image.split("/uploads")[7]}`, "After Result");
 				if (userById) {
 					fs.unlink(`${appRoot}/uploads${result[0].image.split("/uploads")[7]}`, (err) => {
-						console.log("file errro r", err);
+						// console.log("file errro r", err);
 						if (err) {
 							return next(err);
 						}
@@ -386,7 +386,7 @@ class UserController {
 				message: "User updated successfully"
 			});
 		} catch (error) {
-			console.log("errrrrrrrrrrrrrrrrrr", error);
+			// console.log("errrrrrrrrrrrrrrrrrr", error);
 			return next(error);
 		}
 	};
@@ -414,6 +414,44 @@ class UserController {
 				employee: employeeResult
 			}
 		});
+	};
+
+	static changePassword = async (req, res, next) => {
+		try {
+			const oldPassword = req.body.oldPassword;
+			const newPassword = req.body.newPassword;
+			const userId = req.body.userId;
+			const confirmPassword = req.body.confirmPassword;
+
+			if (newPassword === confirmPassword) {
+				const user = await User.findOne({ where: { id: userId } });
+				if (user) {
+					// Compare oldPassword with hashed password stored in the database
+					const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+					if (isPasswordValid) {
+						// Hash the new password
+						const salt = await bcrypt.genSalt(10);
+						const hashPassword = await bcrypt.hash(newPassword, salt);
+						// console.log(hashPassword);
+						// Update the user's password in the database
+						// await User.update({ password: hashPassword }, { where: { id: userId } });
+
+						// Send success response
+						return res.status(200).send({ message: "Password updated successfully." });
+					} else {
+						return res.status(400).send({ message: "Old password is incorrect." });
+					}
+				} else {
+					return res.status(404).send({ message: "User not found." });
+				}
+			} else {
+				return res.status(400).send({ message: "New password and confirm password do not match." });
+			}
+		} catch (err) {
+			res.status(500).send({
+				message: err.message || "Some error occurred."
+			});
+		}
 	};
 }
 

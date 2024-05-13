@@ -263,7 +263,7 @@ class BookingController {
 				Cnic,
 				Address
 			});
-			console.log("RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR", responce);
+			// console.log("RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR", responce);
 			return res.status(200).send({
 				status: 200,
 				message: responce
@@ -431,7 +431,7 @@ class BookingController {
 
 					// console.log('BK_ID.Installment_Code',BK_ID);
 					// console.log('BookingInstallmentDetailO.Installment_Code',BookingInstallmentDetailO.Installment_Code);
-					console.log("BookingInstallmentDetailNextO", BookingInstallmentDetailNextO);
+					// console.log("BookingInstallmentDetailNextO", BookingInstallmentDetailNextO);
 
 					if (BookingInstallmentDetailNextO) {
 						let nextMaxId = await InstallmentReceipts.max("INS_RC_ID");
@@ -468,7 +468,7 @@ class BookingController {
 							}
 						});
 
-						console.log("BookingInstallmentDetailNextO -- DONE ", "DONE");
+						// console.log("BookingInstallmentDetailNextO -- DONE ", "DONE");
 						// BookingInstallmentDetailNextO.Installment_Due = installmentRemaining;
 						// await BookingInstallmentDetails.update({Installment_Due: -1*installmentRemaining}, {
 						//     where: {BKI_DETAIL_ID: BookingInstallmentDetailNextO.BKI_DETAIL_ID},
@@ -681,7 +681,7 @@ class BookingController {
 				// console.log('ppObj.INS_Start_Date',(typeof ppObj.INS_Start_Date));
 
 				var myDate = new Date(ppObj.INS_Start_Date);
-				console.log("myDate myDate myDate myDate", myDate);
+				// console.log("myDate myDate myDate myDate", myDate);
 				// dueDate = myDate.addMonths(-1);
 
 				if (ppObj.downPayment != null) {
@@ -739,7 +739,7 @@ class BookingController {
 					if (type !== "By Annual") {
 						var dueDate = myDate.addMonths(1, i);
 					}
-					console.log("Dueeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee DATEEEEEEEEEEE", dueDate);
+					// console.log("Dueeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee DATEEEEEEEEEEE", dueDate);
 					let maxInstallment_Code = await BookingInstallmentDetails.max("Installment_Code");
 					maxInstallment_Code = maxInstallment_Code + 1;
 
@@ -1080,12 +1080,12 @@ class BookingController {
 
 	///UPDATE Booking
 	static updateBooking = async (req, res, next) => {
-		console.log("hello");
+		// console.log("hello");
 
 		const BookingId = req.query.id;
 		try {
 			const exist = await Booking.findOne({ where: { BK_ID: BookingId } });
-			console.log(exist, "assssssssssssssssssssssssss");
+			// console.log(exist, "assssssssssssssssssssssssss");
 			if (!exist) {
 				return next(CustomErrorHandler.notFound("Data not found!"));
 			}
@@ -1142,7 +1142,7 @@ class BookingController {
 				"Updated Booking": result
 			});
 		} catch (error) {
-			console.log("error: ", error);
+			// console.log("error: ", error);
 			return next(error);
 		}
 	};
@@ -1329,7 +1329,7 @@ class BookingController {
 			}
 
 			booking.toJSON();
-			console.log(booking);
+			// console.log(booking);
 
 			const installmentReceipts = await BookingInstallmentDetails.findAll({
 				order: [["Installment_Code", "ASC"]],
@@ -1705,7 +1705,7 @@ class BookingController {
 			if (exist.length <= 0) {
 				return next(CustomErrorHandler.notFound("Data not found!"));
 			}
-			console.log("QQQQQQQQQQQQQQQQQQQQQQQQQQQQ", TRSR_ID, userId);
+			// console.log("QQQQQQQQQQQQQQQQQQQQQQQQQQQQ", TRSR_ID, userId);
 			result = await TRSRequest.update({ ASSIGN_BY: userId }, { where: { TRSR_ID: TRSR_ID } });
 			res.status(200).json({
 				status: 200,
@@ -1924,14 +1924,14 @@ class BookingController {
 			});
 
 			const result = await BookingService.generatePlotSizeData(data);
-			console.log("IIIIIIIIIIIIIIIIIIIIIIIII", result);
+			// console.log("IIIIIIIIIIIIIIIIIIIIIIIII", result);
 			res.status(200).json({
 				status: 200,
 				Message: "Updated Status SuccessFull",
 				data: result
 			});
 		} catch (error) {
-			console.log("OOOOOOOOOOOOOOOOO", error);
+			// console.log("OOOOOOOOOOOOOOOOO", error);
 			return next(error);
 		}
 	};
@@ -6113,14 +6113,14 @@ class BookingController {
 			// })
 
 			//  const result =  await BookingService.generatePlotSizeData(data);
-			console.log("IIIIIIIIIIIIIIIIIIIIIII", result);
+			// console.log("IIIIIIIIIIIIIIIIIIIIIII", result);
 			res.status(200).json({
 				status: 200,
 				Message: "Updated Status SuccessFull",
 				data: result
 			});
 		} catch (error) {
-			console.log("OOOOOOOOOOOOOOOOO", error);
+			// console.log("OOOOOOOOOOOOOOOOO", error);
 			return next(error);
 		}
 	};
@@ -8803,14 +8803,14 @@ class BookingController {
 			});
 
 			//  const result =  await BookingService.generatePlotSizeData(data);
-			console.log("IIIIIIIIIIIIIIIIIIIIIII", result);
+			// console.log("IIIIIIIIIIIIIIIIIIIIIII", result);
 			res.status(200).json({
 				status: 200,
 				Message: "Updated Status SuccessFull",
 				data: arr
 			});
 		} catch (error) {
-			console.log("OOOOOOOOOOOOOOOOO", error);
+			// console.log("OOOOOOOOOOOOOOOOO", error);
 			return next(error);
 		}
 	};

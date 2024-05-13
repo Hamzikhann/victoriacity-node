@@ -9146,7 +9146,7 @@ class pdfGenerator {
 			const filePath = "uploads/ndcfee/" + `NDCFee-Report-${body.INS_RC_ID}` + ".pdf";
 			pdfDoc.pipe(fs.createWriteStream(filePath));
 			pdfDoc.end();
-			console.log("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM", filePath);
+			// console.log("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM", filePath);
 			return filePath;
 		} catch (error) {
 			// return "";
