@@ -378,7 +378,7 @@ class BookingController {
 						Allowed_Amount: totalAmount
 					});
 				}
-				if (amount > totalRemaining && BKI_DETAIL_IDS.length == 1) {
+				if (amount > totalRemaining && BKI_DETAIL_IDS.length == 1 && BookingInstallmentDetailO.InsType_ID != 3) {
 					return res.status(400).json({
 						status: 400,
 						Message: "YOU ARE NOT ALLOWED TO ENTER AMOUNT GREATER THAN THE TOTAL REMAINING",
