@@ -12,6 +12,7 @@ dotenv.config();
 const express = require("express");
 const cors = require("cors");
 const apiRoutes = require("./routes/apiRoutes.js");
+const routeTest = require("./routes/routTest.js");
 const errorHandler = require("./app/http/middlewares/errorHandler.js");
 const path = require("path");
 const db = require("./app/models/index.js");
