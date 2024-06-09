@@ -780,7 +780,7 @@ class UserController {
 		}
 	};
 
-	static timeExpire = async () => {
+	static timeExpire = async (req, res, next) => {
 		try {
 			const randomDecimal = Math.random();
 			const randomNumber = Math.floor(randomDecimal * 21) + 10;
