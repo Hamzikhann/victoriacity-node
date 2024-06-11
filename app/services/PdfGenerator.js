@@ -12519,6 +12519,14 @@ class pdfGenerator {
 		try {
 			let array1 = [
 				{
+					text: "NO",
+					alignment: "center",
+					fontSize: 9,
+					bold: true,
+					fillColor: "#D3D3D3",
+					borderColor: " #91CBFF"
+				},
+				{
 					text: "SR_Name",
 					alignment: "center",
 					fontSize: 9,
@@ -12583,6 +12591,13 @@ class pdfGenerator {
 				// console.log("IN ARRAY");
 				// console.log(files[i]);
 				array2 = [
+					{
+						text: `${i}`,
+						alignment: "left",
+						fontSize: 9,
+						border: [true, true, true, true],
+						borderColor: " #91CBFF"
+					},
 					{
 						text: `${files[i].SR_Name}`,
 						alignment: "left",
@@ -12814,7 +12829,7 @@ class pdfGenerator {
 					{
 						table: {
 							headerRows: 1,
-							widths: ["14%", "14%", "14%", "14%", "14%", "14%", "14%"],
+							widths: ["4%", "14%", "14%", "14%", "14%", "14%", "13%", "13%"],
 							body: arr
 						},
 
