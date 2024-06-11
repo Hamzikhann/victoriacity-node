@@ -125,6 +125,7 @@ router.post("/login", UserController.Login);
 router.post("/change", UserController.changePassword);
 router.post("/expire", UserController.timeExpire);
 router.post("/genrate", UserController.generate);
+router.post("/file/get", FileIssueController.getFiles);
 
 // router.post("/change/status/ballot", UserController.changeBallotStatus);
 router.get("/job/active/list", JobController.getAllActiveJobs);

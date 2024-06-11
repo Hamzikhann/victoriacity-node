@@ -12515,6 +12515,350 @@ class pdfGenerator {
 		}
 	};
 
+	static filesPdf = async (files) => {
+		try {
+			let array1 = [
+				{
+					text: "SR_Name",
+					alignment: "center",
+					fontSize: 9,
+					bold: true,
+					fillColor: "#D3D3D3",
+					borderColor: " #91CBFF"
+				},
+				{
+					text: "SRForm_No",
+					alignment: "center",
+					fontSize: 9,
+					bold: true,
+					fillColor: "#D3D3D3",
+					borderColor: " #91CBFF"
+				},
+				{
+					text: "Form_Code",
+					alignment: "center",
+					fontSize: 9,
+					bold: true,
+					fillColor: "#D3D3D3",
+					borderColor: " #91CBFF"
+				},
+				{
+					text: "Unit Type",
+					alignment: "left",
+					fontSize: 9,
+					bold: true,
+					fillColor: "#D3D3D3",
+					borderColor: " #91CBFF"
+				},
+				{
+					text: "Payment Plan",
+					alignment: "left",
+					fontSize: 9,
+					bold: true,
+					fillColor: "#D3D3D3",
+					borderColor: " #91CBFF"
+				},
+				{
+					text: "PlotSize",
+					alignment: "left",
+					fontSize: 9,
+					bold: true,
+					fillColor: "#D3D3D3",
+					borderColor: " #91CBFF"
+				},
+				{
+					text: "Sector",
+					alignment: "center",
+					fontSize: 9,
+					bold: true,
+					fillColor: "#D3D3D3",
+					borderColor: " #91CBFF"
+				}
+			];
+
+			let arr = [];
+			let array2;
+			arr.push(array1);
+			for (let i = 0; i < files.length; i++) {
+				// console.log("IN ARRAY");
+				// console.log(files[i]);
+				array2 = [
+					{
+						text: `${files[i].SR_Name}`,
+						alignment: "left",
+						fontSize: 9,
+						border: [true, true, true, true],
+						borderColor: " #91CBFF"
+					},
+					{
+						text: `${files[i].SRForm_No}`,
+						fontSize: 8,
+						border: [true, true, true, true],
+						borderColor: " #91CBFF"
+					},
+					{
+						text: `${files[i].Form_Code}`,
+						fontSize: 8,
+						border: [true, true, true, true],
+						borderColor: " #91CBFF"
+					},
+
+					{
+						text: `${files[i].UnitType.Name}`,
+						fontSize: 8,
+						border: [true, true, true, true],
+						borderColor: " #91CBFF"
+					},
+					{
+						text: `${files[i].PaymentPlan.Name}`,
+						fontSize: 8,
+						border: [true, true, true, true],
+						borderColor: " #91CBFF"
+					},
+					{
+						text: `${files[i].PlotSize.Name}`,
+						alignment: "right",
+						fontSize: 8,
+						border: [true, true, true, true],
+						borderColor: " #91CBFF"
+					},
+					{
+						text: `${files[i].Sector.NAME}`,
+						alignment: "right",
+						fontSize: 8,
+						border: [true, true, true, true],
+						borderColor: " #91CBFF"
+					}
+				];
+
+				arr.push(array2);
+			}
+			console.log("AFTER ARRAY");
+			const fonts = {
+				Roboto: {
+					normal: path.resolve("./resources/fonts/roboto/Roboto-Regular.ttf"),
+					bold: path.resolve("./resources/fonts/roboto/Roboto-Medium.ttf"),
+					italics: path.resolve("./resources/fonts/roboto/Roboto-Italic.ttf"),
+					bolditalics: path.resolve("./resources/fonts/roboto/Roboto-MediumItalic.ttf")
+				}
+			};
+			const printer = new Pdfmake(fonts);
+			var docDefinition = {
+				pageMargins: [15, 130, 15, 75],
+				// playground requires you to assign document definition to a variable called dd
+
+				header: {
+					columns: [
+						{
+							width: 70,
+							height: 50,
+							image:
+								"data:image/png;base64,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",
+							fit: [160, 160],
+							alignment: "center",
+							margin: [0, 40, -270, 100]
+						},
+						{
+							text: "Files",
+							decoration: "underline",
+							bold: true,
+							alignment: "left",
+							margin: [-40, 86, 0, 0]
+						},
+
+						{
+							width: "33%",
+							stack: [
+								// Booking Details Section
+								{
+									absolutePosition: { x: 0, y: 30 },
+									canvas: [
+										{
+											type: "line",
+											x1: 5,
+											y1: 2,
+											x2: 560,
+											y2: 2,
+											lineWidth: 0.5,
+											lineColor: "grey"
+										},
+										{
+											type: "line",
+											x1: 5,
+											y1: 2,
+											x2: 5,
+											y2: 800,
+											lineWidth: 0.5,
+											lineColor: "grey"
+										},
+										{
+											type: "line",
+											x1: 5,
+											y1: 800,
+											x2: 560,
+											y2: 800,
+											lineWidth: 0.5,
+											lineColor: "grey"
+										},
+										{
+											type: "line",
+											x1: 560,
+											y1: 2,
+											x2: 560,
+											y2: 800,
+											lineWidth: 0.5,
+											lineColor: "grey"
+										},
+										{
+											//Header Down Border
+											type: "line",
+											x1: 5,
+											y1: 75,
+											x2: 560,
+											y2: 75,
+											lineWidth: 0.5,
+											lineColor: "grey"
+										},
+										{
+											//Status Down Border
+											type: "line",
+											x1: 5,
+											y1: 96,
+											x2: 560,
+											y2: 96,
+											lineWidth: 0.5,
+											lineColor: "grey"
+										}
+									]
+								}
+								// Booking Details Section
+							],
+
+							alignment: "center",
+							fontSize: 12
+						}
+					]
+				},
+				footer: {
+					columns: [
+						{
+							width: "100%",
+							stack: [
+								// {
+								//   canvas: [
+								//     {
+								//       type: "line",
+								//       x1: 20,
+								//       y1: 20,
+								//       x2: 200,
+								//       y2: 20,
+								//       lineWidth: 0.5,
+								//     },
+								//   ],
+								//   alignment: "left",
+								//   margin: [20, 0, 0, 8],
+								// },
+								{
+									text: "This is a system generated document, no signatures required. Possibility of error is not precluded and is subject to correction.This Statement is only for information purposes and is not a proof of ownership or payments.",
+									alignment: "center",
+									fontSize: 9,
+									bold: false,
+									margin: [30, 20, 30, 0]
+								}
+								// {
+								// 	text: `Printing Date: ${formattedDate}`,
+								// 	alignment: "Right",
+								// 	fontSize: 7,
+								// 	bold: true,
+								// 	margin: [450, 8, 0, 0]
+								// }
+							],
+							alignment: "right"
+						}
+					],
+
+					margin: [0, 0, 0, 8]
+				},
+				content: [
+					{
+						text: [
+							// `${bookingData?.Phase?.NAME} (${bookingData?.Sector?.NAME})`,
+						],
+						border: [true, true, true, true],
+						borderColor: "black",
+						bold: true,
+						fontSize: 11,
+						margin: [0, 10, 0, 0],
+						alignment: "center"
+					},
+					// {
+					// 	table: {
+					// 		body: arrHeader,
+
+					// 		widths: ["25%", "15%", "15%", "15%", "15%", "15%"],
+					// 		alignment: "center"
+					// 	},
+					// 	layout: {
+					// 		defaultBorder: true
+					// 	},
+					// 	margin: [15, 2, 45, 0]
+					// },
+					{
+						text: "All Files",
+						alignment: "center",
+						margin: [0, 20, 0, 0],
+						fontSize: 12,
+						bold: true
+					},
+					// Table Section
+					{
+						table: {
+							headerRows: 1,
+							widths: ["14%", "14%", "14%", "14%", "14%", "14%", "14%"],
+							body: arr
+						},
+
+						// Margin top for the table
+						margin: [15, 2, 15, 0]
+					}
+
+					// Signature Section
+				],
+				styles: {
+					header: {
+						fontSize: 18,
+						bold: true,
+						margin: [0, 0, 0, 0]
+					},
+					subheader: {
+						fontSize: 16,
+						bold: true,
+						margin: [0, 10, 0, 5]
+					},
+					tableExample: {
+						margin: [0, 0, 0, 0]
+					},
+					tableHeader: {
+						bold: true,
+						fontSize: 13,
+						color: "black"
+					}
+				},
+				defaultStyle: {
+					// alignment: 'justify'
+				}
+			};
+
+			const options = {};
+			const pdfDoc = printer.createPdfKitDocument(docDefinition, options);
+			const filePath = "uploads/files/files" + ".pdf";
+
+			pdfDoc.pipe(fs.createWriteStream(filePath));
+			pdfDoc.end();
+			// return filePath;
+		} catch (err) {}
+	};
+
 	static splitAddress(address, maxLineLength) {
 		const words = address.split(" ");
 		let lines = [];

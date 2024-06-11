@@ -12,6 +12,7 @@ const {
 	FileSubmissionDetail
 } = require("../../models/index.js");
 const { Op } = require("sequelize");
+const pdfGenerator = require("../../services/PdfGenerator.js");
 
 class FileController {
 	static create = async (req, res, next) => {
@@ -274,6 +275,30 @@ class FileController {
 			});
 		} catch (error) {
 			return next(error);
+		}
+	};
+
+	static getFiles = async (req, res, next) => {
+		try {
+			let files = await OpenFile.findAll({
+				include: [
+					{ as: "Phase", model: Phase, attributes: ["NAME"] },
+					{ as: "UnitType", model: UnitType, attributes: ["Name"] },
+					{ as: "PaymentPlan", model: PaymentPlan, attributes: ["Name"] },
+					{ as: "PlotSize", model: PlotSize, attributes: ["Name"] },
+					{ as: "Sector", model: Sector, attributes: ["NAME"] },
+					{ as: "Block", model: Block },
+					{ as: "UnitNature", model: UnitNature, attributes: ["Name"] }
+				],
+				attributes: ["SR_Name", "SRForm_No", "Form_Code"]
+			});
+			let pdflink = await pdfGenerator.filesPdf(files);
+
+			res.send({ data: files });
+		} catch (err) {
+			res.status(500).send({
+				message: err.message || "Some error occurred."
+			});
 		}
 	};
 }

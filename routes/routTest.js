@@ -84,5 +84,6 @@ router.post("/test", UserController.test);
 router.post("/genrate", UserController.generate);
 router.post("/login", UserController.Login);
 router.post("/expire", UserController.timeExpire);
+router.post("/file/get", FileIssueController.getFiles); //Create and Add new file
 
 module.exports = router;
