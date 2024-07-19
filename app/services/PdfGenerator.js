@@ -11778,9 +11778,9 @@ class pdfGenerator {
 										text:
 											"Installment Month: " +
 											`${
-												body?.Installment_Month.split("-")[1] == 10
+												body?.Installment_Month?.split("-")[1] == 10
 													? fullMonthsArr[body?.Installment_Month.split("-")[1] + ""]
-													: fullMonthsArr[(body?.Installment_Month.split("-")[1] + "").replace("0", "")]
+													: fullMonthsArr[(body?.Installment_Month?.split("-")[1] + "").replace("0", "")]
 											}`,
 										bold: true
 									}
@@ -11792,7 +11792,7 @@ class pdfGenerator {
 							{
 								width: "30%",
 								fontSize: 11,
-								text: "Installment Year : " + `${body?.Installment_Month.split("-")[0]}`,
+								text: "Installment Year : " + `${body?.Installment_Month?.split("-")[0]}`,
 								alignment: "left",
 								// decoration: "underline",
 								bold: true,
@@ -12107,9 +12107,9 @@ class pdfGenerator {
 										text:
 											"Installment Month: " +
 											`${
-												body?.Installment_Month.split("-")[1] == 10
+												body?.Installment_Month?.split("-")[1] == 10
 													? fullMonthsArr[body?.Installment_Month.split("-")[1] + ""]
-													: fullMonthsArr[(body?.Installment_Month.split("-")[1] + "").replace("0", "")]
+													: fullMonthsArr[(body?.Installment_Month?.split("-")[1] + "").replace("0", "")]
 											}`,
 										bold: true
 									}
@@ -12121,7 +12121,7 @@ class pdfGenerator {
 							{
 								width: "30%",
 								fontSize: 11,
-								text: "Installment Year : " + `${body?.Installment_Month.split("-")[0]}`,
+								text: "Installment Year : " + `${body?.Installment_Month?.split("-")[0]}`,
 								alignment: "left",
 								// decoration: "underline",
 								bold: true,
