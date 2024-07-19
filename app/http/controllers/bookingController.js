@@ -1304,9 +1304,52 @@ class BookingController {
 	static createStatement = async (req, res, next) => {
 		var id = req.query.id;
 		const vcNo = req.query.vcNo;
+		// let ser = await BookingService.surcharges(vcNo);
 
 		if (typeof vcNo != "undefined" && vcNo != null) {
 			id = (await Booking.findOne({ where: { Reg_Code_Disply: vcNo } })).BK_ID;
+		}
+
+		let detailBooking = await InstallmentReceipts.findAll({
+			where: { BK_ID: id },
+			include: [
+				{
+					as: "Booking_Installment_Details",
+					model: BookingInstallmentDetails,
+					where: { InsType_ID: 1, BKI_TYPE: null }
+				}
+			]
+		});
+		let arr = [];
+		let arr2 = [];
+		const surchargeRate = 0.001;
+		var surcharge = 0;
+		for (let i = 0; i < detailBooking.length; i++) {
+			const ircDate = new Date(detailBooking[i].IRC_Date);
+			const dueDate = new Date(detailBooking[i].Booking_Installment_Details.Due_Date);
+
+			// Calculate the difference in milliseconds
+			const differenceInMilliseconds = ircDate - dueDate;
+
+			// Convert the difference from milliseconds to days
+			const millisecondsInOneDay = 1000 * 60 * 60 * 24;
+			const differenceInDays = differenceInMilliseconds / millisecondsInOneDay;
+			arr.push(differenceInDays);
+			if (differenceInDays < 0) {
+				// surcharge = parseFloat(detailBooking[0].Installment_Due) * surchargeRate * differenceInDays;
+				let updateSurchare = await BookingInstallmentDetails.update(
+					{ surCharges: 0 },
+					{ where: { BKI_DETAIL_ID: detailBooking[i].BKI_DETAIL_ID, BKI_TYPE: null } }
+				);
+				// detailBooking[i].BookingInstallmentDetails.surCharges = surcharge;
+			} else {
+				surcharge = parseInt(detailBooking[i].Installment_Due) * surchargeRate * differenceInDays;
+				arr2.push(surcharge);
+				let updateSurchare = await BookingInstallmentDetails.update(
+					{ surCharges: surcharge },
+					{ where: { BKI_DETAIL_ID: detailBooking[i].BKI_DETAIL_ID, BKI_TYPE: null } }
+				);
+			}
 		}
 
 		try {
@@ -1789,7 +1832,7 @@ class BookingController {
 		const data = [
 			{
 				Sr: 1,
-				Block: "Touheed",
+				Block: "TOUHEED",
 				Category: "Residential",
 				Size: "5 Marla",
 				Plot: 156,
@@ -1807,7 +1850,7 @@ class BookingController {
 			},
 			{
 				Sr: 3,
-				Block: "Ali",
+				Block: "ALI",
 				Category: "Residential",
 				Size: "5 Marla",
 				Plot: 51,
@@ -1825,7 +1868,7 @@ class BookingController {
 			},
 			{
 				Sr: 5,
-				Block: "Ali",
+				Block: "ALI",
 				Category: "Residential",
 				Size: "5 Marla",
 				Plot: 52,
@@ -1940,4166 +1983,6345 @@ class BookingController {
 		const data = [
 			{
 				"Sr. #": 1,
-				Block: "Touheed",
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 152,
-				"Client Name": "Ahsan Ahmed",
-				"VC No": "VC121771"
-			},
-			{
-				"Sr. #": 2,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 31,
-				Block: "Umer",
-				"Client Name": "MASOOD AKHTAR",
-				"VC No": "VC111503"
-			},
-			{
-				"Sr. #": 3,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 32,
-				Block: "Umer",
-				"Client Name": "ASIM BASHIR ",
-				"VC No": "VC11137"
-			},
-			{
-				"Sr. #": 4,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 33,
-				Block: "Umer",
-				"Client Name": "M. RASHID MAHMOOD ",
-				"VC No": "VC11940"
-			},
-			{
-				"Sr. #": 5,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 34,
-				Block: "Umer",
-				"Client Name": "MAHMOOD FATEH AHSAN",
-				"VC No": "VC11102"
-			},
-			{
-				"Sr. #": 6,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 35,
-				Block: "Umer",
-				"Client Name": "QASIM ALI",
-				"VC No": "VC11709"
-			},
-			{
-				"Sr. #": 7,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 36,
-				Block: "Umer",
-				"Client Name": "SANIA CHUDHARY",
-				"VC No": "VC11878"
-			},
-			{
-				"Sr. #": 8,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 37,
-				Block: "Umer",
-				"Client Name": "AZEEM UL REHMAN",
-				"VC No": "VC111244"
-			},
-			{
-				"Sr. #": 9,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 38,
-				Block: "Umer",
-				"Client Name": "SOHAIL LATIF",
-				"VC No": "VC111401"
-			},
-			{
-				"Sr. #": 10,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 39,
-				Block: "Umer",
-				"Client Name": "M. OMAR QURESHI",
-				"VC No": "VC11365"
-			},
-			{
-				"Sr. #": 11,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 40,
-				Block: "Umer",
-				"Client Name": "ANIQA MAHOOR",
-				"VC No": "VC111213"
-			},
-			{
-				"Sr. #": 12,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 41,
-				Block: "Umer",
-				"Client Name": "MIAN TANVEER BASHIR ",
-				"VC No": "VC11266"
-			},
-			{
-				"Sr. #": 13,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 42,
-				Block: "Umer",
-				"Client Name": "SADAF ZEESHAN",
-				"VC No": "VC11668"
-			},
-			{
-				"Sr. #": 14,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 43,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD ASLAM ZAHID",
-				"VC No": "VC111520"
-			},
-			{
-				"Sr. #": 15,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 44,
-				Block: "Umer",
-				"Client Name": "AROOBA AZHAR ",
-				"VC No": "VC11307"
-			},
-			{
-				"Sr. #": 16,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 45,
-				Block: "Umer",
-				"Client Name": "SAFIA AFZAL",
-				"VC No": "VC111330"
-			},
-			{
-				"Sr. #": 17,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 46,
-				Block: "Umer",
-				"Client Name": "AWAIS TAUFIQ",
-				"VC No": "VC111137"
-			},
-			{
-				"Sr. #": 18,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 47,
-				Block: "Umer",
-				"Client Name": "MEHBOOB ELAHIE",
-				"VC No": "VC111512"
-			},
-			{
-				"Sr. #": 19,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 48,
-				Block: "Umer",
-				"Client Name": "FATIMA SABIR ",
-				"VC No": "VC11780"
-			},
-			{
-				"Sr. #": 20,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 49,
-				Block: "Umer",
-				"Client Name": "BILalMEHMOOD ",
-				"VC No": "VC111325"
-			},
-			{
-				"Sr. #": 21,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 50,
-				Block: "Umer",
-				"Client Name": "SHAHZAD AHMAD CH.",
-				"VC No": "VC11679"
-			},
-			{
-				"Sr. #": 22,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 51,
-				Block: "Umer",
-				"Client Name": "MEHREEN AHMED ",
-				"VC No": "VC11195"
-			},
-			{
-				"Sr. #": 23,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 52,
-				Block: "Umer",
-				"Client Name": "MIZLA IFTIKHAR",
-				"VC No": "VC111463"
-			},
-			{
-				"Sr. #": 24,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 53,
-				Block: "Umer",
-				"Client Name": "MOHSIN MUKHTAR",
-				"VC No": "VC111363"
-			},
-			{
-				"Sr. #": 25,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 54,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD SAAD TARIQ",
-				"VC No": "VC11151"
-			},
-			{
-				"Sr. #": 26,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 55,
-				Block: "Umer",
-				"Client Name": "SYEDA FARIDA BANO ",
-				"VC No": "VC11874"
-			},
-			{
-				"Sr. #": 27,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 56,
-				Block: "Umer",
-				"Client Name": "SYEDA FARIDA BANO ",
-				"VC No": "VC11875"
-			},
-			{
-				"Sr. #": 28,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 57,
-				Block: "Umer",
-				"Client Name": "AFSHAN ARSHAD ",
-				"VC No": "VC11234"
-			},
-			{
-				"Sr. #": 29,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 58,
-				Block: "Umer",
-				"Client Name": "BEENISH QASIM ",
-				"VC No": "VC11674"
-			},
-			{
-				"Sr. #": 30,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 59,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD AWAIS ZIA",
-				"VC No": "VC111202"
-			},
-			{
-				"Sr. #": 31,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 60,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD IMRAN ",
-				"VC No": "VC11681"
-			},
-			{
-				"Sr. #": 32,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 61,
-				Block: "Umer",
-				"Client Name": "FAISalEJAZ",
-				"VC No": "VC111081"
-			},
-			{
-				"Sr. #": 33,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 62,
-				Block: "Umer",
-				"Client Name": "HAFIZ M. NAUMAN QURESHI",
-				"VC No": "VC11737"
-			},
-			{
-				"Sr. #": 34,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 63,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD SHAFAQAT SAEED",
-				"VC No": "VC111492"
-			},
-			{
-				"Sr. #": 35,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 64,
-				Block: "Umer",
-				"Client Name": "NASIR ALI",
-				"VC No": "VC11261"
-			},
-			{
-				"Sr. #": 36,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 65,
-				Block: "Umer",
-				"Client Name": "ADNAN MANZOOR",
-				"VC No": "VC111226"
-			},
-			{
-				"Sr. #": 37,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 66,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD ALI",
-				"VC No": "VC111361"
-			},
-			{
-				"Sr. #": 38,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 67,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD ABU-BAKAR",
-				"VC No": "VC111374"
-			},
-			{
-				"Sr. #": 39,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 68,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD YAQOOB",
-				"VC No": "VC111175"
-			},
-			{
-				"Sr. #": 40,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 69,
-				Block: "Umer",
-				"Client Name": "SOBIA MUHAMMAD IMRAN ",
-				"VC No": "VC11840"
-			},
-			{
-				"Sr. #": 41,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 70,
-				Block: "Umer",
-				"Client Name": "MIAN TANVEER BASHIR ",
-				"VC No": "VC11265"
-			},
-			{
-				"Sr. #": 42,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 71,
-				Block: "Umer",
-				"Client Name": "MASOOD AKHTAR",
-				"VC No": "VC111504"
-			},
-			{
-				"Sr. #": 43,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 72,
-				Block: "Umer",
-				"Client Name": "HABIB-UR-REHMAN",
-				"VC No": "VC11275"
-			},
-			{
-				"Sr. #": 44,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 74,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD AHMAD ZAIB",
-				"VC No": "VC11374"
-			},
-			{
-				"Sr. #": 45,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 75,
-				Block: "Umer",
-				"Client Name": "SANAULLAH",
-				"VC No": "VC111132"
-			},
-			{
-				"Sr. #": 46,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 76,
-				Block: "Umer",
-				"Client Name": "MUKHTAR AHMAD",
-				"VC No": "VC111417"
-			},
-			{
-				"Sr. #": 47,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 77,
-				Block: "Umer",
-				"Client Name": "SANA HABIB",
-				"VC No": "VC11443"
-			},
-			{
-				"Sr. #": 48,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 78,
-				Block: "Umer",
-				"Client Name": "FIDA HUSSAIN ",
-				"VC No": "VC111200"
-			},
-			{
-				"Sr. #": 49,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 79,
-				Block: "Umer",
-				"Client Name": "AZRA ZIA",
-				"VC No": "VC11433"
-			},
-			{
-				"Sr. #": 50,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 80,
-				Block: "Umer",
-				"Client Name": "FARHAN RASHID",
-				"VC No": "VC01170"
-			},
-			{
-				"Sr. #": 51,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 81,
-				Block: "Umer",
-				"Client Name": "IMRAN NAEEM",
-				"VC No": "VC11358"
-			},
-			{
-				"Sr. #": 52,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 82,
-				Block: "Umer",
-				"Client Name": "TOQEER AHMAD ",
-				"VC No": "VC11274"
-			},
-			{
-				"Sr. #": 53,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 83,
-				Block: "Umer",
-				"Client Name": "WASIM ABBASI",
-				"VC No": "VC01135"
-			},
-			{
-				"Sr. #": 54,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 84,
-				Block: "Umer",
-				"Client Name": "M. WASEEM ANWAR ",
-				"VC No": "VC11330"
-			},
-			{
-				"Sr. #": 55,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 85,
-				Block: "Umer",
-				"Client Name": "SYED HASHIM ALI SHAH",
-				"VC No": "VC111072"
-			},
-			{
-				"Sr. #": 56,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 86,
-				Block: "Umer",
-				"Client Name": "MOHAMMAD EJAZ",
-				"VC No": "VC11698"
-			},
-			{
-				"Sr. #": 57,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 87,
-				Block: "Umer",
-				"Client Name": "ISHFAQ AHMAD",
-				"VC No": "VC11752"
-			},
-			{
-				"Sr. #": 58,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 88,
-				Block: "Umer",
-				"Client Name": "SHAHZAD AHMAD CH. ",
-				"VC No": "VC11678"
-			},
-			{
-				"Sr. #": 59,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 89,
-				Block: "Umer",
-				"Client Name": "ROBINA SHAHEEN ",
-				"VC No": "VC11667"
-			},
-			{
-				"Sr. #": 60,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 90,
-				Block: "Umer",
-				"Client Name": "RUBINA MAHBOOB",
-				"VC No": "VC11635"
-			},
-			{
-				"Sr. #": 61,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 91,
-				Block: "Umer",
-				"Client Name": "ABDUL QAYYUM",
-				"VC No": "VC111372"
-			},
-			{
-				"Sr. #": 62,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 92,
-				Block: "Umer",
-				"Client Name": "SYED NAZIR HASAN",
-				"VC No": "VC11449"
-			},
-			{
-				"Sr. #": 63,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 93,
-				Block: "Umer",
-				"Client Name": "SEYYAD ZISHAN ALI ",
-				"VC No": "VC11209"
-			},
-			{
-				"Sr. #": 64,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 94,
-				Block: "Umer",
-				"Client Name": "TAHIRA IMRAN",
-				"VC No": "VC11355"
-			},
-			{
-				"Sr. #": 65,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 95,
-				Block: "Umer",
-				"Client Name": "KHURRAM SHAHZAD",
-				"VC No": "VC111086"
-			},
-			{
-				"Sr. #": 66,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 96,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD SHAFI",
-				"VC No": "VC11404"
-			},
-			{
-				"Sr. #": 67,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 97,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD ALTAF",
-				"VC No": "VC111405"
-			},
-			{
-				"Sr. #": 68,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 98,
-				Block: "Umer",
-				"Client Name": "ATTA ULLAH",
-				"VC No": "VC11386"
-			},
-			{
-				"Sr. #": 69,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 99,
-				Block: "Umer",
-				"Client Name": "SAJID ALI",
-				"VC No": "VC11391"
-			},
-			{
-				"Sr. #": 70,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 100,
-				Block: "Umer",
-				"Client Name": "ARHAM IMRAN",
-				"VC No": "VC11357"
-			},
-			{
-				"Sr. #": 71,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 101,
-				Block: "Umer",
-				"Client Name": "MUBASHIR REHMAN",
-				"VC No": "VC11713"
-			},
-			{
-				"Sr. #": 72,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 102,
-				Block: "Umer",
-				"Client Name": "AKIF RASHEED",
-				"VC No": "VC111250"
-			},
-			{
-				"Sr. #": 73,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 103,
-				Block: "Umer",
-				"Client Name": "MUDASAR ALI",
-				"VC No": "VC11385"
-			},
-			{
-				"Sr. #": 74,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 104,
-				Block: "Umer",
-				"Client Name": "KASHIF ILYAS ",
-				"VC No": "VC11716"
-			},
-			{
-				"Sr. #": 75,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 105,
-				Block: "Umer",
-				"Client Name": "ASSIA TARIQ",
-				"VC No": "VC11432"
-			},
-			{
-				"Sr. #": 76,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 106,
-				Block: "Umer",
-				"Client Name": "M. FARHAN QURESHI",
-				"VC No": "VC11738"
-			},
-			{
-				"Sr. #": 77,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 107,
-				Block: "Umer",
-				"Client Name": "SHAGUFTA JABEEN",
-				"VC No": "VC11735"
-			},
-			{
-				"Sr. #": 78,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 108,
-				Block: "Umer",
-				"Client Name": "S TAHIR SAJJAD BOKHARI",
-				"VC No": "VC01142"
-			},
-			{
-				"Sr. #": 79,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 109,
-				Block: "Umer",
-				"Client Name": "SOBIA RIZWAN ",
-				"VC No": "VC11204"
-			},
-			{
-				"Sr. #": 80,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 110,
-				Block: "Umer",
-				"Client Name": "ZESHAN ALI ",
-				"VC No": "VC11781"
-			},
-			{
-				"Sr. #": 81,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 111,
-				Block: "Umer",
-				"Client Name": "SYED MASOOD ALI",
-				"VC No": "VC11574"
-			},
-			{
-				"Sr. #": 82,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 112,
-				Block: "Umer",
-				"Client Name": "SANIA CHUDHARY",
-				"VC No": "VC11879"
-			},
-			{
-				"Sr. #": 83,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 113,
-				Block: "Umer",
-				"Client Name": "SHAHBAZ ALI",
-				"VC No": "VC111477"
-			},
-			{
-				"Sr. #": 84,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 114,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD MOHSIN BHATTI",
-				"VC No": "VC111510"
-			},
-			{
-				"Sr. #": 85,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 115,
-				Block: "Umer",
-				"Client Name": "IQBalBASHIR",
-				"VC No": "VC11602"
-			},
-			{
-				"Sr. #": 86,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 116,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD MOHSIN BHATTI",
-				"VC No": "VC111514"
-			},
-			{
-				"Sr. #": 87,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 117,
-				Block: "Umer",
-				"Client Name": "RIDA SHAKIL",
-				"VC No": "VC111496"
-			},
-			{
-				"Sr. #": 88,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 118,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD KASHIF ",
-				"VC No": "VC111017"
-			},
-			{
-				"Sr. #": 89,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 119,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD IMRAN",
-				"VC No": "VC11881"
-			},
-			{
-				"Sr. #": 90,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 120,
-				Block: "Umer",
-				"Client Name": "ATIF AKHTAR BHATTI ",
-				"VC No": "VC11193"
-			},
-			{
-				"Sr. #": 91,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 121,
-				Block: "Umer",
-				"Client Name": "UZAIR BIN IMRAN",
-				"VC No": "VC11356"
-			},
-			{
-				"Sr. #": 92,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 122,
-				Block: "Umer",
-				"Client Name": "IQRA SITAR",
-				"VC No": "VC11314"
-			},
-			{
-				"Sr. #": 93,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 123,
-				Block: "Umer",
-				"Client Name": "ROBINA SHAHEEN ",
-				"VC No": "VC11664"
-			},
-			{
-				"Sr. #": 94,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 124,
-				Block: "Umer",
-				"Client Name": "ASIM RASHEED",
-				"VC No": "VC111257"
-			},
-			{
-				"Sr. #": 95,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 125,
-				Block: "Umer",
-				"Client Name": "ZAIN UL ABIDEEN",
-				"VC No": "VC111247"
-			},
-			{
-				"Sr. #": 96,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 126,
-				Block: "Umer",
-				"Client Name": "RANA EJAZ AHMED",
-				"VC No": "VC11194"
-			},
-			{
-				"Sr. #": 97,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 127,
-				Block: "Umer",
-				"Client Name": "ABDUL REHMAN",
-				"VC No": "VC111513"
-			},
-			{
-				"Sr. #": 98,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 128,
-				Block: "Umer",
-				"Client Name": "SIDRA AMIR",
-				"VC No": "VC111570"
-			},
-			{
-				"Sr. #": 99,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 129,
-				Block: "Umer",
-				"Client Name": "USMAN AHMAD",
-				"VC No": "VC111539"
-			},
-			{
-				"Sr. #": 100,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 130,
-				Block: "Umer",
-				"Client Name": "ASIM RASHEED",
-				"VC No": "VC111258"
-			},
-			{
-				"Sr. #": 101,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 131,
-				Block: "Umer",
-				"Client Name": "RANA DILDAR AHMAD",
-				"VC No": "VC11616"
-			},
-			{
-				"Sr. #": 102,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 132,
-				Block: "Umer",
-				"Client Name": "BATOOL EJAZ",
-				"VC No": "VC01137"
-			},
-			{
-				"Sr. #": 103,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 133,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD ADIL KHAN ",
-				"VC No": "VC111039"
-			},
-			{
-				"Sr. #": 104,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 134,
-				Block: "Umer",
-				"Client Name": "NAVEED AHMED",
-				"VC No": "VC01186"
-			},
-			{
-				"Sr. #": 105,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 135,
-				Block: "Umer",
-				"Client Name": "HAFSA ASHFAQ",
-				"VC No": "VC11896"
-			},
-			{
-				"Sr. #": 106,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 136,
-				Block: "Umer",
-				"Client Name": "FAISalWAHEED KHAN",
-				"VC No": "VC11469"
-			},
-			{
-				"Sr. #": 107,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 137,
-				Block: "Umer",
-				"Client Name": "FAISalWAHEED KHAN",
-				"VC No": "VC11468"
-			},
-			{
-				"Sr. #": 108,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 138,
-				Block: "Umer",
-				"Client Name": "SALMA BIBI",
-				"VC No": "VC111262"
-			},
-			{
-				"Sr. #": 109,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 139,
-				Block: "Umer",
-				"Client Name": "MARIYAM FAHAD",
-				"VC No": "VC11694"
-			},
-			{
-				"Sr. #": 110,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 140,
-				Block: "Umer",
-				"Client Name": "SHUMAILA MOHSIN",
-				"VC No": "VC111297"
-			},
-			{
-				"Sr. #": 111,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 141,
-				Block: "Umer",
-				"Client Name": "SAQIB LATIF",
-				"VC No": "VC11696"
-			},
-			{
-				"Sr. #": 112,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 142,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD TAHIR BASHIR",
-				"VC No": "VC111212"
-			},
-			{
-				"Sr. #": 113,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 143,
-				Block: "Umer",
-				"Client Name": "MAHEEN IMRAN",
-				"VC No": "VC11359"
-			},
-			{
-				"Sr. #": 114,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 144,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD IMRAN",
-				"VC No": "VC111135"
-			},
-			{
-				"Sr. #": 115,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 145,
-				Block: "Umer",
-				"Client Name": "BASHIR AHMAD",
-				"VC No": "VC111215"
-			},
-			{
-				"Sr. #": 116,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 146,
-				Block: "Umer",
-				"Client Name": "FAHAD ISLAM",
-				"VC No": "VC11140"
-			},
-			{
-				"Sr. #": 117,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 147,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD MOON SHAHZAD",
-				"VC No": "VC111506"
-			},
-			{
-				"Sr. #": 118,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 148,
-				Block: "Umer",
-				"Client Name": "TOOBA HASSAN",
-				"VC No": "VC111524"
-			},
-			{
-				"Sr. #": 119,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 149,
-				Block: "Umer",
-				"Client Name": "SAIMA TARIQ",
-				"VC No": "VC111263"
-			},
-			{
-				"Sr. #": 120,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 150,
-				Block: "Umer",
-				"Client Name": "UMAIR SABIR",
-				"VC No": "VC11671"
-			},
-			{
-				"Sr. #": 121,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 151,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD AHMAD ZAIB",
-				"VC No": "VC11375"
-			},
-			{
-				"Sr. #": 122,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 152,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD AKRAM ",
-				"VC No": "VC11631"
-			},
-			{
-				"Sr. #": 123,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 153,
-				Block: "Umer",
-				"Client Name": "IJAZ AHMAD",
-				"VC No": "VC11478"
-			},
-			{
-				"Sr. #": 124,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 154,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD AWAIS",
-				"VC No": "VC11410"
-			},
-			{
-				"Sr. #": 125,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 155,
-				Block: "Umer",
-				"Client Name": "ARSHAD JAVED",
-				"VC No": "VC111203"
-			},
-			{
-				"Sr. #": 126,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 156,
-				Block: "Umer",
-				"Client Name": "AQSA IZHAR",
-				"VC No": "VC11436"
-			},
-			{
-				"Sr. #": 127,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 157,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD ADIL KHAN ",
-				"VC No": "VC11980"
-			},
-			{
-				"Sr. #": 128,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 158,
-				Block: "Umer",
-				"Client Name": "MARYUM MAHMOOD ",
-				"VC No": "VC11153"
-			},
-			{
-				"Sr. #": 129,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 159,
-				Block: "Umer",
-				"Client Name": "AYESHA AHMED ",
-				"VC No": "VC11623"
-			},
-			{
-				"Sr. #": 130,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 160,
-				Block: "Umer",
-				"Client Name": "MOUZAM JAVED ",
-				"VC No": "VC11179"
-			},
-			{
-				"Sr. #": 131,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 161,
-				Block: "Umer",
-				"Client Name": "FAISalEJAZ",
-				"VC No": "VC111082"
-			},
-			{
-				"Sr. #": 132,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 162,
-				Block: "Umer",
-				"Client Name": "SOBIA NOUMAN",
-				"VC No": "VC11789"
-			},
-			{
-				"Sr. #": 133,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 163,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD IMRAN",
-				"VC No": "VC11882"
-			},
-			{
-				"Sr. #": 134,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 164,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD KAMRAN",
-				"VC No": "VC111474"
-			},
-			{
-				"Sr. #": 135,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 165,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD KHALID ",
-				"VC No": "VC11945"
-			},
-			{
-				"Sr. #": 136,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 166,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD JAVED",
-				"VC No": "VC111505"
-			},
-			{
-				"Sr. #": 137,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 167,
-				Block: "Umer",
-				"Client Name": "RANA HAFEEZ ULLAH",
-				"VC No": "VC11431"
-			},
-			{
-				"Sr. #": 138,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 168,
-				Block: "Umer",
-				"Client Name": "FATIMA AFZAAL",
-				"VC No": "VC111229"
-			},
-			{
-				"Sr. #": 139,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 169,
-				Block: "Umer",
-				"Client Name": "ROBINA SHAHEEN ",
-				"VC No": "VC11665"
-			},
-			{
-				"Sr. #": 140,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 170,
-				Block: "Umer",
-				"Client Name": "ROBINA SHAHEEN ",
-				"VC No": "VC11666"
-			},
-			{
-				"Sr. #": 141,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 171,
-				Block: "Umer",
-				"Client Name": "YASIR IQBAL",
-				"VC No": "VC11390"
-			},
-			{
-				"Sr. #": 142,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 172,
-				Block: "Umer",
-				"Client Name": "YASIR IQBAL",
-				"VC No": "VC11388"
-			},
-			{
-				"Sr. #": 143,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 173,
-				Block: "Umer",
-				"Client Name": "YASIR IQBAL",
-				"VC No": "VC11389"
-			},
-			{
-				"Sr. #": 144,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 174,
-				Block: "Umer",
-				"Client Name": "SYED KANWalZAIDI",
-				"VC No": "VC11450"
-			},
-			{
-				"Sr. #": 145,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 176,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD SHAKEEL",
-				"VC No": "VC11625"
-			},
-			{
-				"Sr. #": 146,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 177,
-				Block: "Umer",
-				"Client Name": "AKIF RASHEED",
-				"VC No": "VC111251"
-			},
-			{
-				"Sr. #": 147,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 178,
-				Block: "Umer",
-				"Client Name": "SHAGUFTA JABEEN",
-				"VC No": "VC11736"
-			},
-			{
-				"Sr. #": 148,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 179,
-				Block: "Umer",
-				"Client Name": "HINA QAISER",
-				"VC No": "VC11774"
-			},
-			{
-				"Sr. #": 149,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 180,
-				Block: "Umer",
-				"Client Name": "BALalAHMAD",
-				"VC No": "VC11101"
-			},
-			{
-				"Sr. #": 150,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 181,
-				Block: "Umer",
-				"Client Name": "SHAZIA TASNEEM",
-				"VC No": "VC11348"
-			},
-			{
-				"Sr. #": 151,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 182,
-				Block: "Umer",
-				"Client Name": "IZMA ANWAR",
-				"VC No": "VC111085"
-			},
-			{
-				"Sr. #": 152,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 183,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD BASHIR ",
-				"VC No": "VC11782"
-			},
-			{
-				"Sr. #": 153,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 184,
-				Block: "Umer",
-				"Client Name": "M. AZEEM QURESHI",
-				"VC No": "VC11351"
-			},
-			{
-				"Sr. #": 154,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 185,
-				Block: "Umer",
-				"Client Name": "ZILE HUMA",
-				"VC No": "VC111365"
-			},
-			{
-				"Sr. #": 155,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 186,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD BILAL",
-				"VC No": "VC11408"
-			},
-			{
-				"Sr. #": 156,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 187,
-				Block: "Umer",
-				"Client Name": "SHAHZADA ANJUM",
-				"VC No": "VC11790"
-			},
-			{
-				"Sr. #": 157,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 188,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD ZEESHAN",
-				"VC No": "VC11830"
-			},
-			{
-				"Sr. #": 158,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 189,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD NASIR",
-				"VC No": "VC01168"
-			},
-			{
-				"Sr. #": 159,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 190,
-				Block: "Umer",
-				"Client Name": "ROBINA SHAHEEN ",
-				"VC No": "VC11663"
-			},
-			{
-				"Sr. #": 160,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 191,
-				Block: "Umer",
-				"Client Name": "ZUHAIB KHALID",
-				"VC No": "VC11228"
-			},
-			{
-				"Sr. #": 161,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 192,
-				Block: "Umer",
-				"Client Name": "FATIMA HABIB",
-				"VC No": "VC01178"
-			},
-			{
-				"Sr. #": 162,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 193,
-				Block: "Umer",
-				"Client Name": "USMAN AHMAD",
-				"VC No": "VC11772"
-			},
-			{
-				"Sr. #": 163,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 194,
-				Block: "Umer",
-				"Client Name": "GHULAM ALI",
-				"VC No": "VC111471"
-			},
-			{
-				"Sr. #": 164,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 195,
-				Block: "Umer",
-				"Client Name": "SHAHZAD AHMAD CHAUDHARY ",
-				"VC No": "VC11677"
-			},
-			{
-				"Sr. #": 165,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 196,
-				Block: "Umer",
-				"Client Name": "AKIF RASHEED",
-				"VC No": "VC111252"
-			},
-			{
-				"Sr. #": 166,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 197,
-				Block: "Umer",
-				"Client Name": "BIBI RUKHSANA",
-				"VC No": "VC111367"
-			},
-			{
-				"Sr. #": 167,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 199,
-				Block: "Umer",
-				"Client Name": "ZULQARNAIN HABIB",
-				"VC No": "VC111302"
-			},
-			{
-				"Sr. #": 168,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 200,
-				Block: "Umer",
-				"Client Name": "KASHIF ILYAS ",
-				"VC No": "VC11715"
-			},
-			{
-				"Sr. #": 169,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 201,
-				Block: "Umer",
-				"Client Name": "KASHIF ILYAS ",
-				"VC No": "VC11714"
-			},
-			{
-				"Sr. #": 170,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 202,
-				Block: "Umer",
-				"Client Name": "ASAD TARIQ ",
-				"VC No": "VC11158"
-			},
-			{
-				"Sr. #": 171,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 203,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD YOUNAS",
-				"VC No": "VC111228"
-			},
-			{
-				"Sr. #": 172,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 204,
-				Block: "Umer",
-				"Client Name": "AYESHA SAQIB",
-				"VC No": "VC111315"
-			},
-			{
-				"Sr. #": 173,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 205,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD ARSLAN",
-				"VC No": "VC111425"
-			},
-			{
-				"Sr. #": 174,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 206,
-				Block: "Umer",
-				"Client Name": "JAVARIA SALEEM",
-				"VC No": "VC111034"
-			},
-			{
-				"Sr. #": 175,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 207,
-				Block: "Umer",
-				"Client Name": "TOOBA HASSAN",
-				"VC No": "VC111521"
-			},
-			{
-				"Sr. #": 176,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 208,
-				Block: "Umer",
-				"Client Name": "Maqsood Ahmad",
-				"VC No": "VC111661"
-			},
-			{
-				"Sr. #": 177,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 209,
-				Block: "Umer",
-				"Client Name": "Zukhruf Umair",
-				"VC No": "VC11466"
-			},
-			{
-				"Sr. #": 178,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 210,
-				Block: "Umer",
-				"Client Name": "SAJID MUNIR",
-				"VC No": "VC111460"
-			},
-			{
-				"Sr. #": 179,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 211,
-				Block: "Umer",
-				"Client Name": "SAJID MUNIR",
-				"VC No": "VC111461"
-			},
-			{
-				"Sr. #": 180,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 212,
-				Block: "Umer",
-				"Client Name": "MEHBOOB UL HASSAN",
-				"VC No": "VC111543"
-			},
-			{
-				"Sr. #": 181,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 234,
-				Block: "Umer",
-				"Client Name": "SAJID ALI",
-				"VC No": "VC111541"
-			},
-			{
-				"Sr. #": 182,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 235,
-				Block: "Umer",
-				"Client Name": "MEHBOOB UL HASSAN",
-				"VC No": "VC111545"
-			},
-			{
-				"Sr. #": 183,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 236,
-				Block: "Umer",
-				"Client Name": "MUHAMMAD AMJAD",
-				"VC No": "VC111555"
-			},
-			{
-				"Sr. #": 184,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 239,
-				Block: "Umer",
-				"Client Name": "MEHBOOB UL HASSAN",
-				"VC No": "VC111542"
-			},
-			{
-				"Sr. #": 185,
-				Category: "Residential",
-				Size: "3 Marla ",
-				"Plot No": 241,
-				Block: "Umer",
-				"Client Name": "MEHBOOB UL HASSAN",
-				"VC No": "VC111544"
-			},
-			{
-				"Sr. #": 186,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 1,
-				Block: "Touheed",
-				"Client Name": "RIDA ASHFAQ",
-				"VC No": "VC12757"
-			},
-			{
-				"Sr. #": 187,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 2,
-				Block: "Touheed",
-				"Client Name": "MIAN MOHAMMAD ASLAM",
-				"VC No": "VC12213"
-			},
-			{
-				"Sr. #": 188,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 3,
-				Block: "Touheed",
-				"Client Name": "ZUBAIR AHMAD WASEEM",
-				"VC No": "VC12110"
-			},
-			{
-				"Sr. #": 189,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 4,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD AWAIS",
-				"VC No": "VC121223"
-			},
-			{
-				"Sr. #": 190,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 5,
-				Block: "Touheed",
-				"Client Name": "AHMAD WAQAR ",
-				"VC No": "VC12871"
-			},
-			{
-				"Sr. #": 191,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 6,
-				Block: "Touheed",
-				"Client Name": "MAMOONA RIAZ",
-				"VC No": "VC12769"
-			},
-			{
-				"Sr. #": 192,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 7,
-				Block: "Touheed",
-				"Client Name": "SABA BABAR ",
-				"VC No": "VC12989"
-			},
-			{
-				"Sr. #": 193,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 8,
-				Block: "Touheed",
-				"Client Name": "AYESHA BIBI ",
-				"VC No": "VC121439"
-			},
-			{
-				"Sr. #": 194,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 9,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD AHMAD ZAIB",
-				"VC No": "VC121078"
-			},
-			{
-				"Sr. #": 195,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 10,
-				Block: "Touheed",
-				"Client Name": "AMIR SHAHZAD",
-				"VC No": "VC12406"
-			},
-			{
-				"Sr. #": 196,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 11,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD WAQAS SABIR ",
-				"VC No": "VC12633"
-			},
-			{
-				"Sr. #": 197,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 12,
-				Block: "Touheed",
-				"Client Name": "SAHJEED HUSSAIN",
-				"VC No": "VC12886"
-			},
-			{
-				"Sr. #": 198,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 13,
-				Block: "Touheed",
-				"Client Name": "HAMZAH RAAFEH KHANZADA ",
-				"VC No": "VC121433"
-			},
-			{
-				"Sr. #": 199,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 14,
-				Block: "Touheed",
-				"Client Name": "IFFAT ALIA",
-				"VC No": "VC01284"
-			},
-			{
-				"Sr. #": 200,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 15,
-				Block: "Touheed",
-				"Client Name": "HUSNAIN RAZA",
-				"VC No": "VC121304"
-			},
-			{
-				"Sr. #": 201,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 16,
-				Block: "Touheed",
-				"Client Name": "IMRAN AHMAD QURESHI",
-				"VC No": "VC121397"
-			},
-			{
-				"Sr. #": 202,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 17,
-				Block: "Touheed",
-				"Client Name": "SAQIB ISRAR",
-				"VC No": "VC01217"
-			},
-			{
-				"Sr. #": 203,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 18,
-				Block: "Touheed",
-				"Client Name": "IMRAN NAEEM",
-				"VC No": "VC12684"
-			},
-			{
-				"Sr. #": 204,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 19,
-				Block: "Touheed",
-				"Client Name": "RANA HASSAN MUMTAZ",
-				"VC No": "VC12304"
-			},
-			{
-				"Sr. #": 205,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 20,
-				Block: "Touheed",
-				"Client Name": "S. TAHIR SAJJAD BUKHARI",
-				"VC No": "VC121430"
-			},
-			{
-				"Sr. #": 206,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 21,
-				Block: "Touheed",
-				"Client Name": "UMER FAROOQ MALIK",
-				"VC No": "VC121138"
-			},
-			{
-				"Sr. #": 207,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 22,
-				Block: "Touheed",
-				"Client Name": "ASHFAQ MAHMOOD",
-				"VC No": "VC121083"
-			},
-			{
-				"Sr. #": 208,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 23,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD HASSAN",
-				"VC No": "VC121557"
-			},
-			{
-				"Sr. #": 209,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 24,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD HASSAN",
-				"VC No": "VC121558"
-			},
-			{
-				"Sr. #": 210,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 25,
-				Block: "Touheed",
-				"Client Name": "MEHBOOB UL HASSAN",
-				"VC No": "VC121547"
-			},
-			{
-				"Sr. #": 211,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 26,
-				Block: "Touheed",
-				"Client Name": "MUKHTAR AHMAD",
-				"VC No": "VC121416"
-			},
-			{
-				"Sr. #": 212,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 27,
-				Block: "Touheed",
-				"Client Name": "MADIHA BABAR",
-				"VC No": "VC121458"
-			},
-			{
-				"Sr. #": 213,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 28,
-				Block: "Touheed",
-				"Client Name": "HAMZA MUKHTAR",
-				"VC No": "VC12776"
-			},
-			{
-				"Sr. #": 214,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 29,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD SHAFIQUE ",
-				"VC No": "VC12807"
-			},
-			{
-				"Sr. #": 215,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 30,
-				Block: "Touheed",
-				"Client Name": "AMJAD RASOOL AWAN",
-				"VC No": "VC12726"
-			},
-			{
-				"Sr. #": 216,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 31,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD ZAHEER",
-				"VC No": "VC01299"
-			},
-			{
-				"Sr. #": 217,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 32,
-				Block: "Touheed",
-				"Client Name": "MOHAMMAD ZAFAR IQBal",
-				"VC No": "VC12586"
-			},
-			{
-				"Sr. #": 218,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 33,
-				Block: "Touheed",
-				"Client Name": "UMER SHEHZAD",
-				"VC No": "VC12508"
-			},
-			{
-				"Sr. #": 219,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 34,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD SHAFIQUE ",
-				"VC No": "VC12808"
-			},
-			{
-				"Sr. #": 220,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 35,
-				Block: "Touheed",
-				"Client Name": "ZULFIQAR ALI",
-				"VC No": "VC121162"
-			},
-			{
-				"Sr. #": 221,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 36,
-				Block: "Touheed",
-				"Client Name": "FARHAN YOUSAF",
-				"VC No": "VC121380"
-			},
-			{
-				"Sr. #": 222,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 37,
-				Block: "Touheed",
-				"Client Name": "NABEEL ANJUM",
-				"VC No": "VC12160"
-			},
-			{
-				"Sr. #": 223,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 38,
-				Block: "Touheed",
-				"Client Name": "BUSHRA ALI",
-				"VC No": "VC12217"
-			},
-			{
-				"Sr. #": 224,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 39,
-				Block: "Touheed",
-				"Client Name": "BILalAHMAD",
-				"VC No": "VC121526"
-			},
-			{
-				"Sr. #": 225,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 40,
-				Block: "Touheed",
-				"Client Name": "M. FAWAD NASEEM ABBASI",
-				"VC No": "VC01274"
-			},
-			{
-				"Sr. #": 226,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 41,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD SUFYAN ",
-				"VC No": "VC12990"
-			},
-			{
-				"Sr. #": 227,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 42,
-				Block: "Touheed",
-				"Client Name": "ZEESHAN AFZAL",
-				"VC No": "VC01281"
-			},
-			{
-				"Sr. #": 228,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 43,
-				Block: "Touheed",
-				"Client Name": "NAZIR AHMAD",
-				"VC No": "VC121285"
-			},
-			{
-				"Sr. #": 229,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 44,
-				Block: "Touheed",
-				"Client Name": "NAIMA ARAB CHOUDHARY",
-				"VC No": "VC121136"
-			},
-			{
-				"Sr. #": 230,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 45,
-				Block: "Touheed",
-				"Client Name": "NAZISH ZAFAR",
-				"VC No": "VC121067"
-			},
-			{
-				"Sr. #": 231,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 46,
-				Block: "Touheed",
-				"Client Name": "SAIMA NOMAN",
-				"VC No": "VC12724"
-			},
-			{
-				"Sr. #": 232,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 47,
-				Block: "Touheed",
-				"Client Name": "TAHIR RASHID",
-				"VC No": "VC12686"
-			},
-			{
-				"Sr. #": 233,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 48,
-				Block: "Touheed",
-				"Client Name": "AMNA HASSAN",
-				"VC No": "VC121166"
-			},
-			{
-				"Sr. #": 234,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 49,
-				Block: "Touheed",
-				"Client Name": "SYED AKHTAR HUSSAIN ZAIDI",
-				"VC No": "VC12603"
-			},
-			{
-				"Sr. #": 235,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 50,
-				Block: "Touheed",
-				"Client Name": "SYED GHUFRAN AHMAD",
-				"VC No": "VC121283"
-			},
-			{
-				"Sr. #": 236,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 51,
-				Block: "Touheed",
-				"Client Name": "SHAHID RASHEED",
-				"VC No": "VC12593"
-			},
-			{
-				"Sr. #": 237,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 52,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD AHMAD ZAIB",
-				"VC No": "VC121127"
-			},
-			{
-				"Sr. #": 238,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 55,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD SADIQ",
-				"VC No": "VC121158"
-			},
-			{
-				"Sr. #": 239,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 56,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD AHMAD ZAIB",
-				"VC No": "VC121126"
-			},
-			{
-				"Sr. #": 240,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 57,
-				Block: "Touheed",
-				"Client Name": "IMRAN AHMAD QURESHI",
-				"VC No": "VC121396"
-			},
-			{
-				"Sr. #": 241,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 58,
-				Block: "Touheed",
-				"Client Name": "BADAR JAMAL",
-				"VC No": "VC12437"
-			},
-			{
-				"Sr. #": 242,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 59,
-				Block: "Touheed",
-				"Client Name": "IQRA SARWAR",
-				"VC No": "VC121532"
-			},
-			{
-				"Sr. #": 243,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 60,
-				Block: "Touheed",
-				"Client Name": "FARHAN RASHID",
-				"VC No": "VC01269"
-			},
-			{
-				"Sr. #": 244,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 61,
-				Block: "Touheed",
-				"Client Name": "KINZA ARIF ",
-				"VC No": "VC12276"
-			},
-			{
-				"Sr. #": 245,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 62,
-				Block: "Touheed",
-				"Client Name": "USMAN KHALID WARAICH ",
-				"VC No": "VC12335"
-			},
-			{
-				"Sr. #": 246,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 63,
-				Block: "Touheed",
-				"Client Name": "SHAKEELA BASHARAT ",
-				"VC No": "VC121429"
-			},
-			{
-				"Sr. #": 247,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 64,
-				Block: "Touheed",
-				"Client Name": "MALIK RIZWAN",
-				"VC No": "VC121480"
-			},
-			{
-				"Sr. #": 248,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 65,
-				Block: "Touheed",
-				"Client Name": "NASEER AHMAD BUTT",
-				"VC No": "VC121254"
-			},
-			{
-				"Sr. #": 249,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 66,
-				Block: "Touheed",
-				"Client Name": "RUSHNA SAFIA",
-				"VC No": "VC121295"
-			},
-			{
-				"Sr. #": 250,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 67,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD WAQAS",
-				"VC No": "VC121296"
-			},
-			{
-				"Sr. #": 251,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 68,
-				Block: "Touheed",
-				"Client Name": "SARFRAZ IQBAL",
-				"VC No": "VC121184"
-			},
-			{
-				"Sr. #": 252,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 69,
-				Block: "Touheed",
-				"Client Name": "ABDUL GHAFFAR",
-				"VC No": "VC121149"
-			},
-			{
-				"Sr. #": 253,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 70,
-				Block: "Touheed",
-				"Client Name": "QAMAR UN NISA",
-				"VC No": "VC01293"
-			},
-			{
-				"Sr. #": 254,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 71,
-				Block: "Touheed",
-				"Client Name": "ABDULLAH RAAKEH KHANZADA ",
-				"VC No": "VC121435"
-			},
-			{
-				"Sr. #": 255,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 72,
-				Block: "Touheed",
-				"Client Name": "MEHBOOB UL HASSAN",
-				"VC No": "VC121548"
-			},
-			{
-				"Sr. #": 256,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 73,
-				Block: "Touheed",
-				"Client Name": "AHMAD BILAL",
-				"VC No": "VC01214"
-			},
-			{
-				"Sr. #": 257,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 74,
-				Block: "Touheed",
-				"Client Name": "TAHIR RASHID",
-				"VC No": "VC12687"
-			},
-			{
-				"Sr. #": 258,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 75,
-				Block: "Touheed",
-				"Client Name": "WAQAS AHMAD",
-				"VC No": "VC01298"
-			},
-			{
-				"Sr. #": 259,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 76,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD HASEEB",
-				"VC No": "VC121255"
-			},
-			{
-				"Sr. #": 260,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 77,
-				Block: "Touheed",
-				"Client Name": "TOOBA HASSAN",
-				"VC No": "VC121522"
-			},
-			{
-				"Sr. #": 261,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 78,
-				Block: "Touheed",
-				"Client Name": "REHANA KAUSAR ",
-				"VC No": "VC12946"
-			},
-			{
-				"Sr. #": 262,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 79,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD AHSAAN",
-				"VC No": "VC121291"
-			},
-			{
-				"Sr. #": 263,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 80,
-				Block: "Touheed",
-				"Client Name": "BABER ALI",
-				"VC No": "VC121133"
-			},
-			{
-				"Sr. #": 264,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 81,
-				Block: "Touheed",
-				"Client Name": "MUTAHAR AHMAD KHAN",
-				"VC No": "VC12257"
-			},
-			{
-				"Sr. #": 265,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 82,
-				Block: "Touheed",
-				"Client Name": "ZEESHAN ALI ",
-				"VC No": "VC12685"
-			},
-			{
-				"Sr. #": 266,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 85,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD SALIK TARIQ",
-				"VC No": "VC12152"
-			},
-			{
-				"Sr. #": 267,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 86,
-				Block: "Touheed",
-				"Client Name": "FEHMIDA FAISAL",
-				"VC No": "VC12641"
-			},
-			{
-				"Sr. #": 268,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 87,
-				Block: "Touheed",
-				"Client Name": "TAHIR RASHID",
-				"VC No": "VC12689"
-			},
-			{
-				"Sr. #": 269,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 88,
-				Block: "Touheed",
-				"Client Name": "LUBNA WAHEED ",
-				"VC No": "VC12297"
-			},
-			{
-				"Sr. #": 270,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 89,
-				Block: "Touheed",
-				"Client Name": "HAMID SHOAIB",
-				"VC No": "VC121478"
-			},
-			{
-				"Sr. #": 271,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 90,
-				Block: "Touheed",
-				"Client Name": "ANUM KAMRAN",
-				"VC No": "VC01246"
-			},
-			{
-				"Sr. #": 272,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 91,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD ADIL KHAN ",
-				"VC No": "VC12981"
-			},
-			{
-				"Sr. #": 273,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 92,
-				Block: "Touheed",
-				"Client Name": "MEHBOOB UL HASSAN",
-				"VC No": "VC121549"
-			},
-			{
-				"Sr. #": 274,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 93,
-				Block: "Touheed",
-				"Client Name": "SAQIB ISRAR",
-				"VC No": "VC01216"
-			},
-			{
-				"Sr. #": 275,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 94,
-				Block: "Touheed",
-				"Client Name": "TOOBA HASSAN",
-				"VC No": "VC121523"
-			},
-			{
-				"Sr. #": 276,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 95,
-				Block: "Touheed",
-				"Client Name": "AJMalBUTT",
-				"VC No": "VC12704"
-			},
-			{
-				"Sr. #": 277,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 96,
-				Block: "Touheed",
-				"Client Name": "SAEED AKRAM",
-				"VC No": "VC121180"
-			},
-			{
-				"Sr. #": 278,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 97,
-				Block: "Touheed",
-				"Client Name": "HASSAN RIAZ",
-				"VC No": "VC12132"
-			},
-			{
-				"Sr. #": 279,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 98,
-				Block: "Touheed",
-				"Client Name": "ZAFEER BASHIR",
-				"VC No": "VC121051"
-			},
-			{
-				"Sr. #": 280,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 99,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD ASHRAF",
-				"VC No": "VC12854"
-			},
-			{
-				"Sr. #": 281,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 100,
-				Block: "Touheed",
-				"Client Name": "QASIM ALI",
-				"VC No": "VC12710"
-			},
-			{
-				"Sr. #": 282,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 101,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD ANEES ABBASI ",
-				"VC No": "VC121437"
-			},
-			{
-				"Sr. #": 283,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 102,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD AKHTAR",
-				"VC No": "VC121090"
-			},
-			{
-				"Sr. #": 284,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 103,
-				Block: "Touheed",
-				"Client Name": "SHAHEEN AKBAR",
-				"VC No": "VC12651"
-			},
-			{
-				"Sr. #": 285,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 104,
-				Block: "Touheed",
-				"Client Name": "BILalAHMED MIRZA",
-				"VC No": "VC12106"
-			},
-			{
-				"Sr. #": 286,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 105,
-				Block: "Touheed",
-				"Client Name": "BUSHRA MAAHNOOR NAEEM",
-				"VC No": "VC12575"
-			},
-			{
-				"Sr. #": 287,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 106,
-				Block: "Touheed",
-				"Client Name": "KHAWAR MAQBOOL",
-				"VC No": "VC121141"
-			},
-			{
-				"Sr. #": 288,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 107,
-				Block: "Touheed",
-				"Client Name": "FAIZA ARSHID",
-				"VC No": "VC121507"
-			},
-			{
-				"Sr. #": 289,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 108,
-				Block: "Touheed",
-				"Client Name": "SABRINA HUMAYUN",
-				"VC No": "VC12411"
-			},
-			{
-				"Sr. #": 290,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 109,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD MAHROZ ",
-				"VC No": "VC12186"
-			},
-			{
-				"Sr. #": 291,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 110,
-				Block: "Touheed",
-				"Client Name": "JAHANGEER",
-				"VC No": "VC121225"
-			},
-			{
-				"Sr. #": 292,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 111,
-				Block: "Touheed",
-				"Client Name": "AAFIA BATOOL ",
-				"VC No": "VC12867"
-			},
-			{
-				"Sr. #": 293,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 112,
-				Block: "Touheed",
-				"Client Name": "MUSHTAQ AHMAD",
-				"VC No": "VC121554"
-			},
-			{
-				"Sr. #": 294,
-				Category: "Residential",
-				Size: "10 Marla",
-				"Plot No": 119,
-				Block: "Touheed",
-				"Client Name": "Omer Zahid Sheikh",
-				"VC No": "VC131593"
-			},
-			{
-				"Sr. #": 295,
-				Category: "Residential",
-				Size: "10 Marla",
-				"Plot No": 120,
-				Block: "Touheed",
-				"Client Name": "Shama Parveen",
-				"VC No": "VC131609"
-			},
-			{
-				"Sr. #": 296,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 140,
-				Block: "Touheed",
-				"Client Name": "SABA BABAR ",
-				"VC No": "VC121227"
-			},
-			{
-				"Sr. #": 297,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 141,
-				Block: "Touheed",
-				"Client Name": "ASJED RAUF ",
-				"VC No": "VC12870"
-			},
-			{
-				"Sr. #": 298,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 142,
-				Block: "Touheed",
-				"Client Name": "AFSHAN ARSHAD ",
-				"VC No": "VC12235"
-			},
-			{
-				"Sr. #": 299,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 143,
-				Block: "Touheed",
-				"Client Name": "NABEELA RIAZ",
-				"VC No": "VC121169"
-			},
-			{
-				"Sr. #": 300,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 144,
-				Block: "Touheed",
-				"Client Name": "SYED AKHTAR HUSSAIN ZAIDI",
-				"VC No": "VC12604"
-			},
-			{
-				"Sr. #": 301,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 145,
-				Block: "Touheed",
-				"Client Name": "UMER FAROOQ MALIK",
-				"VC No": "VC121139"
-			},
-			{
-				"Sr. #": 302,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 146,
-				Block: "Touheed",
-				"Client Name": "FATIMA RIZWAN ",
-				"VC No": "VC12196"
-			},
-			{
-				"Sr. #": 303,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 147,
-				Block: "Touheed",
-				"Client Name": "TAHIR RASHID",
-				"VC No": "VC12690"
-			},
-			{
-				"Sr. #": 304,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 148,
-				Block: "Touheed",
-				"Client Name": "AHMAD BILAL",
-				"VC No": "VC01215"
-			},
-			{
-				"Sr. #": 305,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 149,
-				Block: "Touheed",
-				"Client Name": "TAHIR RASHID",
-				"VC No": "VC12688"
-			},
-			{
-				"Sr. #": 306,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 150,
-				Block: "Touheed",
-				"Client Name": "SHABANA YASMIN",
-				"VC No": "VC01267"
-			},
-			{
-				"Sr. #": 307,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 161,
-				Block: "Touheed",
-				"Client Name": "ADREES ARIF",
-				"VC No": "VC121546"
-			},
-			{
-				"Sr. #": 308,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 162,
-				Block: "Touheed",
-				"Client Name": "MUHAMMAD YOUNAS",
-				"VC No": "VC121157"
-			},
-			{
-				"Sr. #": 309,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 163,
-				Block: "Touheed",
-				"Client Name": "SHAHIDA PARVEEN",
-				"VC No": "VC12103"
-			},
-			{
-				"Sr. #": 310,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 164,
-				Block: "Touheed",
-				"Client Name": "NASRIN BEGUM ",
-				"VC No": "VC12187"
-			},
-			{
-				"Sr. #": 311,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 165,
-				Block: "Touheed",
-				"Client Name": "SYED IFTIKHAR BUKHARI",
-				"VC No": "VC121134"
-			},
-			{
-				"Sr. #": 312,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 166,
-				Block: "Touheed",
-				"Client Name": "SAIMA NOMAN",
-				"VC No": "VC12725"
-			},
-			{
-				"Sr. #": 313,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 167,
-				Block: "Touheed",
-				"Client Name": "MATLOOB AKRAM ",
-				"VC No": "VC121322"
-			},
-			{
-				"Sr. #": 314,
+				"Member Name": "Ahsan Ahmed",
+				VC: "VC111772",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 7,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 2,
+				"Member Name": "Umer Zahid",
+				VC: "VC111773",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 10,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 3,
+				"Member Name": "Muhammad Arif",
+				VC: "VC11827",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 11,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 4,
+				"Member Name": "Muhammad Javed",
+				VC: "VC111314",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 12,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 5,
+				"Member Name": "Rohail Angelo",
+				VC: "VC121421",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "UMER",
+				Plot: 19,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 6,
+				"Member Name": "Muhammad Mohsin",
+				VC: "VC12372",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "UMER",
+				Plot: 20,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 7,
+				"Member Name": "Amir Baig",
+				VC: "VC12114",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "UMER",
+				Plot: 21,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 8,
+				"Member Name": "Mir Maqsood Ul Rehman Hamdani",
+				VC: "VC121070",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "UMER",
+				Plot: 22,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 9,
+				"Member Name": "Nasir ALI Khan",
+				VC: "VC12176",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "UMER",
+				Plot: 23,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 10,
+				"Member Name": "Nasir ALI Khan",
+				VC: "VC12177",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "UMER",
+				Plot: 24,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 11,
+				"Member Name": "Nimra Khan",
+				VC: "VC12184",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "UMER",
+				Plot: 25,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 12,
+				"Member Name": "Mohammad ALI Khan",
+				VC: "VC12182",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "UMER",
+				Plot: 26,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 13,
+				"Member Name": "Haya Ghazali",
+				VC: "VC121248",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "UMER",
+				Plot: 27,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 14,
+				"Member Name": "NAZAM AMIN",
+				VC: "VC121466",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "UMER",
+				Plot: 28,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 15,
+				"Member Name": "Muhammad Awais Attari",
+				VC: "VC121638",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "UMER",
+				Plot: 29,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 16,
+				"Member Name": "Hassan Nawaz",
+				VC: "VC12174",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "UMER",
+				Plot: 30,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 17,
+				"Member Name": "MASOOD AKHTAR",
+				VC: "VC111503",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 31,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 18,
+				"Member Name": "ASIM BASHIR ",
+				VC: "VC11137",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 32,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 19,
+				"Member Name": "M. RASHID MAHMOOD ",
+				VC: "VC11940",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 33,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 20,
+				"Member Name": "MAHMOOD FATEH AHSAN",
+				VC: "VC11102",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 34,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 21,
+				"Member Name": "QASIM ALI",
+				VC: "VC11709",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 35,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 22,
+				"Member Name": "SANIA CHUDHARY",
+				VC: "VC11878",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 36,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 23,
+				"Member Name": "AZEEM UL REHMAN",
+				VC: "VC111244",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 37,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 24,
+				"Member Name": "SOHAIL LATIF",
+				VC: "VC111401",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 38,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 25,
+				"Member Name": "M. OMAR QURESHI",
+				VC: "VC11365",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 39,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 26,
+				"Member Name": "ANIQA MAHOOR",
+				VC: "VC111213",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 40,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 27,
+				"Member Name": "MIAN TANVEER BASHIR ",
+				VC: "VC11266",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 41,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 28,
+				"Member Name": "SADAF ZEESHAN",
+				VC: "VC11668",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 42,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 29,
+				"Member Name": "MUHAMMAD ASLAM ZAHID",
+				VC: "VC111520",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 43,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 30,
+				"Member Name": "AROOBA AZHAR ",
+				VC: "VC11307",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 44,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 31,
+				"Member Name": "SAFIA AFZAL",
+				VC: "VC111330",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 45,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 32,
+				"Member Name": "AWAIS TAUFIQ",
+				VC: "VC111137",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 46,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 33,
+				"Member Name": "MEHBOOB ELAHIE",
+				VC: "VC111512",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 47,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 34,
+				"Member Name": "FATIMA SABIR ",
+				VC: "VC11780",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 48,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 35,
+				"Member Name": "BILAL MEHMOOD ",
+				VC: "VC111325",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 49,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 36,
+				"Member Name": "SHAHZAD AHMAD CH.",
+				VC: "VC11679",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 50,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 37,
+				"Member Name": "MEHREEN AHMED ",
+				VC: "VC11195",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 51,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 38,
+				"Member Name": "MIZLA IFTIKHAR",
+				VC: "VC111463",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 52,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 39,
+				"Member Name": "MOHSIN MUKHTAR",
+				VC: "VC111363",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 53,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 40,
+				"Member Name": "MUHAMMAD SAAD TARIQ",
+				VC: "VC11151",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 54,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 41,
+				"Member Name": "SYEDA FARIDA BANO ",
+				VC: "VC11874",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 55,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 42,
+				"Member Name": "SYEDA FARIDA BANO ",
+				VC: "VC11875",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 56,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 43,
+				"Member Name": "AFSHAN ARSHAD ",
+				VC: "VC11234",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 57,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 44,
+				"Member Name": "BEENISH QASIM ",
+				VC: "VC11674",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 58,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 45,
+				"Member Name": "MUHAMMAD AWAIS ZIA",
+				VC: "VC111202",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 59,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 46,
+				"Member Name": "MUHAMMAD IMRAN ",
+				VC: "VC11681",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 60,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 47,
+				"Member Name": "FAISAL EJAZ",
+				VC: "VC111081",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 61,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 48,
+				"Member Name": "HAFIZ M. NAUMAN QURESHI",
+				VC: "VC11737",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 62,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 49,
+				"Member Name": "MUHAMMAD SHAFAQAT SAEED",
+				VC: "VC111492",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 63,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 50,
+				"Member Name": "NASIR ALI",
+				VC: "VC11261",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 64,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 51,
+				"Member Name": "ADNAN MANZOOR",
+				VC: "VC111226",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 65,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 52,
+				"Member Name": "MUHAMMAD ALI",
+				VC: "VC111361",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 66,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 53,
+				"Member Name": "MUHAMMAD ABU-BAKAR",
+				VC: "VC111374",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 67,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 54,
+				"Member Name": "MUHAMMAD YAQOOB",
+				VC: "VC111175",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 68,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 55,
+				"Member Name": "SOBIA MUHAMMAD IMRAN ",
+				VC: "VC11840",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 69,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 56,
+				"Member Name": "MIAN TANVEER BASHIR ",
+				VC: "VC11265",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 70,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 57,
+				"Member Name": "MASOOD AKHTAR",
+				VC: "VC111504",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 71,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 58,
+				"Member Name": "HABIB-UR-REHMAN",
+				VC: "VC11275",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 72,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 59,
+				"Member Name": "Samrooz Abbas",
+				VC: "VC111571",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 73,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 60,
+				"Member Name": "MUHAMMAD AHMAD ZAIB",
+				VC: "VC11374",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 74,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 61,
+				"Member Name": "SANAULLAH",
+				VC: "VC111132",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 75,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 62,
+				"Member Name": "MUKHTAR AHMAD",
+				VC: "VC111417",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 76,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 63,
+				"Member Name": "SANA HABIB",
+				VC: "VC11443",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 77,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 64,
+				"Member Name": "FIDA HUSSAIN ",
+				VC: "VC111200",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 78,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 65,
+				"Member Name": "AZRA ZIA",
+				VC: "VC11433",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 79,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 66,
+				"Member Name": "FARHAN RASHID",
+				VC: "VC01170",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 80,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 67,
+				"Member Name": "IMRAN NAEEM",
+				VC: "VC11358",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 81,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 68,
+				"Member Name": "TOQEER AHMAD ",
+				VC: "VC11274",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 82,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 69,
+				"Member Name": "WASIM ABBASI",
+				VC: "VC01135",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 83,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 70,
+				"Member Name": "M. WASEEM ANWAR ",
+				VC: "VC11330",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 84,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 71,
+				"Member Name": "SYED HASHIM ALI SHAH",
+				VC: "VC111072",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 85,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 72,
+				"Member Name": "MOHAMMAD EJAZ",
+				VC: "VC11698",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 86,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 73,
+				"Member Name": "ISHFAQ AHMAD",
+				VC: "VC11752",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 87,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 74,
+				"Member Name": "SHAHZAD AHMAD CH. ",
+				VC: "VC11678",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 88,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 75,
+				"Member Name": "ROBINA SHAHEEN ",
+				VC: "VC11667",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 89,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 76,
+				"Member Name": "RUBINA MAHBOOB",
+				VC: "VC11635",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 90,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 77,
+				"Member Name": "ABDUL QAYYUM",
+				VC: "VC111372",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 91,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 78,
+				"Member Name": "SYED NAZIR HASAN",
+				VC: "VC11449",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 92,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 79,
+				"Member Name": "SEYYAD ZISHAN ALI ",
+				VC: "VC11209",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 93,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 80,
+				"Member Name": "TAHIRA IMRAN",
+				VC: "VC11355",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 94,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 81,
+				"Member Name": "KHURRAM SHAHZAD",
+				VC: "VC111086",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 95,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 82,
+				"Member Name": "MUHAMMAD SHAFI",
+				VC: "VC11404",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 96,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 83,
+				"Member Name": "MUHAMMAD ALTAF",
+				VC: "VC111405",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 97,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 84,
+				"Member Name": "ATTA ULLAH",
+				VC: "VC11386",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 98,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 85,
+				"Member Name": "SAJID ALI",
+				VC: "VC11391",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 99,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 86,
+				"Member Name": "ARHAM IMRAN",
+				VC: "VC11357",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 100,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 87,
+				"Member Name": "MUBASHIR REHMAN",
+				VC: "VC11713",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 101,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 88,
+				"Member Name": "AKIF RASHEED",
+				VC: "VC111250",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 102,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 89,
+				"Member Name": "MUDASAR ALI",
+				VC: "VC11385",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 103,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 90,
+				"Member Name": "KASHIF ILYAS ",
+				VC: "VC11716",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 104,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 91,
+				"Member Name": "ASSIA TARIQ",
+				VC: "VC11432",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 105,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 92,
+				"Member Name": "M. FARHAN QURESHI",
+				VC: "VC11738",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 106,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 93,
+				"Member Name": "SHAGUFTA JABEEN",
+				VC: "VC11735",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 107,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 94,
+				"Member Name": "S TAHIR SAJJAD BOKHARI",
+				VC: "VC01142",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 108,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 95,
+				"Member Name": "SOBIA RIZWAN ",
+				VC: "VC11204",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 109,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 96,
+				"Member Name": "ZESHAN ALI ",
+				VC: "VC11781",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 110,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 97,
+				"Member Name": "SYED MASOOD ALI",
+				VC: "VC11574",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 111,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 98,
+				"Member Name": "SANIA CHUDHARY",
+				VC: "VC11879",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 112,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 99,
+				"Member Name": "SHAHBAZ ALI",
+				VC: "VC111477",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 113,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 100,
+				"Member Name": "MUHAMMAD MOHSIN BHATTI",
+				VC: "VC111510",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 114,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 101,
+				"Member Name": "IQBAL BASHIR",
+				VC: "VC11602",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 115,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 102,
+				"Member Name": "MUHAMMAD MOHSIN BHATTI",
+				VC: "VC111514",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 116,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 103,
+				"Member Name": "RIDA SHAKIL",
+				VC: "VC111496",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 117,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 104,
+				"Member Name": "MUHAMMAD KASHIF ",
+				VC: "VC111017",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 118,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 105,
+				"Member Name": "MUHAMMAD IMRAN",
+				VC: "VC11881",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 119,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 106,
+				"Member Name": "ATIF AKHTAR BHATTI ",
+				VC: "VC11193",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 120,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 107,
+				"Member Name": "UZAIR BIN IMRAN",
+				VC: "VC11356",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 121,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 108,
+				"Member Name": "IQRA SITAR",
+				VC: "VC11314",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 122,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 109,
+				"Member Name": "ROBINA SHAHEEN ",
+				VC: "VC11664",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 123,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 110,
+				"Member Name": "ASIM RASHEED",
+				VC: "VC111257",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 124,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 111,
+				"Member Name": "ZAIN UL ABIDEEN",
+				VC: "VC111247",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 125,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 112,
+				"Member Name": "RANA EJAZ AHMED",
+				VC: "VC11194",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 126,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 113,
+				"Member Name": "ABDUL REHMAN",
+				VC: "VC111513",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 127,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 114,
+				"Member Name": "SIDRA AMIR",
+				VC: "VC111570",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 128,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 115,
+				"Member Name": "USMAN AHMAD",
+				VC: "VC111539",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 129,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 116,
+				"Member Name": "ASIM RASHEED",
+				VC: "VC111258",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 130,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 117,
+				"Member Name": "RANA DILDAR AHMAD",
+				VC: "VC11616",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 131,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 118,
+				"Member Name": "BATOOL EJAZ",
+				VC: "VC01137",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 132,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 119,
+				"Member Name": "MUHAMMAD ADIL KHAN ",
+				VC: "VC111039",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 133,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 120,
+				"Member Name": "NAVEED AHMED",
+				VC: "VC01186",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 134,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 121,
+				"Member Name": "HAFSA ASHFAQ",
+				VC: "VC11896",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 135,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 122,
+				"Member Name": "FAISAL WAHEED KHAN",
+				VC: "VC11469",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 136,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 123,
+				"Member Name": "FAISAL WAHEED KHAN",
+				VC: "VC11468",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 137,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 124,
+				"Member Name": "SALMA BIBI",
+				VC: "VC111262",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 138,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 125,
+				"Member Name": "MARIYAM FAHAD",
+				VC: "VC11694",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 139,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 126,
+				"Member Name": "SHUMAILA MOHSIN",
+				VC: "VC111297",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 140,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 127,
+				"Member Name": "SAQIB LATIF",
+				VC: "VC11696",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 141,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 128,
+				"Member Name": "MUHAMMAD TAHIR BASHIR",
+				VC: "VC111212",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 142,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 129,
+				"Member Name": "MAHEEN IMRAN",
+				VC: "VC11359",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 143,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 130,
+				"Member Name": "MUHAMMAD IMRAN",
+				VC: "VC111135",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 144,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 131,
+				"Member Name": "BASHIR AHMAD",
+				VC: "VC111215",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 145,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 132,
+				"Member Name": "FAHAD ISLAM",
+				VC: "VC11140",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 146,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 133,
+				"Member Name": "MUHAMMAD MOON SHAHZAD",
+				VC: "VC111506",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 147,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 134,
+				"Member Name": "TOOBA HASSAN",
+				VC: "VC111524",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 148,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 135,
+				"Member Name": "SAIMA TARIQ",
+				VC: "VC111263",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 149,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 136,
+				"Member Name": "UMAIR SABIR",
+				VC: "VC11671",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 150,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 137,
+				"Member Name": "MUHAMMAD AHMAD ZAIB",
+				VC: "VC11375",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 151,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 138,
+				"Member Name": "MUHAMMAD AKRAM ",
+				VC: "VC11631",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 152,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 139,
+				"Member Name": "IJAZ AHMAD",
+				VC: "VC11478",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 153,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 140,
+				"Member Name": "MUHAMMAD AWAIS",
+				VC: "VC11410",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 154,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 141,
+				"Member Name": "ARSHAD JAVED",
+				VC: "VC111203",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 155,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 142,
+				"Member Name": "AQSA IZHAR",
+				VC: "VC11436",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 156,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 143,
+				"Member Name": "MUHAMMAD ADIL KHAN ",
+				VC: "VC11980",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 157,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 144,
+				"Member Name": "MARYUM MAHMOOD ",
+				VC: "VC11153",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 158,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 145,
+				"Member Name": "AYESHA AHMED ",
+				VC: "VC11623",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 159,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 146,
+				"Member Name": "MOUZAM JAVED ",
+				VC: "VC11179",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 160,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 147,
+				"Member Name": "FAISAL EJAZ",
+				VC: "VC111082",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 161,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 148,
+				"Member Name": "SOBIA NOUMAN",
+				VC: "VC11789",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 162,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 149,
+				"Member Name": "MUHAMMAD IMRAN",
+				VC: "VC11882",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 163,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 150,
+				"Member Name": "MUHAMMAD KAMRAN",
+				VC: "VC111474",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 164,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 151,
+				"Member Name": "MUHAMMAD KHALID ",
+				VC: "VC11945",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 165,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 152,
+				"Member Name": "MUHAMMAD JAVED",
+				VC: "VC111505",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 166,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 153,
+				"Member Name": "RANA HAFEEZ ULLAH",
+				VC: "VC11431",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 167,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 154,
+				"Member Name": "FATIMA AFZAAL",
+				VC: "VC111229",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 168,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 155,
+				"Member Name": "ROBINA SHAHEEN ",
+				VC: "VC11665",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 169,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 156,
+				"Member Name": "ROBINA SHAHEEN ",
+				VC: "VC11666",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 170,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 157,
+				"Member Name": "YASIR IQBAL",
+				VC: "VC11390",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 171,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 158,
+				"Member Name": "YASIR IQBAL",
+				VC: "VC11388",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 172,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 159,
+				"Member Name": "YASIR IQBAL",
+				VC: "VC11389",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 173,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 160,
+				"Member Name": "SYED KANWAL ZAIDI",
+				VC: "VC11450",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 174,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 161,
+				"Member Name": "MUHAMMAD SHAKEEL",
+				VC: "VC11625",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 176,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 162,
+				"Member Name": "AKIF RASHEED",
+				VC: "VC111251",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 177,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 163,
+				"Member Name": "SHAGUFTA JABEEN",
+				VC: "VC11736",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 178,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 164,
+				"Member Name": "HINA QAISER",
+				VC: "VC11774",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 179,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 165,
+				"Member Name": "BALAL AHMAD",
+				VC: "VC11101",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 180,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 166,
+				"Member Name": "SHAZIA TASNEEM",
+				VC: "VC11348",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 181,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 167,
+				"Member Name": "IZMA ANWAR",
+				VC: "VC111085",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 182,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 168,
+				"Member Name": "MUHAMMAD BASHIR ",
+				VC: "VC11782",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 183,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 169,
+				"Member Name": "M. AZEEM QURESHI",
+				VC: "VC11351",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 184,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 170,
+				"Member Name": "ZILE HUMA",
+				VC: "VC111365",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 185,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 171,
+				"Member Name": "MUHAMMAD BILAL",
+				VC: "VC11408",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 186,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 172,
+				"Member Name": "SHAHZADA ANJUM",
+				VC: "VC11790",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 187,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 173,
+				"Member Name": "MUHAMMAD ZEESHAN",
+				VC: "VC11830",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 188,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 174,
+				"Member Name": "MUHAMMAD NASIR",
+				VC: "VC01168",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 189,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 175,
+				"Member Name": "ROBINA SHAHEEN ",
+				VC: "VC11663",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 190,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 176,
+				"Member Name": "ZUHAIB KHALID",
+				VC: "VC11228",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 191,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 177,
+				"Member Name": "FATIMA HABIB",
+				VC: "VC01178",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 192,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 178,
+				"Member Name": "USMAN AHMAD",
+				VC: "VC11772",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 193,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 179,
+				"Member Name": "GHULAM ALI",
+				VC: "VC111471",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 194,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 180,
+				"Member Name": "SHAHZAD AHMAD CHAUDHARY ",
+				VC: "VC11677",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 195,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 181,
+				"Member Name": "AKIF RASHEED",
+				VC: "VC111252",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 196,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 182,
+				"Member Name": "BIBI RUKHSANA",
+				VC: "VC111367",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 197,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 183,
+				"Member Name": "ZULQARNAIN HABIB",
+				VC: "VC111302",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 199,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 184,
+				"Member Name": "KASHIF ILYAS ",
+				VC: "VC11715",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 200,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 185,
+				"Member Name": "KASHIF ILYAS ",
+				VC: "VC11714",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 201,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 186,
+				"Member Name": "ASAD TARIQ ",
+				VC: "VC11158",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 202,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 187,
+				"Member Name": "MUHAMMAD YOUNAS",
+				VC: "VC111228",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 203,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 188,
+				"Member Name": "AYESHA SAQIB",
+				VC: "VC111315",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 204,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 189,
+				"Member Name": "MUHAMMAD ARSLAN",
+				VC: "VC111425",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 205,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 190,
+				"Member Name": "JAVARIA SALEEM",
+				VC: "VC111034",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 206,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 191,
+				"Member Name": "TOOBA HASSAN",
+				VC: "VC111521",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 207,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 192,
+				"Member Name": "Maqsood Ahmad",
+				VC: "VC111661",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 208,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 193,
+				"Member Name": "Zukhruf Umair",
+				VC: "VC11466",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 209,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 194,
+				"Member Name": "SAJID MUNIR",
+				VC: "VC111460",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 210,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 195,
+				"Member Name": "SAJID MUNIR",
+				VC: "VC111461",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 211,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 196,
+				"Member Name": "MEHBOOB UL HASSAN",
+				VC: "VC111543",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 212,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 197,
+				"Member Name": "Samrooz Abbas",
+				VC: "VC111572",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 213,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 198,
+				"Member Name": "Murad ALI",
+				VC: "VC11371",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 214,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 199,
+				"Member Name": "Ch. Sohil",
+				VC: "VC11392",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 215,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 200,
+				"Member Name": "Ch. Sohil",
+				VC: "VC11393",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 216,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 201,
+				"Member Name": "Ch. Sohil",
+				VC: "VC11394",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 217,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 202,
+				"Member Name": "Ch. Sohil",
+				VC: "VC11395",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 218,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 203,
+				"Member Name": "ALI Hamza",
+				VC: "VC11398",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 219,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 204,
+				"Member Name": "ALI Hamza",
+				VC: "VC11399",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 220,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 205,
+				"Member Name": "ALI Hamza",
+				VC: "VC11400",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 221,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 206,
+				"Member Name": "ALI Hamza",
+				VC: "VC11401",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 222,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 207,
+				"Member Name": "Kouser Parveen",
+				VC: "VC11446",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 223,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 208,
+				"Member Name": "Muhammad Aslam Tabasum",
+				VC: "VC11427",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 224,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 209,
+				"Member Name": "Fakhar Husnain",
+				VC: "VC11473",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 225,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 210,
+				"Member Name": "Muhammad UMER ALI Usmani / Muhammad ALI",
+				VC: "VC111774",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 226,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 211,
+				"Member Name": "Muhammad Javed",
+				VC: "VC11396",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 227,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 212,
+				"Member Name": "Sameer Ahmad",
+				VC: "VC1756",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 228,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 213,
+				"Member Name": "Zeeshan Nazir",
+				VC: "VC11384",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 229,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 214,
+				"Member Name": "Muhammad Shafique",
+				VC: "VC111791",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 230,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 215,
+				"Member Name": "Nayab Imtiaz",
+				VC: "VC111717",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 231,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 216,
+				"Member Name": "Muhammad Iqbal",
+				VC: "VC11918",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 232,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 217,
+				"Member Name": "Faizan Tariq",
+				VC: "VC111584",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 233,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 218,
+				"Member Name": "SAJID ALI",
+				VC: "VC111541",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 234,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 219,
+				"Member Name": "MEHBOOB UL HASSAN",
+				VC: "VC111545",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 235,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 220,
+				"Member Name": "MUHAMMAD AMJAD",
+				VC: "VC111555",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 236,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 221,
+				"Member Name": "Muhammad Attique",
+				VC: "VC11216",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 238,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 222,
+				"Member Name": "MEHBOOB UL HASSAN",
+				VC: "VC111542",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 239,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 223,
+				"Member Name": "Kashif Raza",
+				VC: "VC111426",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 240,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 224,
+				"Member Name": "MEHBOOB UL HASSAN",
+				VC: "VC111544",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 241,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 225,
+				"Member Name": "Abdul Rehman",
+				VC: "VC111660",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 242,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 226,
+				"Member Name": "Nisha Uzair",
+				VC: "VC01131",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 243,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 227,
+				"Member Name": "Zeeshan Arif",
+				VC: "VC111610",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 244,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 228,
+				"Member Name": "Akbar ALI",
+				VC: "VC111781",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 245,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 229,
+				"Member Name": "Nadeem Ahmed",
+				VC: "VC11898",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 246,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 230,
+				"Member Name": "Muhammad Qasim",
+				VC: "VC11596",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 247,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 231,
+				"Member Name": "Abdul Raheem Hussain",
+				VC: "VC11697",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 248,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 232,
+				"Member Name": "Mian Waqar Ahmed",
+				VC: "VC111183",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 249,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 233,
+				"Member Name": "Muhammad Faraz Ul Haq",
+				VC: "VC11273",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 250,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 234,
+				"Member Name": "ALI Ahmad",
+				VC: "VC01139",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 251,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 235,
+				"Member Name": "Muhammad Adnan Haider",
+				VC: "VC11159",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 252,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 236,
+				"Member Name": "Shan Saleem",
+				VC: "VC111402",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 253,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 237,
+				"Member Name": "Zeeshan ALI",
+				VC: "VC111036",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 254,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 238,
+				"Member Name": "Qaisar Ashraf",
+				VC: "VC111727",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 255,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 239,
+				"Member Name": "Shahzad Ahmad Khan",
+				VC: "VC111766",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 256,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 240,
+				"Member Name": "Muhammad Asif Naeem",
+				VC: "VC11373",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 257,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 241,
+				"Member Name": "Muhammad Shafi",
+				VC: "VC11403",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 258,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 242,
+				"Member Name": "Syed Sajjad Hussain",
+				VC: "VC11258",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 259,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 243,
+				"Member Name": "Jawad Usman",
+				VC: "VC111324",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 260,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 244,
+				"Member Name": "Mushtaq Zauque Diamond",
+				VC: "VC111693",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 261,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 245,
+				"Member Name": "Muhammad Younas",
+				VC: "VC111763",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 262,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 246,
+				"Member Name": "Tasleem Kousar",
+				VC: "VC111662",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 263,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 247,
+				"Member Name": "Ghulam Mustafa Nayyer Alvi",
+				VC: "VC111457",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 264,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 248,
+				"Member Name": "Rafia Tabassum",
+				VC: "VC111589",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 265,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 249,
+				"Member Name": "Muhammad Munir Khan",
+				VC: "VC11885",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 266,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 250,
+				"Member Name": "Muhammad Munir Khan",
+				VC: "VC11884",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 267,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 251,
+				"Member Name": "Muhammad Touqeer Tariq",
+				VC: "VC01153",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 268,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 252,
+				"Member Name": "Tanveer Ahmad",
+				VC: "VC111491",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 269,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 253,
+				"Member Name": "Mah Noor Karim",
+				VC: "VC11825",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 270,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 254,
+				"Member Name": "Waqar Ahmad",
+				VC: "VC11649",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 271,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 255,
+				"Member Name": "Waqar Ahmad",
+				VC: "VC11650",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 272,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 256,
+				"Member Name": "Kiran Aftab",
+				VC: "VC11643",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 273,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 257,
+				"Member Name": "Haroon Mansha",
+				VC: "VC11648",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "UMER",
+				Plot: 274,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 258,
+				"Member Name": "RIDA ASHFAQ",
+				VC: "VC12757",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 1,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 259,
+				"Member Name": "MIAN MOHAMMAD ASLAM",
+				VC: "VC12213",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 2,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 260,
+				"Member Name": "ZUBAIR AHMAD WASEEM",
+				VC: "VC12110",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 3,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 261,
+				"Member Name": "MUHAMMAD AWAIS",
+				VC: "VC121223",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 4,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 262,
+				"Member Name": "AHMAD WAQAR ",
+				VC: "VC12871",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 5,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 263,
+				"Member Name": "MAMOONA RIAZ",
+				VC: "VC12769",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 6,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 264,
+				"Member Name": "SABA BABAR ",
+				VC: "VC12989",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 7,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 265,
+				"Member Name": "AYESHA BIBI ",
+				VC: "VC121439",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 8,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 266,
+				"Member Name": "MUHAMMAD AHMAD ZAIB",
+				VC: "VC121078",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 9,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 267,
+				"Member Name": "AMIR SHAHZAD",
+				VC: "VC12406",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 10,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 268,
+				"Member Name": "MUHAMMAD WAQAS SABIR ",
+				VC: "VC12633",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 11,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 269,
+				"Member Name": "SAHJEED HUSSAIN",
+				VC: "VC12886",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 12,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 270,
+				"Member Name": "S. TAHIR SAJJAD BUKHARI",
+				VC: "VC121430",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 13,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 271,
+				"Member Name": "IFFAT ALIA",
+				VC: "VC01284",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 14,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 272,
+				"Member Name": "HUSNAIN RAZA",
+				VC: "VC121304",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 15,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 273,
+				"Member Name": "IMRAN AHMAD QURESHI",
+				VC: "VC121397",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 16,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 274,
+				"Member Name": "SAQIB ISRAR",
+				VC: "VC01217",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 17,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 275,
+				"Member Name": "IMRAN NAEEM",
+				VC: "VC12684",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 18,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 276,
+				"Member Name": "RANA HASSAN MUMTAZ",
+				VC: "VC12304",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 19,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 277,
+				"Member Name": "HAMZAH RAAFEH KHANZADA ",
+				VC: "VC121433",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 20,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 278,
+				"Member Name": "UMER FAROOQ MALIK",
+				VC: "VC121138",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 21,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 279,
+				"Member Name": "ASHFAQ MAHMOOD",
+				VC: "VC121083",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 22,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 280,
+				"Member Name": "MUHAMMAD HASSAN",
+				VC: "VC121557",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 23,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 281,
+				"Member Name": "MUHAMMAD HASSAN",
+				VC: "VC121558",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 24,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 282,
+				"Member Name": "MEHBOOB UL HASSAN",
+				VC: "VC121547",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 25,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 283,
+				"Member Name": "MUKHTAR AHMAD",
+				VC: "VC121416",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 26,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 284,
+				"Member Name": "MADIHA BABAR",
+				VC: "VC121458",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 27,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 285,
+				"Member Name": "HAMZA MUKHTAR",
+				VC: "VC12776",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 28,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 286,
+				"Member Name": "MUHAMMAD SHAFIQUE ",
+				VC: "VC12807",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 29,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 287,
+				"Member Name": "AMJAD RASOOL AWAN",
+				VC: "VC12726",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 30,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 288,
+				"Member Name": "MUHAMMAD ZAHEER",
+				VC: "VC01299",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 31,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 289,
+				"Member Name": "MOHAMMAD ZAFAR IQBAL ",
+				VC: "VC12586",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 32,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 290,
+				"Member Name": "UMER SHEHZAD",
+				VC: "VC12508",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 33,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 291,
+				"Member Name": "MUHAMMAD SHAFIQUE ",
+				VC: "VC12808",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 34,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 292,
+				"Member Name": "ZULFIQAR ALI",
+				VC: "VC121162",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 35,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 293,
+				"Member Name": "FARHAN YOUSAF",
+				VC: "VC121380",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 36,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 294,
+				"Member Name": "NABEEL ANJUM",
+				VC: "VC12160",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 37,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 295,
+				"Member Name": "BUSHRA ALI",
+				VC: "VC12217",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 38,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 296,
+				"Member Name": "Syed Saqlain Raza Shah Naqvi (Dual Ownership)",
+				VC: "VC12902",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 39,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 297,
+				"Member Name": "M. FAWAD NASEEM ABBASI",
+				VC: "VC01274",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 40,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 298,
+				"Member Name": "MUHAMMAD SUFYAN ",
+				VC: "VC12990",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 41,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 299,
+				"Member Name": "ZEESHAN AFZAL",
+				VC: "VC01281",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 42,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 300,
+				"Member Name": "NAZIR AHMAD",
+				VC: "VC121285",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 43,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 301,
+				"Member Name": "NAIMA ARAB CHOUDHARY",
+				VC: "VC121136",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 44,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 302,
+				"Member Name": "NAZISH ZAFAR",
+				VC: "VC121067",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 45,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 303,
+				"Member Name": "SAIMA NOMAN",
+				VC: "VC12724",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 46,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 304,
+				"Member Name": "TAHIR RASHID",
+				VC: "VC12686",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 47,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 305,
+				"Member Name": "AMNA HASSAN",
+				VC: "VC121166",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 48,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 306,
+				"Member Name": "SYED AKHTAR HUSSAIN ZAIDI",
+				VC: "VC12603",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 49,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 307,
+				"Member Name": "SYED GHUFRAN AHMAD",
+				VC: "VC121283",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 50,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 308,
+				"Member Name": "SHAHID RASHEED",
+				VC: "VC12593",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 51,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 309,
+				"Member Name": "MUHAMMAD AHMAD ZAIB",
+				VC: "VC121127",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 52,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 310,
+				"Member Name": "MUHAMMAD SADIQ",
+				VC: "VC121158",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 55,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 311,
+				"Member Name": "MUHAMMAD AHMAD ZAIB",
+				VC: "VC121126",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 56,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 312,
+				"Member Name": "IMRAN AHMAD QURESHI",
+				VC: "VC121396",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 57,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 313,
+				"Member Name": "BADAR JAMAL",
+				VC: "VC12437",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 58,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 314,
+				"Member Name": "IQRA SARWAR",
+				VC: "VC121532",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 59,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 315,
+				"Member Name": "FARHAN RASHID",
+				VC: "VC01269",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 60,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 316,
+				"Member Name": "KINZA ARIF ",
+				VC: "VC12276",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 61,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 317,
+				"Member Name": "USMAN KHALID WARAICH ",
+				VC: "VC12335",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 62,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 318,
+				"Member Name": "SHAKEELA BASHARAT ",
+				VC: "VC121429",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 63,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 319,
+				"Member Name": "MALIK RIZWAN",
+				VC: "VC121480",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 64,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 320,
+				"Member Name": "NASEER AHMAD BUTT",
+				VC: "VC121254",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 65,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 321,
+				"Member Name": "RUSHNA SAFIA",
+				VC: "VC121295",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 66,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 322,
+				"Member Name": "MUHAMMAD WAQAS",
+				VC: "VC121296",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 67,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 323,
+				"Member Name": "SARFRAZ IQBAL",
+				VC: "VC121184",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 68,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 324,
+				"Member Name": "ABDUL GHAFFAR",
+				VC: "VC121149",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 69,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 325,
+				"Member Name": "QAMAR UN NISA",
+				VC: "VC01293",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 70,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 326,
+				"Member Name": "ABDULLAH RAAKEH KHANZADA ",
+				VC: "VC121435",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 71,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 327,
+				"Member Name": "MEHBOOB UL HASSAN",
+				VC: "VC121548",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 72,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 328,
+				"Member Name": "AHMAD BILAL",
+				VC: "VC01214",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 73,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 329,
+				"Member Name": "TAHIR RASHID",
+				VC: "VC12687",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 74,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 330,
+				"Member Name": "WAQAS AHMAD",
+				VC: "VC01298",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 75,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 331,
+				"Member Name": "MUHAMMAD HASEEB",
+				VC: "VC121255",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 76,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 332,
+				"Member Name": "TOOBA HASSAN",
+				VC: "VC121522",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 77,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 333,
+				"Member Name": "REHANA KAUSAR ",
+				VC: "VC12946",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 78,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 334,
+				"Member Name": "MUHAMMAD AHSAAN",
+				VC: "VC121291",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 79,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 335,
+				"Member Name": "BABER ALI",
+				VC: "VC121133",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 80,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 336,
+				"Member Name": "MUTAHAR AHMAD KHAN",
+				VC: "VC12257",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 81,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 337,
+				"Member Name": "ZEESHAN ALI ",
+				VC: "VC12685",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 82,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 338,
+				"Member Name": "MUHAMMAD SALIK TARIQ",
+				VC: "VC12152",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 85,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 339,
+				"Member Name": "FEHMIDA FAISAL",
+				VC: "VC12641",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 86,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 340,
+				"Member Name": "TAHIR RASHID",
+				VC: "VC12689",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 87,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 341,
+				"Member Name": "LUBNA WAHEED ",
+				VC: "VC12297",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 88,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 342,
+				"Member Name": "HAMID SHOAIB",
+				VC: "VC121478",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 89,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 343,
+				"Member Name": "ANUM KAMRAN",
+				VC: "VC01246",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 90,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 344,
+				"Member Name": "MUHAMMAD ADIL KHAN ",
+				VC: "VC12981",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 91,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 345,
+				"Member Name": "MEHBOOB UL HASSAN",
+				VC: "VC121549",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 92,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 346,
+				"Member Name": "SAQIB ISRAR",
+				VC: "VC01216",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 93,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 347,
+				"Member Name": "TOOBA HASSAN",
+				VC: "VC121523",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 94,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 348,
+				"Member Name": "AJMAL BUTT",
+				VC: "VC12704",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 95,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 349,
+				"Member Name": "SAEED AKRAM",
+				VC: "VC121180",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 96,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 350,
+				"Member Name": "HASSAN RIAZ",
+				VC: "VC12132",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 97,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 351,
+				"Member Name": "ZAFEER BASHIR",
+				VC: "VC121051",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 98,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 352,
+				"Member Name": "MUHAMMAD ASHRAF",
+				VC: "VC12854",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 99,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 353,
+				"Member Name": "QASIM ALI",
+				VC: "VC12710",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 100,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 354,
+				"Member Name": "MUHAMMAD ANEES ABBASI ",
+				VC: "VC121437",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 101,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 355,
+				"Member Name": "MUHAMMAD AKHTAR",
+				VC: "VC121090",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 102,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 356,
+				"Member Name": "SHAHEEN AKBAR",
+				VC: "VC12651",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 103,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 357,
+				"Member Name": "BILAL AHMED MIRZA",
+				VC: "VC12106",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 104,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 358,
+				"Member Name": "BUSHRA MAAHNOOR NAEEM",
+				VC: "VC12575",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 105,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 359,
+				"Member Name": "KHAWAR MAQBOOL",
+				VC: "VC121141",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 106,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 360,
+				"Member Name": "FAIZA ARSHID",
+				VC: "VC121507",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 107,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 361,
+				"Member Name": "SABRINA HUMAYUN",
+				VC: "VC12411",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 108,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 362,
+				"Member Name": "MUHAMMAD MAHROZ ",
+				VC: "VC12186",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 109,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 363,
+				"Member Name": "JAHANGEER",
+				VC: "VC121225",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 110,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 364,
+				"Member Name": "AAFIA BATOOL ",
+				VC: "VC12867",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 111,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 365,
+				"Member Name": "MUSHTAQ AHMAD",
+				VC: "VC121554",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 112,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 366,
+				"Member Name": "Durdana Sabahat",
+				VC: "VC12511",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 113,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 367,
+				"Member Name": "Ahsan Ahmed",
+				VC: "VC121770",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 114,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 368,
+				"Member Name": "Furqan Khan",
+				VC: "VC121179",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 115,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 369,
+				"Member Name": "Salma Zafar",
+				VC: "VC121185",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 116,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 370,
+				"Member Name": "Asma Ashiq",
+				VC: "VC121197",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 117,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 371,
+				"Member Name": "Abeera Saad",
+				VC: "VC121041",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 118,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 372,
+				"Member Name": "Omer Zahid Sheikh",
+				VC: "VC131593",
+				Category: "Residential",
+				"Size (Marlas)": "10 Marla",
+				Block: "TOUHEED",
+				Plot: 119,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 373,
+				"Member Name": "Shama Parveen",
+				VC: "VC131609",
+				Category: "Residential",
+				"Size (Marlas)": "10 Marla",
+				Block: "TOUHEED",
+				Plot: 120,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 374,
+				"Member Name": "Nasir ALI Khan",
+				VC: "VC13175",
+				Category: "Residential",
+				"Size (Marlas)": "10 Marla",
+				Block: "TOUHEED",
+				Plot: 121,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 375,
+				"Member Name": "Rizwana Shahbaz",
+				VC: "VC13785",
+				Category: "Residential",
+				"Size (Marlas)": "10 Marla",
+				Block: "TOUHEED",
+				Plot: 122,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 376,
+				"Member Name": "Tahira Kausar",
+				VC: "VC13269",
+				Category: "Residential",
+				"Size (Marlas)": "10 Marla",
+				Block: "TOUHEED",
+				Plot: 123,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 377,
+				"Member Name": "Syed Faraz Hassan Zaidi",
+				VC: "VC13148",
+				Category: "Residential",
+				"Size (Marlas)": "10 Marla",
+				Block: "TOUHEED",
+				Plot: 124,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 378,
+				"Member Name": "Habib Ullah",
+				VC: "VC121093",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 138,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 379,
+				"Member Name": "Wasim Qaiser",
+				VC: "VC121722",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 139,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 380,
+				"Member Name": "SABA BABAR ",
+				VC: "VC121227",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 140,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 381,
+				"Member Name": "ASJED RAUF ",
+				VC: "VC12870",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 141,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 382,
+				"Member Name": "AFSHAN ARSHAD ",
+				VC: "VC12235",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 142,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 383,
+				"Member Name": "NABEELA RIAZ",
+				VC: "VC121169",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 143,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 384,
+				"Member Name": "SYED AKHTAR HUSSAIN ZAIDI",
+				VC: "VC12604",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 144,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 385,
+				"Member Name": "UMER FAROOQ MALIK",
+				VC: "VC121139",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 145,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 386,
+				"Member Name": "FATIMA RIZWAN ",
+				VC: "VC12196",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 146,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 387,
+				"Member Name": "TAHIR RASHID",
+				VC: "VC12690",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 147,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 388,
+				"Member Name": "AHMAD BILAL",
+				VC: "VC01215",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 148,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 389,
+				"Member Name": "TAHIR RASHID",
+				VC: "VC12688",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 149,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 390,
+				"Member Name": "SHABANA YASMIN",
+				VC: "VC01267",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 150,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 391,
+				"Member Name": "Muhammad Sameer Murad",
+				VC: "VC121767",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 151,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 392,
+				"Member Name": "Ahsan Ahmed",
+				VC: "VC121771",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 152,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 393,
+				"Member Name": "Shoukat ALI",
+				VC: "VC01243",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 153,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 394,
+				"Member Name": "Ghulam Mustafa",
+				VC: "VC121798",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 154,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 395,
+				"Member Name": "Muhammad Zubair",
+				VC: "VC121256",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 155,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 396,
+				"Member Name": "MUHAMMAD NAEEM NASIR",
+				VC: "VC121516",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 156,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 397,
+				"Member Name": "MUHAMMAD NAEEM NASIR",
+				VC: "VC121515",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 157,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 398,
+				"Member Name": "UMER ZAHID",
+				VC: "VC121769",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 158,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 399,
+				"Member Name": "ADREES ARIF",
+				VC: "VC121546",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 161,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 400,
+				"Member Name": "MUHAMMAD YOUNAS",
+				VC: "VC121157",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 162,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 401,
+				"Member Name": "SHAHIDA PARVEEN",
+				VC: "VC12103",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 163,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 402,
+				"Member Name": "NASRIN BEGUM ",
+				VC: "VC12187",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 164,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 403,
+				"Member Name": "SYED IFTIKHAR BUKHARI",
+				VC: "VC121134",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 165,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 404,
+				"Member Name": "SAIMA NOMAN",
+				VC: "VC12725",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 166,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 405,
+				"Member Name": "MATLOOB AKRAM ",
+				VC: "VC121322",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 167,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 406,
+				"Member Name": "Muhammad Uzair Ahmed",
+				VC: "VC111234",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 15,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 407,
+				"Member Name": "Muhammad Jahanzaib",
+				VC: "VC111442",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 16,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 408,
+				"Member Name": "Muhammad Ejaz Bashir",
+				VC: "VC111794",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 107,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 409,
+				"Member Name": "Mazhar Qayyum",
+				VC: "VC111796",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 108,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 410,
+				"Member Name": "Faiz Ullah",
+				VC: "VC11836",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 117,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 411,
+				"Member Name": "Faiz Ullah",
+				VC: "VC11835",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 118,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 412,
+				"Member Name": "Sumaira Saqib",
+				VC: 111686,
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 130,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 413,
+				"Member Name": "Haroon Mansha",
+				VC: "VC11647",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 131,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 414,
+				"Member Name": "Muhammad Ahmad",
+				VC: "VC11646",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 132,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 415,
+				"Member Name": "Kausar Parveen",
+				VC: "VC01180",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 133,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 416,
+				"Member Name": "Saira Chaudhry",
+				VC: "VC111759",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 134,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 417,
+				"Member Name": "Tazeem Asim",
+				VC: "VC11418",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 135,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 418,
+				"Member Name": "Nasreen Akhtar",
+				VC: "VC111760",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 136,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 419,
+				"Member Name": "Jamila Riaz",
+				VC: "VC11826",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 137,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 420,
+				"Member Name": "Syed Sajjad Hussain",
+				VC: "VC11259",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 138,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 421,
+				"Member Name": "Ahmed Bakhsh",
+				VC: "VC111328",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 140,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 422,
+				"Member Name": "Kaneezan Bibi",
+				VC: "VC11889",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 141,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 423,
+				"Member Name": "Waqas Majeed",
+				VC: "VC111738",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 142,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 424,
+				"Member Name": "Muhammad Aslam",
+				VC: "VC11670",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 143,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 425,
+				"Member Name": "Murtaza Masood",
+				VC: "VC11719",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 144,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 426,
+				"Member Name": "Hina Awais",
+				VC: "VC11105",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 145,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 427,
+				"Member Name": "Amjad Hussain",
+				VC: "VC11812",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 146,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 428,
+				"Member Name": "Muhammad Arslan",
+				VC: "VC11552",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 147,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 429,
+				"Member Name": "Sajid Munir",
+				VC: "VC1741",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 148,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 430,
+				"Member Name": "Syed Solat Abbas",
+				VC: "VC111604",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 149,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 431,
+				"Member Name": "Tahir Nazir",
+				VC: "VC111583",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 150,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 432,
+				"Member Name": "Fahmeeda Kausar",
+				VC: "VC111585",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 160,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 433,
+				"Member Name": "Muhammad Amin",
+				VC: "VC11268",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 165,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 434,
+				"Member Name": "Muhammad Nadeem Atif",
+				VC: "VC11286",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 166,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 435,
+				"Member Name": "Abdul Basit / Kashif Akhter",
+				VC: "VC11900",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 167,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 436,
+				"Member Name": "Muhammad Ishfaq",
+				VC: "VC11282",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 168,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 437,
+				"Member Name": "Eid Nazeer",
+				VC: "VC11642",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 169,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 438,
+				"Member Name": "Eid Nazeer",
+				VC: "VC11912",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 170,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 439,
+				"Member Name": "Umar Draz ALI",
+				VC: "VC111675",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 171,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 440,
+				"Member Name": "Sadia Umer",
+				VC: "VC111357",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 172,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 441,
+				"Member Name": "Kabsha Mahmood",
+				VC: "VC111681",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 173,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 442,
+				"Member Name": "Pir Muneeb Rehman",
+				VC: "VC01151",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 174,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 443,
+				"Member Name": "Majid Farooq",
+				VC: "VC111605",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 175,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 444,
+				"Member Name": "Sajjad Haider",
+				VC: "VC11822",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 176,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 445,
+				"Member Name": "Tariq Masih",
+				VC: "VC111728",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 177,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 446,
+				"Member Name": "Muhammad Moazzum Ul Ibad",
+				VC: "VC11944",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 178,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 447,
+				"Member Name": "Hamid ALI",
+				VC: "VC111705",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 179,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 448,
+				"Member Name": "Hamid ALI",
+				VC: "VC111704",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 180,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 449,
+				"Member Name": "Abdul Qayyum",
+				VC: "VC111703",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 181,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 450,
+				"Member Name": "Mubeen Ahmed",
+				VC: "VC11318",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 1,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 451,
+				"Member Name": "Wasim Abbasi",
+				VC: "VC01136",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 2,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 452,
+				"Member Name": "Abdul Basit",
+				VC: "VC11906",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 3,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 453,
+				"Member Name": "Ambreen Akhtar",
+				VC: "VC11206",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 4,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 454,
+				"Member Name": "Sidra Altaf",
+				VC: "VC111553",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 5,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 455,
+				"Member Name": "Jamil Ahmed",
+				VC: "VC111272",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 6,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 456,
+				"Member Name": "Muhammad Waqar Hussain",
+				VC: "VC111140",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 7,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 457,
+				"Member Name": "Kaneezan Bibi",
+				VC: "VC11890",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 8,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 458,
+				"Member Name": "Nazia Atiq",
+				VC: "VC01120",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 9,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 459,
+				"Member Name": "Muhammad Saeed",
+				VC: "VC111075",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 10,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 460,
+				"Member Name": "IfshaAkhlaq",
+				VC: "VC111615",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 11,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 461,
+				"Member Name": "Mahboob Ul Hassan",
+				VC: "VC111680",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 12,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 462,
+				"Member Name": "Hina Tayyab",
+				VC: "VC111221",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 13,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 463,
+				"Member Name": "Zohaib Raza",
+				VC: "VC111601",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 14,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 464,
+				"Member Name": "Khalil Ahmed",
+				VC: "VC11846",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 15,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 465,
+				"Member Name": "Aurang Zaib Sajjad",
+				VC: "VC121732",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 16,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 466,
+				"Member Name": "Ghulam Hussain",
+				VC: "VC121073",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 17,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 467,
+				"Member Name": "Madiha Babar",
+				VC: "VC12617",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 18,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 468,
+				"Member Name": "Muhammad Afzal",
+				VC: "VC121538",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 19,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 469,
+				"Member Name": "Muhammad Ahmad",
+				VC: "VC12594",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 20,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 470,
+				"Member Name": "Syed Saqlain Shan Naqvi",
+				VC: "VC12595",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 21,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 471,
+				"Member Name": "Muhammad Younas",
+				VC: "VC121734",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 22,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 472,
+				"Member Name": "Mian Zeeshan Meraj",
+				VC: "VC121231",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 23,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 473,
+				"Member Name": "Rizwan Kauser",
+				VC: "VC12198",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 24,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 474,
+				"Member Name": "Rizwana",
+				VC: "VC12816",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 25,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 475,
+				"Member Name": "Muhammad Anwar Ul Haque",
+				VC: "VC12382",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 26,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 476,
+				"Member Name": "Muhammad Anwar Ul Haque",
+				VC: "VC12381",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 27,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 477,
+				"Member Name": "ALI Afzal",
+				VC: "VC121718",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 28,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 478,
+				"Member Name": "Muhammad Shahbaz ALI",
+				VC: "VC121725",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 29,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 479,
+				"Member Name": "Tahir Masood Rana",
+				VC: "VC12226",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 30,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 480,
+				"Member Name": "Haroon Saeed",
+				VC: "VC121399",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 31,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 481,
+				"Member Name": "Asghar ALI",
+				VC: "VC12988",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 32,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 482,
+				"Member Name": "Amir Masood Rana",
+				VC: "VC12320",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 33,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 483,
+				"Member Name": "Nadia Maqbool",
+				VC: "VC121552",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 34,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 484,
+				"Member Name": "Muhammad Aqeel Rasheed",
+				VC: "VC121673",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 35,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 485,
+				"Member Name": "Haziq Naeem",
+				VC: "VC12702",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 36,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 486,
+				"Member Name": "Muhammad Fiaz",
+				VC: "VC121054",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 37,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 487,
+				"Member Name": "Zafar ALI Khan",
+				VC: "VC121621",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 38,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 488,
+				"Member Name": "Kashif Mehboob",
+				VC: "VC121387",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 39,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 489,
+				"Member Name": "Muhammad Uzair Ahmed",
+				VC: "VC121123",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 40,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 490,
+				"Member Name": "Muhammad Jahanzaib",
+				VC: "VC121120",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 41,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 491,
+				"Member Name": "Malik Tanveer Ahmad",
+				VC: "VC121205",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 42,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 492,
+				"Member Name": "Malik Tanveer Ahmad",
+				VC: "VC121206",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 43,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 493,
+				"Member Name": "Malik Tanveer Ahmad",
+				VC: "VC121207",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 44,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 494,
+				"Member Name": "Malik Tanveer Ahmad",
+				VC: "VC121208",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 45,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 495,
+				"Member Name": "Malik Tanveer Ahmad",
+				VC: "VC121209",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 46,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 496,
+				"Member Name": "Malik Tanveer Ahmad",
+				VC: "VC121210",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 47,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 497,
+				"Member Name": "Malik Tanveer Ahmad",
+				VC: "VC121211",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 48,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 498,
+				"Member Name": "Muhammad Tahir Nadeem",
+				VC: "VC121088",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 49,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 499,
+				"Member Name": "Nida Atif",
+				VC: "VC121411",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 50,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 500,
+				"Member Name": "Syed Shabbir Hussain Shah",
+				VC: "VC121452",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 51,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 501,
+				"Member Name": "Abdul Rauf",
+				VC: "VC12496",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 52,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 502,
+				"Member Name": "Muhammad Sharif",
+				VC: "VC01244",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 53,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 503,
+				"Member Name": "Abdul Wahab",
+				VC: "VC01250",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 54,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 504,
+				"Member Name": "Sundas ALI Malik",
+				VC: "VC121602",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 55,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 505,
+				"Member Name": "Miftah Ud Din",
+				VC: "VC121595",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 56,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 506,
+				"Member Name": "Ahsan Ullah",
+				VC: "VC121586",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 57,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 507,
+				"Member Name": "Muhammad Naeem Nasir",
+				VC: "VC121519",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 58,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 508,
+				"Member Name": "Muhammad Naeem Nasir",
+				VC: "VC121518",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 59,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 509,
+				"Member Name": "Muhammad Naeem Nasir",
+				VC: "VC121517",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 60,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 510,
+				"Member Name": "Fozia Ashfaq",
+				VC: "VC12653",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 61,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 511,
+				"Member Name": "Muhammad Qasim",
+				VC: "VC12675",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 62,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 512,
+				"Member Name": "Iram Hamayun",
+				VC: "VC1747",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 63,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 513,
+				"Member Name": "Iram Hamayun",
+				VC: "VC1746",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 64,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 514,
+				"Member Name": "Ahsan Shahzad Khan",
+				VC: "VC121633",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 65,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 515,
+				"Member Name": "Muhammad Waqas",
+				VC: "VC121668",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 66,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 516,
+				"Member Name": "Muhammad Azam",
+				VC: "VC121667",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 67,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 517,
+				"Member Name": "Nisar Ahmad",
+				VC: "VC12942",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 68,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 518,
+				"Member Name": "Syed Khuram ALI",
+				VC: "VC12536",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 69,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 519,
+				"Member Name": "Sajid ALI",
+				VC: "VC121220",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 70,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 520,
+				"Member Name": "Muhammad Iqbal Bhatti",
+				VC: "VC121527",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 71,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 521,
+				"Member Name": "Muhammad Iqbal Bhatti",
+				VC: "VC121528",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 72,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 522,
+				"Member Name": "Muhammad Rameez",
+				VC: "VC01275",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 73,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 523,
+				"Member Name": "Muhammad Yaser",
+				VC: "VC121484",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 74,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 524,
+				"Member Name": "Shahzad ALI",
+				VC: "VC1757",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 75,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 525,
+				"Member Name": "Saqib ALI",
+				VC: "VC121776",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 76,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 526,
+				"Member Name": "Muhammad Waqar",
+				VC: "VC12759",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 77,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 527,
+				"Member Name": "Farah Iqbal",
+				VC: "VC121321",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 78,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 528,
+				"Member Name": "Ayesha Irfan",
+				VC: "VC12287",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 79,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 529,
+				"Member Name": "Haseeb ALI",
+				VC: "VC12260",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 80,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 530,
+				"Member Name": "Moeed Ejaz Ghauree",
+				VC: "VC12293",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 81,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 531,
+				"Member Name": "Ahmed Zubair",
+				VC: "VC121608",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 82,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 532,
+				"Member Name": "Zishan Javed",
+				VC: "VC12718",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 83,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 533,
+				"Member Name": "Muhammad Saad Cheema",
+				VC: "VC121580",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 84,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 534,
+				"Member Name": "Zakariya Irshad",
+				VC: "VC121027",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 85,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 535,
+				"Member Name": "Ahsan Iqbal Bela",
+				VC: "VC121147",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 86,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 536,
+				"Member Name": "Shahid Ijaz",
+				VC: "VC121436",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 87,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 537,
+				"Member Name": "Muhammad Younas",
+				VC: "VC121459",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 88,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 538,
+				"Member Name": "Muneeb Awais Sheikh",
+				VC: "VC12180",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 89,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 539,
+				"Member Name": "Muhammad Ejaz Bashir / Mazhar Qayyum",
+				VC: "VC121793",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 90,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 540,
+				"Member Name": "Nasir Siddique",
+				VC: "121530",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 91,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 541,
+				"Member Name": "Zahid Nafeer",
+				VC: "121050",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 92,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 542,
+				"Member Name": "Syeda Gulshan Mubashir",
+				VC: "VC1753",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 93,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 543,
+				"Member Name": "Faisal Mehmood",
+				VC: "VC12367",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 94,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 544,
+				"Member Name": "Naqash Ahmad",
+				VC: "VC12869",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 95,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 545,
+				"Member Name": "Junaid ALI Suleri",
+				VC: "VC121403",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 96,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 546,
+				"Member Name": "Arif Mukhtar Rana",
+				VC: "VC12305",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 97,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 547,
+				"Member Name": "Farzana Munir Khan",
+				VC: "VC121189",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 98,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 548,
+				"Member Name": "Uzair Shafqat",
+				VC: "VC12452",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 99,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 549,
+				"Member Name": "Uzair Shafqat",
+				VC: "VC12453",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 100,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 550,
+				"Member Name": "Ayesha Saqib",
+				VC: "VC121652",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 101,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 551,
+				"Member Name": "Muhammad Raza Iqbal",
+				VC: "VC12943",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 102,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 552,
+				"Member Name": "Hafiz Rana Raheel Shafqat",
+				VC: "VC00123",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 103,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 553,
+				"Member Name": "Hafiz Muhammad Zain Zahid Butt",
+				VC: "VC121627",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 104,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 554,
+				"Member Name": "Umer Hassam",
+				VC: "VC121400",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 105,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 555,
+				"Member Name": "Adeela Kashif",
+				VC: "VC121378",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 106,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 556,
+				"Member Name": "Azher Tahir",
+				VC: "VC121379",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 107,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 557,
+				"Member Name": "Muhammad Jahangir Khan",
+				VC: "VC12100",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 108,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 558,
+				"Member Name": "Syed Mowahid Hussain",
+				VC: "VC12104",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 109,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 559,
+				"Member Name": "Sharafat ALI",
+				VC: "VC121735",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 110,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 560,
+				"Member Name": "Sheikh Muhammad Iqbal",
+				VC: "VC12936",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 111,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 561,
+				"Member Name": "Syeda Hina Fayyaz",
+				VC: "VC121454",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 112,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 562,
+				"Member Name": "Muhammad Zubair",
+				VC: "VC121623",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 113,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 563,
+				"Member Name": "Zeeshan Javed",
+				VC: "VC12747",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 114,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 564,
+				"Member Name": "Faiz Ullah",
+				VC: "VC121431",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 115,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 565,
+				"Member Name": "Syed Imran ALI",
+				VC: "VC12551",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 116,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 566,
+				"Member Name": "Syed Hussain ALI Rehmat",
+				VC: "VC12535",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 117,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 567,
+				"Member Name": "FAISAL SAMROZ HASHMI",
+				VC: "VC271533",
 				Category: "Commercial",
-				Size: "2 Marla",
-				"Plot No": 47,
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "FAISalSAMROZ HASHMI",
-				"VC No": "VC271533"
+				Plot: 47,
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 315,
+				"Sr. ": 568,
+				"Member Name": "MUHAMMAD ASIF SHARIF",
+				VC: "VC271424",
 				Category: "Commercial",
-				Size: "2 Marla",
-				"Plot No": 48,
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "MUHAMMAD ASIF SHARIF",
-				"VC No": "VC271424"
+				Plot: 48,
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 316,
+				"Sr. ": 569,
+				"Member Name": "MUHAMMAD AHSAAN",
+				VC: "VC271269",
 				Category: "Commercial",
-				Size: "2 Marla",
-				"Plot No": 49,
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "MUHAMMAD AHSAAN",
-				"VC No": "VC271269"
+				Plot: 49,
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 317,
+				"Sr. ": 570,
+				"Member Name": "SHAIKH MUHAMMAD ZAHID",
+				VC: "VC271525",
 				Category: "Commercial",
-				Size: "2 Marla",
-				"Plot No": 50,
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "SHAIKH MUHAMMAD ZAHID",
-				"VC No": "VC271525"
+				Plot: 50,
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 318,
+				"Sr. ": 571,
+				"Member Name": "MUHAMMAD IMRAN SOHAIL",
+				VC: "VC271344",
 				Category: "Commercial",
-				Size: "2 Marla",
-				"Plot No": 51,
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "MUHAMMAD IMRAN SOHAIL",
-				"VC No": "VC271344"
+				Plot: 51,
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 319,
+				"Sr. ": 572,
+				"Member Name": "MUHAMMAD ALTAF",
+				VC: "VC271406",
 				Category: "Commercial",
-				Size: "2 Marla",
-				"Plot No": 52,
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "MUHAMMAD ALTAF",
-				"VC No": "VC271406"
+				Plot: 52,
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 320,
+				"Sr. ": 573,
+				"Member Name": "SABIR ALI",
+				VC: "VC271186",
 				Category: "Commercial",
-				Size: "2 Marla",
-				"Plot No": 53,
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "SABIR ALI",
-				"VC No": "VC271186"
+				Plot: 53,
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 321,
+				"Sr. ": 574,
+				"Member Name": "SAQIB ISRAR",
+				VC: "VC271014",
 				Category: "Commercial",
-				Size: "2 Marla",
-				"Plot No": 54,
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "SAQIB ISRAR",
-				"VC No": "VC271014"
+				Plot: 54,
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 322,
+				"Sr. ": 575,
+				"Member Name": "TAHIRA ARSHAD",
+				VC: "VC271060",
 				Category: "Commercial",
-				Size: "2 Marla",
-				"Plot No": 55,
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "TAHIRA ARSHAD",
-				"VC No": "VC271060"
+				Plot: 55,
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 323,
+				"Sr. ": 576,
+				"Member Name": "ABDUL REHMAN",
+				VC: "VC271479",
 				Category: "Commercial",
-				Size: "2 Marla",
-				"Plot No": 56,
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "ABDUL REHMAN",
-				"VC No": "VC271479"
+				Plot: 56,
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 324,
+				"Sr. ": 577,
+				"Member Name": "MUHAMMAD JAHANZAIB",
+				VC: "VC271091",
 				Category: "Commercial",
-				Size: "2 Marla",
-				"Plot No": 57,
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "MUHAMMAD JAHANZAIB",
-				"VC No": "VC271091"
+				Plot: 57,
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 325,
+				"Sr. ": 578,
+				"Member Name": "MUHAMMAD FAROOQ",
+				VC: "VC271293",
 				Category: "Commercial",
-				Size: "2 Marla",
-				"Plot No": 58,
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "MUHAMMAD FAROOQ",
-				"VC No": "VC271293"
+				Plot: 58,
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 326,
+				"Sr. ": 579,
+				"Member Name": "Muhammad Ejaz Bashir",
+				VC: "VC271792",
 				Category: "Commercial",
-				Size: "2.5 Marla",
-				"Plot No": "87/1",
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "Khurram Waheed",
-				"VC No": "VC271712"
+				Plot: "73/1",
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 327,
+				"Sr. ": 580,
+				"Member Name": "Mazhar Qayyum",
+				VC: "VC271795",
 				Category: "Commercial",
-				Size: "2.5 Marla",
-				"Plot No": "88/2",
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "Jamila Akhtar",
-				"VC No": "VC271649"
+				Plot: "73/2",
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 328,
+				"Sr. ": 581,
+				"Member Name": "Khurram Waheed",
+				VC: "VC271712",
 				Category: "Commercial",
-				Size: "2.5 Marla",
-				"Plot No": "89/1",
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "Naeem Butt",
-				"VC No": "VC271144"
+				Plot: "87/1",
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 329,
+				"Sr. ": 582,
+				"Member Name": "Jamila Akhtar",
+				VC: "VC271649",
 				Category: "Commercial",
-				Size: "2.5 Marla",
-				"Plot No": "89/2",
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "Mubasher Hussain",
-				"VC No": "VC271699"
+				Plot: "88/2",
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 330,
+				"Sr. ": 583,
+				"Member Name": "Naeem Butt",
+				VC: "VC271144",
 				Category: "Commercial",
-				Size: "2.5 Marla",
-				"Plot No": "90/1",
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "Mubasher Hussain",
-				"VC No": "VC271698"
+				Plot: "89/1",
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 331,
+				"Sr. ": 584,
+				"Member Name": "Mubasher Hussain",
+				VC: "VC271699",
 				Category: "Commercial",
-				Size: "2.5 Marla",
-				"Plot No": "90/2",
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "Mubasher Hussain",
-				"VC No": "VC271697"
+				Plot: "89/2",
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 332,
+				"Sr. ": 585,
+				"Member Name": "Mubasher Hussain",
+				VC: "VC271698",
 				Category: "Commercial",
-				Size: "2.5 Marla",
-				"Plot No": "90/3",
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "Mubasher Hussain",
-				"VC No": "VC271696"
+				Plot: "90/1",
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 333,
+				"Sr. ": 586,
+				"Member Name": "Mubasher Hussain",
+				VC: "VC271697",
 				Category: "Commercial",
-				Size: "2.5 Marla",
-				"Plot No": "90/4",
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "Mubasher Hussain",
-				"VC No": "VC271695"
+				Plot: "90/2",
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 334,
+				"Sr. ": 587,
+				"Member Name": "Mubasher Hussain",
+				VC: "VC271696",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 91,
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "Syeda Rizwana Jafri",
-				"VC No": "VC221637"
+				Plot: "90/3",
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 335,
+				"Sr. ": 588,
+				"Member Name": "Mubasher Hussain",
+				VC: "VC271695",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 103,
+				"Size (Marlas)": "2 Marla",
 				Block: "CCA",
-				"Client Name": "Arshman Asif",
-				"VC No": "VC22538"
+				Plot: "90/4",
+				Location: "Corner"
 			},
 			{
-				"Sr. #": 336,
+				"Sr. ": 589,
+				"Member Name": "Syeda Rizwana Jafri",
+				VC: "VC221637",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 104,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "Muhammad Imran Saeed",
-				"VC No": "VC22803"
+				Plot: 91,
+				Location: "Corner + FP"
 			},
 			{
-				"Sr. #": 337,
+				"Sr. ": 590,
+				"Member Name": "Khurram Zahid",
+				VC: "VC22155",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 105,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "Shaheen Shahid",
-				"VC No": "VC221040"
+				Plot: 96,
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 338,
+				"Sr. ": 591,
+				"Member Name": "Muhammad Nadeem",
+				VC: "VC221779",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 106,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "MUHAMMAD AMJAD KHAN",
-				"VC No": "VC22777"
+				Plot: 100,
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 339,
+				"Sr. ": 592,
+				"Member Name": "Rang Zaib",
+				VC: "VC221780",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 107,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "AHMAD HASSAN",
-				"VC No": "VC221446"
+				Plot: 101,
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 340,
+				"Sr. ": 593,
+				"Member Name": "Arshman Asif",
+				VC: "VC22538",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 108,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "ASHFAQ MAHMOOD",
-				"VC No": "VC22758"
+				Plot: 103,
+				Location: "Corner"
 			},
 			{
-				"Sr. #": 341,
+				"Sr. ": 594,
+				"Member Name": "Muhammad Imran Saeed",
+				VC: "VC22803",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 109,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "KASHIF NOOR",
-				"VC No": "VC22699"
+				Plot: 104,
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 342,
+				"Sr. ": 595,
+				"Member Name": "Shaheen Shahid",
+				VC: "VC221040",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 110,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "SAMINA KOUSAR",
-				"VC No": "VC221500"
+				Plot: 105,
+				Location: "FP"
 			},
 			{
-				"Sr. #": 343,
+				"Sr. ": 596,
+				"Member Name": "MUHAMMAD AMJAD KHAN",
+				VC: "VC22777",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 111,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "MUHAMMAD ASIF",
-				"VC No": "VC221445"
+				Plot: 106,
+				Location: "FP"
 			},
 			{
-				"Sr. #": 344,
+				"Sr. ": 597,
+				"Member Name": "AHMAD HASSAN",
+				VC: "VC221446",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 112,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "AMIR SHAHZAD",
-				"VC No": "VC00226"
+				Plot: 107,
+				Location: "FP"
 			},
 			{
-				"Sr. #": 345,
+				"Sr. ": 598,
+				"Member Name": "ASHFAQ MAHMOOD",
+				VC: "VC22758",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 113,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "ABDUL SHAKOOR BHUTTA",
-				"VC No": "VC22751"
+				Plot: 108,
+				Location: "FP"
 			},
 			{
-				"Sr. #": 346,
+				"Sr. ": 599,
+				"Member Name": "KASHIF NOOR",
+				VC: "VC22699",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 114,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "MAZHAR RAHIM ",
-				"VC No": "VC221062"
+				Plot: 109,
+				Location: "FP"
 			},
 			{
-				"Sr. #": 347,
+				"Sr. ": 600,
+				"Member Name": "SAMINA KOUSAR",
+				VC: "VC221500",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 115,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "AADIL MANZOOR",
-				"VC No": "VC221502"
+				Plot: 110,
+				Location: "FP"
 			},
 			{
-				"Sr. #": 348,
+				"Sr. ": 601,
+				"Member Name": "MUHAMMAD ASIF",
+				VC: "VC221445",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 116,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "ZULFIQAR ALI",
-				"VC No": "VC221163"
+				Plot: 111,
+				Location: "FP"
 			},
 			{
-				"Sr. #": 349,
+				"Sr. ": 602,
+				"Member Name": "AMIR SHAHZAD",
+				VC: "VC00226",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 117,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "Mian Amjad Iqbal",
-				"VC No": "VC221663"
+				Plot: 112,
+				Location: "FP"
 			},
 			{
-				"Sr. #": 350,
+				"Sr. ": 603,
+				"Member Name": "ABDUL SHAKOOR BHUTTA",
+				VC: "VC22751",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 118,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "Muhammad Yasin",
-				"VC No": "VC02256"
+				Plot: 113,
+				Location: "FP"
 			},
 			{
-				"Sr. #": 351,
+				"Sr. ": 604,
+				"Member Name": "MAZHAR RAHIM ",
+				VC: "VC221062",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 119,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "Chaudary Shahzad Anwar",
-				"VC No": "VC221655"
+				Plot: 114,
+				Location: "FP"
 			},
 			{
-				"Sr. #": 352,
+				"Sr. ": 605,
+				"Member Name": "AADIL MANZOOR",
+				VC: "VC221502",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 161,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "BUSHRA SHAHBAZ",
-				"VC No": "VC221316"
+				Plot: 115,
+				Location: "FP"
 			},
 			{
-				"Sr. #": 353,
+				"Sr. ": 606,
+				"Member Name": "ZULFIQAR ALI",
+				VC: "VC221163",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 162,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "MAHMOOD AHMAD ",
-				"VC No": "VC22956"
+				Plot: 116,
+				Location: "FP"
 			},
 			{
-				"Sr. #": 354,
+				"Sr. ": 607,
+				"Member Name": "Mian Amjad Iqbal",
+				VC: "VC221663",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 163,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "AASIA SALEEM BAIG",
-				"VC No": "VC22350"
+				Plot: 117,
+				Location: "FP"
 			},
 			{
-				"Sr. #": 355,
+				"Sr. ": 608,
+				"Member Name": "Muhammad Yasin",
+				VC: "VC02256",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 164,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "SAHJEED HUSSAIN",
-				"VC No": "VC22903"
+				Plot: 118,
+				Location: "FP"
 			},
 			{
-				"Sr. #": 356,
+				"Sr. ": 609,
+				"Member Name": "Chaudary Shahzad Anwar",
+				VC: "VC221655",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 165,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "SAMINA KOUSAR",
-				"VC No": "VC221499"
+				Plot: 119,
+				Location: "Corner + FP"
 			},
 			{
-				"Sr. #": 357,
+				"Sr. ": 610,
+				"Member Name": "Rizwan Akbar Bajwa",
+				VC: 22749,
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 166,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "MUHAMMAD YASIN",
-				"VC No": "VC02255"
+				Plot: 121,
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 358,
+				"Sr. ": 611,
+				"Member Name": "Tahir Masood Rana",
+				VC: "22225",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 167,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "SAMINA KOUSAR",
-				"VC No": "VC221498"
+				Plot: 122,
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 359,
+				"Sr. ": 612,
+				"Member Name": "ALI Farrukh Islam",
+				VC: "VC221736",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 168,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "MOBEEN FAISal",
-				"VC No": "VC22986"
+				Plot: 123,
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 360,
+				"Sr. ": 613,
+				"Member Name": "Saad Farooq",
+				VC: "VC221192",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 169,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "ADNAN SIDDIQ",
-				"VC No": "VC221434"
+				Plot: 124,
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 361,
+				"Sr. ": 614,
+				"Member Name": "Mohammad Sharif",
+				VC: "VC221778",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 170,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "SAMINA KOUSAR",
-				"VC No": "VC221497"
+				Plot: 145,
+				Location: "Corner + FP"
 			},
 			{
-				"Sr. #": 362,
+				"Sr. ": 615,
+				"Member Name": "BUSHRA SHAHBAZ",
+				VC: "VC221316",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 171,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "AHMED HASSAN KHAN",
-				"VC No": "VC221376"
+				Plot: 161,
+				Location: "Normal"
 			},
 			{
-				"Sr. #": 363,
+				"Sr. ": 616,
+				"Member Name": "MAHMOOD AHMAD ",
+				VC: "VC22956",
 				Category: "Commercial",
-				Size: "5 Marla",
-				"Plot No": 172,
+				"Size (Marlas)": "5 Marla",
 				Block: "CCA",
-				"Client Name": "ZEESHAN JAVED",
-				"VC No": "VC22746"
-			},
-			{
-				"Sr. #": 364,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 117,
-				Block: "Usman",
-				"Client Name": "Faiz Ullah",
-				"VC No": "VC11836"
-			},
-			{
-				"Sr. #": 365,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 118,
-				Block: "Usman",
-				"Client Name": "Faiz Ullah",
-				"VC No": "VC11835"
-			},
-			{
-				"Sr. #": 366,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 140,
-				Block: "Usman",
-				"Client Name": "Ahmed Bakhsh",
-				"VC No": "VC111328"
-			},
-			{
-				"Sr. #": 367,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 141,
-				Block: "Usman",
-				"Client Name": "Kaneezan Bibi",
-				"VC No": "VC11889"
-			},
-			{
-				"Sr. #": 368,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 142,
-				Block: "Usman",
-				"Client Name": "Waqas Majeed",
-				"VC No": "VC111738"
-			},
-			{
-				"Sr. #": 369,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 143,
-				Block: "Usman",
-				"Client Name": "Muhammad Aslam",
-				"VC No": "VC11670"
-			},
-			{
-				"Sr. #": 370,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 144,
-				Block: "Usman",
-				"Client Name": "Murtaza Masood",
-				"VC No": "VC11719"
-			},
-			{
-				"Sr. #": 371,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 147,
-				Block: "Usman",
-				"Client Name": "Muhammad Arslan",
-				"VC No": "VC11552"
-			},
-			{
-				"Sr. #": 372,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 148,
-				Block: "Usman",
-				"Client Name": "Sajid Munir",
-				"VC No": "VC1741"
-			},
-			{
-				"Sr. #": 373,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 149,
-				Block: "Usman",
-				"Client Name": "Syed Solat Abbas",
-				"VC No": "VC111604"
-			},
-			{
-				"Sr. #": 374,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 150,
-				Block: "Usman",
-				"Client Name": "Tahir Nazir",
-				"VC No": "VC111583"
-			},
-			{
-				"Sr. #": 375,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 160,
-				Block: "Usman",
-				"Client Name": "Fahmeeda Kausar",
-				"VC No": "VC111585"
-			},
-			{
-				"Sr. #": 376,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 165,
-				Block: "Usman",
-				"Client Name": "Muhammad Amin",
-				"VC No": "VC11268"
-			},
-			{
-				"Sr. #": 377,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 166,
-				Block: "Usman",
-				"Client Name": "Muhammad Nadeem Atif",
-				"VC No": "VC11286"
-			},
-			{
-				"Sr. #": 378,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 167,
-				Block: "Usman",
-				"Client Name": "Muhammad Abid Nadeem",
-				"VC No": "VC11900"
-			},
-			{
-				"Sr. #": 379,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 168,
-				Block: "Usman",
-				"Client Name": "Muhammad Ishfaq",
-				"VC No": "VC11282"
-			},
-			{
-				"Sr. #": 380,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 169,
-				Block: "Usman",
-				"Client Name": "Eid Nazeer",
-				"VC No": "VC11642"
-			},
-			{
-				"Sr. #": 381,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 170,
-				Block: "Usman",
-				"Client Name": "Eid Nazeer",
-				"VC No": "VC11912"
-			},
-			{
-				"Sr. #": 382,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 171,
-				Block: "Usman",
-				"Client Name": "Umar Draz Ali",
-				"VC No": "VC111675"
-			},
-			{
-				"Sr. #": 383,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 172,
-				Block: "Usman",
-				"Client Name": "Sadia Umer",
-				"VC No": "VC111357"
-			},
-			{
-				"Sr. #": 384,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 173,
-				Block: "Usman",
-				"Client Name": "Kabsha Mahmood",
-				"VC No": "VC111681"
-			},
-			{
-				"Sr. #": 385,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 174,
-				Block: "Usman",
-				"Client Name": "Pir Muneeb Rehman",
-				"VC No": "VC01151"
-			},
-			{
-				"Sr. #": 386,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 175,
-				Block: "Usman",
-				"Client Name": "Majid Farooq",
-				"VC No": "VC111605"
-			},
-			{
-				"Sr. #": 387,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 176,
-				Block: "Usman",
-				"Client Name": "Sajjad Haider",
-				"VC No": "VC11822"
-			},
-			{
-				"Sr. #": 388,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 177,
-				Block: "Usman",
-				"Client Name": "Tariq Masih",
-				"VC No": "VC111728"
-			},
-			{
-				"Sr. #": 389,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 178,
-				Block: "Usman",
-				"Client Name": "Muhammad Moazzum Ul Ibad",
-				"VC No": "VC11944"
-			},
-			{
-				"Sr. #": 390,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 179,
-				Block: "Usman",
-				"Client Name": "Hamid Ali",
-				"VC No": "VC111705"
-			},
-			{
-				"Sr. #": 391,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 180,
-				Block: "Usman",
-				"Client Name": "Hamid Ali",
-				"VC No": "VC111704"
-			},
-			{
-				"Sr. #": 392,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 181,
-				Block: "Usman",
-				"Client Name": "Abdul Qayyum",
-				"VC No": "VC111703"
-			},
-			{
-				"Sr. #": 393,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 1,
-				Block: "Ali",
-				"Client Name": "Mubeen Ahmed",
-				"VC No": "VC11318"
-			},
-			{
-				"Sr. #": 394,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 2,
-				Block: "Ali",
-				"Client Name": "Wasim Abbasi",
-				"VC No": "VC01136"
-			},
-			{
-				"Sr. #": 395,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 3,
-				Block: "Ali",
-				"Client Name": "Abdul Basit",
-				"VC No": "VC11906"
-			},
-			{
-				"Sr. #": 396,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 4,
-				Block: "Ali",
-				"Client Name": "Ambreen Akhtar",
-				"VC No": "VC11206"
-			},
-			{
-				"Sr. #": 397,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 5,
-				Block: "Ali",
-				"Client Name": "Sidra Altaf",
-				"VC No": "VC111553"
-			},
-			{
-				"Sr. #": 398,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 6,
-				Block: "Ali",
-				"Client Name": "Jamil Ahmed",
-				"VC No": "VC111272"
-			},
-			{
-				"Sr. #": 399,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 7,
-				Block: "Ali",
-				"Client Name": "Muhammad Waqar Hussain",
-				"VC No": "VC111140"
-			},
-			{
-				"Sr. #": 400,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 8,
-				Block: "Ali",
-				"Client Name": "Kaneezan Bibi",
-				"VC No": "VC11890"
-			},
-			{
-				"Sr. #": 401,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 9,
-				Block: "Ali",
-				"Client Name": "Nazia Atiq",
-				"VC No": "VC01120"
-			},
-			{
-				"Sr. #": 402,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 10,
-				Block: "Ali",
-				"Client Name": "Muhammad Saeed",
-				"VC No": "VC111075"
-			},
-			{
-				"Sr. #": 403,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 11,
-				Block: "Ali",
-				"Client Name": "IfshaAkhlaq",
-				"VC No": "VC111615"
-			},
-			{
-				"Sr. #": 404,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 12,
-				Block: "Ali",
-				"Client Name": "Mahboob Ul Hassan",
-				"VC No": "VC111680"
-			},
-			{
-				"Sr. #": 405,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 13,
-				Block: "Ali",
-				"Client Name": "Hina Tayyab",
-				"VC No": "VC111221"
-			},
-			{
-				"Sr. #": 406,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 14,
-				Block: "Ali",
-				"Client Name": "Zohaib Raza",
-				"VC No": "VC111601"
-			},
-			{
-				"Sr. #": 407,
-				Category: "Residential",
-				Size: "3 Marla",
-				"Plot No": 15,
-				Block: "Ali",
-				"Client Name": "Khalil Ahmed",
-				"VC No": "VC11846"
-			},
-			{
-				"Sr. #": 408,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 16,
-				Block: "Ali",
-				"Client Name": "Aurang Zaib Sajjad",
-				"VC No": "VC121732"
-			},
-			{
-				"Sr. #": 409,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 17,
-				Block: "Ali",
-				"Client Name": "Ghulam Hussain",
-				"VC No": "VC121073"
-			},
-			{
-				"Sr. #": 410,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 18,
-				Block: "Ali",
-				"Client Name": "Madiha Babar",
-				"VC No": "VC12617"
-			},
-			{
-				"Sr. #": 411,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 19,
-				Block: "Ali",
-				"Client Name": "Muhammad Afzal",
-				"VC No": "VC121538"
-			},
-			{
-				"Sr. #": 412,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 20,
-				Block: "Ali",
-				"Client Name": "Muhammad Ahmad",
-				"VC No": "VC12594"
-			},
-			{
-				"Sr. #": 413,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 21,
-				Block: "Ali",
-				"Client Name": "Syed Saqlain Shan Naqvi",
-				"VC No": "VC12595"
-			},
-			{
-				"Sr. #": 414,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 22,
-				Block: "Ali",
-				"Client Name": "Muhammad Younas",
-				"VC No": "VC121734"
-			},
-			{
-				"Sr. #": 415,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 23,
-				Block: "Ali",
-				"Client Name": "Mian Zeeshan Meraj",
-				"VC No": "VC121231"
-			},
-			{
-				"Sr. #": 416,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 24,
-				Block: "Ali",
-				"Client Name": "Rizwan Kauser",
-				"VC No": "VC12198"
-			},
-			{
-				"Sr. #": 417,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 25,
-				Block: "Ali",
-				"Client Name": "Rizwana",
-				"VC No": "VC12816"
-			},
-			{
-				"Sr. #": 418,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 26,
-				Block: "Ali",
-				"Client Name": "Muhammad Anwar Ul Haque",
-				"VC No": "VC12382"
-			},
-			{
-				"Sr. #": 419,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 27,
-				Block: "Ali",
-				"Client Name": "Muhammad Anwar Ul Haque",
-				"VC No": "VC12381"
-			},
-			{
-				"Sr. #": 420,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 28,
-				Block: "Ali",
-				"Client Name": "Ali Afzal",
-				"VC No": "VC121718"
-			},
-			{
-				"Sr. #": 421,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 29,
-				Block: "Ali",
-				"Client Name": "Muhammad Shahbaz Ali",
-				"VC No": "VC121725"
-			},
-			{
-				"Sr. #": 422,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 55,
-				Block: "Ali",
-				"Client Name": "Sundas Ali Malik",
-				"VC No": "VC121602"
-			},
-			{
-				"Sr. #": 423,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 56,
-				Block: "Ali",
-				"Client Name": "Miftah Ud Din",
-				"VC No": "VC121595"
-			},
-			{
-				"Sr. #": 424,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 57,
-				Block: "Ali",
-				"Client Name": "Ahsan Ullah",
-				"VC No": "VC121586"
-			},
-			{
-				"Sr. #": 425,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 58,
-				Block: "Ali",
-				"Client Name": "Muhammad Naeem Nasir",
-				"VC No": "VC121519"
-			},
-			{
-				"Sr. #": 426,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 59,
-				Block: "Ali",
-				"Client Name": "Muhammad Naeem Nasir",
-				"VC No": "VC121518"
-			},
-			{
-				"Sr. #": 427,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 60,
-				Block: "Ali",
-				"Client Name": "Muhammad Naeem Nasir",
-				"VC No": "VC121517"
-			},
-			{
-				"Sr. #": 428,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 61,
-				Block: "Ali",
-				"Client Name": "Fozia Ashfaq",
-				"VC No": "VC12653"
-			},
-			{
-				"Sr. #": 429,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 62,
-				Block: "Ali",
-				"Client Name": "Muhammad Qasim",
-				"VC No": "VC12675"
-			},
-			{
-				"Sr. #": 430,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 63,
-				Block: "Ali",
-				"Client Name": "Iram Hamayun",
-				"VC No": "VC1747"
-			},
-			{
-				"Sr. #": 431,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 64,
-				Block: "Ali",
-				"Client Name": "Iram Hamayun",
-				"VC No": "VC1746"
-			},
-			{
-				"Sr. #": 432,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 65,
-				Block: "Ali",
-				"Client Name": "Ahsan Shahzad Khan",
-				"VC No": "VC121633"
-			},
-			{
-				"Sr. #": 433,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 66,
-				Block: "Ali",
-				"Client Name": "Muhammad Waqas",
-				"VC No": "VC121668"
-			},
-			{
-				"Sr. #": 434,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 67,
-				Block: "Ali",
-				"Client Name": "Muhammad Azam",
-				"VC No": "VC121667"
-			},
-			{
-				"Sr. #": 435,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 68,
-				Block: "Ali",
-				"Client Name": "Nisar Ahmad",
-				"VC No": "VC12942"
-			},
-			{
-				"Sr. #": 436,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 69,
-				Block: "Ali",
-				"Client Name": "Syed Khuram Ali",
-				"VC No": "VC12536"
-			},
-			{
-				"Sr. #": 437,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 94,
-				Block: "Ali",
-				"Client Name": "FaisalMehmood",
-				"VC No": "VC12367"
-			},
-			{
-				"Sr. #": 438,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 95,
-				Block: "Ali",
-				"Client Name": "Naqash Ahmad",
-				"VC No": "VC12869"
-			},
-			{
-				"Sr. #": 439,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 96,
-				Block: "Ali",
-				"Client Name": "Junaid Ali Suleri",
-				"VC No": "VC121403"
-			},
-			{
-				"Sr. #": 440,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 97,
-				Block: "Ali",
-				"Client Name": "Arif Mukhtar Rana",
-				"VC No": "VC12305"
-			},
-			{
-				"Sr. #": 441,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 98,
-				Block: "Ali",
-				"Client Name": "Farzana Munir Khan",
-				"VC No": "VC121189"
-			},
-			{
-				"Sr. #": 442,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 99,
-				Block: "Ali",
-				"Client Name": "Uzair Shafqat",
-				"VC No": "VC12452"
-			},
-			{
-				"Sr. #": 443,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 100,
-				Block: "Ali",
-				"Client Name": "Uzair Shafqat",
-				"VC No": "VC12453"
-			},
-			{
-				"Sr. #": 444,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 101,
-				Block: "Ali",
-				"Client Name": "Ayesha Saqib",
-				"VC No": "VC121652"
-			},
-			{
-				"Sr. #": 445,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 102,
-				Block: "Ali",
-				"Client Name": "Muhammad Raza Iqbal",
-				"VC No": "VC12943"
-			},
-			{
-				"Sr. #": 446,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 103,
-				Block: "Ali",
-				"Client Name": "Hafiz Rana Raheel Shafqat",
-				"VC No": "VC00123"
-			},
-			{
-				"Sr. #": 447,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 104,
-				Block: "Ali",
-				"Client Name": "Hafiz Muhammad Zain Zahid Butt",
-				"VC No": "VC121627"
-			},
-			{
-				"Sr. #": 448,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 105,
-				Block: "Ali",
-				"Client Name": "Umer Hassam",
-				"VC No": "VC121400"
-			},
-			{
-				"Sr. #": 449,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 106,
-				Block: "Ali",
-				"Client Name": "Adeela Kashif",
-				"VC No": "VC121378"
-			},
-			{
-				"Sr. #": 450,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 107,
-				Block: "Ali",
-				"Client Name": "Azher Tahir",
-				"VC No": "VC121379"
-			},
-			{
-				"Sr. #": 451,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 108,
-				Block: "Ali",
-				"Client Name": "Muhammad Jahangir Khan",
-				"VC No": "VC12100"
-			},
-			{
-				"Sr. #": 452,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 109,
-				Block: "Ali",
-				"Client Name": "Syed Mowahid Hussain",
-				"VC No": "VC12104"
-			},
-			{
-				"Sr. #": 453,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 110,
-				Block: "Ali",
-				"Client Name": "Sharafat Ali",
-				"VC No": "VC121735"
-			},
-			{
-				"Sr. #": 454,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 111,
-				Block: "Ali",
-				"Client Name": "Sheikh Muhammad Iqbal",
-				"VC No": "VC12936"
-			},
-			{
-				"Sr. #": 455,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 112,
-				Block: "Ali",
-				"Client Name": "Syeda Hina Fayyaz",
-				"VC No": "VC121454"
-			},
-			{
-				"Sr. #": 456,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 113,
-				Block: "Ali",
-				"Client Name": "Muhammad Zubair",
-				"VC No": "VC121623"
-			},
-			{
-				"Sr. #": 457,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 114,
-				Block: "Ali",
-				"Client Name": "Zeeshan Javed",
-				"VC No": "VC12747"
-			},
-			{
-				"Sr. #": 458,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 115,
-				Block: "Ali",
-				"Client Name": "Faiz Ullah",
-				"VC No": "VC121431"
-			},
-			{
-				"Sr. #": 459,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 116,
-				Block: "Ali",
-				"Client Name": "Syed Imran Ali",
-				"VC No": "VC12551"
-			},
-			{
-				"Sr. #": 460,
-				Category: "Residential",
-				Size: "5 Marla",
-				"Plot No": 117,
-				Block: "Ali",
-				"Client Name": "Syed Hussain Ali Rehmat",
-				"VC No": "VC12535"
+				Plot: 162,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 617,
+				"Member Name": "AASIA SALEEM BAIG",
+				VC: "VC22350",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 163,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 618,
+				"Member Name": "SAHJEED HUSSAIN",
+				VC: "VC22903",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 164,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 619,
+				"Member Name": "SAMINA KOUSAR",
+				VC: "VC221499",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 165,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 620,
+				"Member Name": "MUHAMMAD YASIN",
+				VC: "VC02255",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 166,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 621,
+				"Member Name": "SAMINA KOUSAR",
+				VC: "VC221498",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 167,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 622,
+				"Member Name": "MOBEEN FAISAL ",
+				VC: "VC22986",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 168,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 623,
+				"Member Name": "ADNAN SIDDIQ",
+				VC: "VC221434",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 169,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 624,
+				"Member Name": "SAMINA KOUSAR",
+				VC: "VC221497",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 170,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 625,
+				"Member Name": "AHMED HASSAN KHAN",
+				VC: "VC221376",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 171,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 626,
+				"Member Name": "ZEESHAN JAVED",
+				VC: "VC22746",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 172,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 627,
+				"Member Name": "Muhammad Abu Baker",
+				VC: "VC22562",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 185,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 628,
+				"Member Name": "M. Jahanzaib",
+				VC: "VC221092",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 93,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 629,
+				"Member Name": "M. Uzair Ahmed",
+				VC: "VC221089",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 94,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 630,
+				"Member Name": "Ahmad Ishaq",
+				VC: "VC221764",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 95,
+				Location: "Normal"
 			}
 		];
-
 		try {
 			const result = data.map(async (item) => {
-				const VC_NO = item["VC No"];
+				console.log(item["Plot"]);
+				console.log(item.Block);
+
+				const VC_NO = item["VC"];
 				const booking = await Booking.findOne({
 					where: { Reg_Code_Disply: VC_NO }
 				});
 				const block = await Block.findOne({ where: { Name: item.Block } });
+				console.log(block.BLK_ID);
+				if (booking) {
+					// let unitObj = {
+					// 	BK_ID: booking.BK_ID,
+					// 	Unit_Code: item["Plot"],
+					// 	Plot_No: item["Plot"],
+					// 	UType_ID: booking.UType_ID,
+					// 	PS_ID: booking.PS_ID,
+					// 	MEMBER_ID: booking.MEMBER_ID,
+					// 	MN_ID: booking.MN_ID,
+					// 	BLK_ID: block.BLK_ID,
+					// 	IsActive: 1
+					// };
+					// console.log(unitObj);
+					// const updateUnit = await Unit.update(unitObj, { where: { ID: item["Plot"] } });
 
-				const unit = await Unit.create({
-					BK_ID: booking.BK_ID,
-					Unit_Code: item["Plot No"],
-					Plot_No: item["Plot No"],
-					UType_ID: booking.UType_ID,
-					PS_ID: booking.PS_ID,
-					MEMBER_ID: booking.MEMBER_ID,
-					MN_ID: booking.MN_ID,
-					BLK_ID: block.BLK_ID,
-					IsActive: 1
-				});
-				await Booking.update({ Unit_ID: unit.ID }, { where: { BK_ID: booking.BK_ID } });
+					const unit = await Unit.create({
+						BK_ID: booking.BK_ID,
+						Unit_Code: item["Plot"],
+						Plot_No: item["Plot"],
+						UType_ID: booking.UType_ID,
+						PS_ID: booking.PS_ID,
+						MEMBER_ID: booking.MEMBER_ID,
+						MN_ID: booking.MN_ID,
+						BLK_ID: block.BLK_ID,
+						IsActive: 1
+					});
+					// let unit = await Unit.findOne({ where: { Plot_No: item["Plot"] } });
+					await Booking.update({ Unit_ID: unit.ID }, { where: { BK_ID: booking.BK_ID } });
+				}
 			});
 
 			// const result = data.map(async(item)=>{
@@ -6128,2660 +8350,6313 @@ class BookingController {
 		const data = [
 			{
 				"Sr. #": 1,
-				"Plot #": 1,
-				Location: "Corner",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "RIDA ASHFAQ",
-				Registration: "VC12757"
-			},
-			{
-				"Sr. #": 2,
-				"Plot #": 2,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MIAN MOHAMMAD ASLAM",
-				Registration: "VC12213"
-			},
-			{
-				"Sr. #": 3,
-				"Plot #": 3,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "ZUBAIR AHMAD WASEEM",
-				Registration: "VC12110"
-			},
-			{
-				"Sr. #": 4,
-				"Plot #": 4,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD AWAIS",
-				Registration: "VC121223"
-			},
-			{
-				"Sr. #": 5,
-				"Plot #": 5,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "AHMAD WAQAR ",
-				Registration: "VC12871"
-			},
-			{
-				"Sr. #": 6,
-				"Plot #": 6,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MAMOONA RIAZ",
-				Registration: "VC12769"
-			},
-			{
-				"Sr. #": 7,
-				"Plot #": 7,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "SABA BABAR ",
-				Registration: "VC12989"
-			},
-			{
-				"Sr. #": 8,
-				"Plot #": 8,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "AYESHA BIBI ",
-				Registration: "VC121439"
-			},
-			{
-				"Sr. #": 9,
-				"Plot #": 9,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD AHMAD ZAIB",
-				Registration: "VC121078"
-			},
-			{
-				"Sr. #": 10,
-				"Plot #": 10,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "AMIR SHAHZAD",
-				Registration: "VC12406"
-			},
-			{
-				"Sr. #": 11,
-				"Plot #": 11,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD WAQAS SABIR ",
-				Registration: "VC12633"
-			},
-			{
-				"Sr. #": 12,
-				"Plot #": 12,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "SAHJEED HUSSAIN",
-				Registration: "VC12886"
-			},
-			{
-				"Sr. #": 13,
-				"Plot #": 13,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "HAMZAH RAAFEH KHANZADA ",
-				Registration: "VC121433"
-			},
-			{
-				"Sr. #": 14,
-				"Plot #": 14,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "IFFAT ALIA",
-				Registration: "VC01284"
-			},
-			{
-				"Sr. #": 15,
-				"Plot #": 15,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "HUSNAIN RAZA",
-				Registration: "VC121304"
-			},
-			{
-				"Sr. #": 16,
-				"Plot #": 16,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "IMRAN AHMAD QURESHI",
-				Registration: "VC121397"
-			},
-			{
-				"Sr. #": 17,
-				"Plot #": 17,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "SAQIB ISRAR",
-				Registration: "VC01217"
-			},
-			{
-				"Sr. #": 18,
-				"Plot #": 18,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "IMRAN NAEEM",
-				Registration: "VC12684"
-			},
-			{
-				"Sr. #": 19,
-				"Plot #": 19,
-				Location: "FP",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "RANA HASSAN MUMTAZ",
-				Registration: "VC12304"
-			},
-			{
-				"Sr. #": 20,
-				"Plot #": 20,
-				Location: "FP",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "S. TAHIR SAJJAD BUKHARI",
-				Registration: "VC121430"
-			},
-			{
-				"Sr. #": 21,
-				"Plot #": 21,
-				Location: "FP",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "UMER FAROOQ MALIK",
-				Registration: "VC121138"
-			},
-			{
-				"Sr. #": 22,
-				"Plot #": 22,
-				Location: "FP",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "ASHFAQ MAHMOOD",
-				Registration: "VC121083"
-			},
-			{
-				"Sr. #": 23,
-				"Plot #": 23,
-				Location: "FP",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD HASSAN",
-				Registration: "VC121557"
-			},
-			{
-				"Sr. #": 24,
-				"Plot #": 24,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD HASSAN",
-				Registration: "VC121558"
-			},
-			{
-				"Sr. #": 25,
-				"Plot #": 25,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MEHBOOB UL HASSAN",
-				Registration: "VC121547"
-			},
-			{
-				"Sr. #": 26,
-				"Plot #": 26,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUKHTAR AHMAD",
-				Registration: "VC121416"
-			},
-			{
-				"Sr. #": 27,
-				"Plot #": 27,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MADIHA BABAR",
-				Registration: "VC121458"
-			},
-			{
-				"Sr. #": 28,
-				"Plot #": 28,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "HAMZA MUKHTAR",
-				Registration: "VC12776"
-			},
-			{
-				"Sr. #": 29,
-				"Plot #": 29,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD SHAFIQUE ",
-				Registration: "VC12807"
-			},
-			{
-				"Sr. #": 30,
-				"Plot #": 30,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "AMJAD RASOOL AWAN",
-				Registration: "VC12726"
-			},
-			{
-				"Sr. #": 31,
-				"Plot #": 31,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD ZAHEER",
-				Registration: "VC01299"
-			},
-			{
-				"Sr. #": 32,
-				"Plot #": 32,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MOHAMMAD ZAFAR IQBAL ",
-				Registration: "VC12586"
-			},
-			{
-				"Sr. #": 33,
-				"Plot #": 33,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "UMER SHEHZAD",
-				Registration: "VC12508"
-			},
-			{
-				"Sr. #": 34,
-				"Plot #": 34,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD SHAFIQUE ",
-				Registration: "VC12808"
-			},
-			{
-				"Sr. #": 35,
-				"Plot #": 35,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "ZULFIQAR ALI",
-				Registration: "VC121162"
-			},
-			{
-				"Sr. #": 36,
-				"Plot #": 36,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "FARHAN YOUSAF",
-				Registration: "VC121380"
-			},
-			{
-				"Sr. #": 37,
-				"Plot #": 37,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "NABEEL ANJUM",
-				Registration: "VC12160"
-			},
-			{
-				"Sr. #": 38,
-				"Plot #": 38,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "BUSHRA ALI",
-				Registration: "VC12217"
-			},
-			{
-				"Sr. #": 39,
-				"Plot #": 39,
-				Location: "Corner",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "BILAL AHMAD",
-				Registration: "VC121526"
-			},
-			{
-				"Sr. #": 40,
-				"Plot #": 40,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "M. FAWAD NASEEM ABBASI",
-				Registration: "VC01274"
-			},
-			{
-				"Sr. #": 41,
-				"Plot #": 41,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD SUFYAN ",
-				Registration: "VC12990"
-			},
-			{
-				"Sr. #": 42,
-				"Plot #": 42,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "ZEESHAN AFZAL",
-				Registration: "VC01281"
-			},
-			{
-				"Sr. #": 43,
-				"Plot #": 43,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "NAZIR AHMAD",
-				Registration: "VC121285"
-			},
-			{
-				"Sr. #": 44,
-				"Plot #": 44,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "NAIMA ARAB CHOUDHARY",
-				Registration: "VC121136"
-			},
-			{
-				"Sr. #": 45,
-				"Plot #": 45,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "NAZISH ZAFAR",
-				Registration: "VC121067"
-			},
-			{
-				"Sr. #": 46,
-				"Plot #": 46,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "SAIMA NOMAN",
-				Registration: "VC12724"
-			},
-			{
-				"Sr. #": 47,
-				"Plot #": 47,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "TAHIR RASHID",
-				Registration: "VC12686"
-			},
-			{
-				"Sr. #": 48,
-				"Plot #": 48,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "AMNA HASSAN",
-				Registration: "VC121166"
-			},
-			{
-				"Sr. #": 49,
-				"Plot #": 49,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "SYED AKHTAR HUSSAIN ZAIDI",
-				Registration: "VC12603"
-			},
-			{
-				"Sr. #": 50,
-				"Plot #": 50,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "SYED GHUFRAN AHMAD",
-				Registration: "VC121283"
-			},
-			{
-				"Sr. #": 51,
-				"Plot #": 51,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "SHAHID RASHEED",
-				Registration: "VC12593"
-			},
-			{
-				"Sr. #": 52,
-				"Plot #": 52,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD AHMAD ZAIB",
-				Registration: "VC121127"
-			},
-			{
-				"Sr. #": 55,
-				"Plot #": 55,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD SADIQ",
-				Registration: "VC121158"
-			},
-			{
-				"Sr. #": 56,
-				"Plot #": 56,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD AHMAD ZAIB",
-				Registration: "VC121126"
-			},
-			{
-				"Sr. #": 57,
-				"Plot #": 57,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "IMRAN AHMAD QURESHI",
-				Registration: "VC121396"
-			},
-			{
-				"Sr. #": 58,
-				"Plot #": 58,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "BADAR JAMAL",
-				Registration: "VC12437"
-			},
-			{
-				"Sr. #": 59,
-				"Plot #": 59,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "IQRA SARWAR",
-				Registration: "VC121532"
-			},
-			{
-				"Sr. #": 60,
-				"Plot #": 60,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "FARHAN RASHID",
-				Registration: "VC01269"
-			},
-			{
-				"Sr. #": 61,
-				"Plot #": 61,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "KINZA ARIF ",
-				Registration: "VC12276"
-			},
-			{
-				"Sr. #": 62,
-				"Plot #": 62,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "USMAN KHALID WARAICH ",
-				Registration: "VC12335"
-			},
-			{
-				"Sr. #": 63,
-				"Plot #": 63,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "SHAKEELA BASHARAT ",
-				Registration: "VC121429"
-			},
-			{
-				"Sr. #": 64,
-				"Plot #": 64,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MALIK RIZWAN",
-				Registration: "VC121480"
-			},
-			{
-				"Sr. #": 65,
-				"Plot #": 65,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "NASEER AHMAD BUTT",
-				Registration: "VC121254"
-			},
-			{
-				"Sr. #": 66,
-				"Plot #": 66,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "RUSHNA SAFIA",
-				Registration: "VC121295"
-			},
-			{
-				"Sr. #": 67,
-				"Plot #": 67,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD WAQAS",
-				Registration: "VC121296"
-			},
-			{
-				"Sr. #": 68,
-				"Plot #": 68,
-				Location: "Corner",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "SARFRAZ IQBAL",
-				Registration: "VC121184"
-			},
-			{
-				"Sr. #": 69,
-				"Plot #": 69,
-				Location: "Corner",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "ABDUL GHAFFAR",
-				Registration: "VC121149"
-			},
-			{
-				"Sr. #": 70,
-				"Plot #": 70,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "QAMAR UN NISA",
-				Registration: "VC01293"
-			},
-			{
-				"Sr. #": 71,
-				"Plot #": 71,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "ABDULLAH RAAKEH KHANZADA ",
-				Registration: "VC121435"
-			},
-			{
-				"Sr. #": 72,
-				"Plot #": 72,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MEHBOOB UL HASSAN",
-				Registration: "VC121548"
-			},
-			{
-				"Sr. #": 73,
-				"Plot #": 73,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "AHMAD BILAL",
-				Registration: "VC01214"
-			},
-			{
-				"Sr. #": 74,
-				"Plot #": 74,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "TAHIR RASHID",
-				Registration: "VC12687"
-			},
-			{
-				"Sr. #": 75,
-				"Plot #": 75,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "WAQAS AHMAD",
-				Registration: "VC01298"
-			},
-			{
-				"Sr. #": 76,
-				"Plot #": 76,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD HASEEB",
-				Registration: "VC121255"
-			},
-			{
-				"Sr. #": 77,
-				"Plot #": 77,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "TOOBA HASSAN",
-				Registration: "VC121522"
-			},
-			{
-				"Sr. #": 78,
-				"Plot #": 78,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "REHANA KAUSAR ",
-				Registration: "VC12946"
-			},
-			{
-				"Sr. #": 79,
-				"Plot #": 79,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD AHSAAN",
-				Registration: "VC121291"
-			},
-			{
-				"Sr. #": 80,
-				"Plot #": 80,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "BABER ALI",
-				Registration: "VC121133"
-			},
-			{
-				"Sr. #": 81,
-				"Plot #": 81,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUTAHAR AHMAD KHAN",
-				Registration: "VC12257"
-			},
-			{
-				"Sr. #": 82,
-				"Plot #": 82,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "ZEESHAN ALI ",
-				Registration: "VC12685"
-			},
-			{
-				"Sr. #": 85,
-				"Plot #": 85,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD SALIK TARIQ",
-				Registration: "VC12152"
-			},
-			{
-				"Sr. #": 86,
-				"Plot #": 86,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "FEHMIDA FAISAL",
-				Registration: "VC12641"
-			},
-			{
-				"Sr. #": 87,
-				"Plot #": 87,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "TAHIR RASHID",
-				Registration: "VC12689"
-			},
-			{
-				"Sr. #": 88,
-				"Plot #": 88,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "LUBNA WAHEED ",
-				Registration: "VC12297"
-			},
-			{
-				"Sr. #": 89,
-				"Plot #": 89,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "HAMID SHOAIB",
-				Registration: "VC121478"
-			},
-			{
-				"Sr. #": 90,
-				"Plot #": 90,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "ANUM KAMRAN",
-				Registration: "VC01246"
-			},
-			{
-				"Sr. #": 91,
-				"Plot #": 91,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD ADIL KHAN ",
-				Registration: "VC12981"
-			},
-			{
-				"Sr. #": 92,
-				"Plot #": 92,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MEHBOOB UL HASSAN",
-				Registration: "VC121549"
-			},
-			{
-				"Sr. #": 93,
-				"Plot #": 93,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "SAQIB ISRAR",
-				Registration: "VC01216"
-			},
-			{
-				"Sr. #": 94,
-				"Plot #": 94,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "TOOBA HASSAN",
-				Registration: "VC121523"
-			},
-			{
-				"Sr. #": 95,
-				"Plot #": 95,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "AJMAL BUTT",
-				Registration: "VC12704"
-			},
-			{
-				"Sr. #": 96,
-				"Plot #": 96,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "SAEED AKRAM",
-				Registration: "VC121180"
-			},
-			{
-				"Sr. #": 97,
-				"Plot #": 97,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "HASSAN RIAZ",
-				Registration: "VC12132"
-			},
-			{
-				"Sr. #": 98,
-				"Plot #": 98,
-				Location: "Corner",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "ZAFEER BASHIR",
-				Registration: "VC121051"
-			},
-			{
-				"Sr. #": 99,
-				"Plot #": 99,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD ASHRAF",
-				Registration: "VC12854"
-			},
-			{
-				"Sr. #": 100,
-				"Plot #": 100,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "QASIM ALI",
-				Registration: "VC12710"
-			},
-			{
-				"Sr. #": 101,
-				"Plot #": 101,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD ANEES ABBASI ",
-				Registration: "VC121437"
-			},
-			{
-				"Sr. #": 102,
-				"Plot #": 102,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD AKHTAR",
-				Registration: "VC121090"
-			},
-			{
-				"Sr. #": 103,
-				"Plot #": 103,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "SHAHEEN AKBAR",
-				Registration: "VC12651"
-			},
-			{
-				"Sr. #": 104,
-				"Plot #": 104,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "BILAL AHMED MIRZA",
-				Registration: "VC12106"
-			},
-			{
-				"Sr. #": 105,
-				"Plot #": 105,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "BUSHRA MAAHNOOR NAEEM",
-				Registration: "VC12575"
-			},
-			{
-				"Sr. #": 106,
-				"Plot #": 106,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "KHAWAR MAQBOOL",
-				Registration: "VC121141"
-			},
-			{
-				"Sr. #": 107,
-				"Plot #": 107,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "FAIZA ARSHID",
-				Registration: "VC121507"
-			},
-			{
-				"Sr. #": 108,
-				"Plot #": 108,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "SABRINA HUMAYUN",
-				Registration: "VC12411"
-			},
-			{
-				"Sr. #": 109,
-				"Plot #": 109,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD MAHROZ ",
-				Registration: "VC12186"
-			},
-			{
-				"Sr. #": 110,
-				"Plot #": 110,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "JAHANGEER",
-				Registration: "VC121225"
-			},
-			{
-				"Sr. #": 111,
-				"Plot #": 111,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "AAFIA BATOOL ",
-				Registration: "VC12867"
-			},
-			{
-				"Sr. #": 112,
-				"Plot #": 112,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUSHTAQ AHMAD",
-				Registration: "VC121554"
-			},
-			{
-				"Sr. #": 119,
-				"Plot #": 119,
-				Location: "Corner + FP",
-				"Category ": "Residential",
-				Size: "10 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Omer Zahid Sheikh",
-				Registration: "VC131593"
-			},
-			{
-				"Sr. #": 120,
-				"Plot #": 120,
-				Location: "FP",
-				"Category ": "Residential",
-				Size: "10 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Shama Parveen",
-				Registration: "VC131609"
-			},
-			{
-				"Sr. #": 140,
-				"Plot #": 140,
-				Location: "FP",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "SABA BABAR ",
-				Registration: "VC121227"
-			},
-			{
-				"Sr. #": 141,
-				"Plot #": 141,
-				Location: "FP",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "ASJED RAUF ",
-				Registration: "VC12870"
-			},
-			{
-				"Sr. #": 142,
-				"Plot #": 142,
-				Location: "FP",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "AFSHAN ARSHAD ",
-				Registration: "VC12235"
-			},
-			{
-				"Sr. #": 143,
-				"Plot #": 143,
-				Location: "FP",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "NABEELA RIAZ",
-				Registration: "VC121169"
-			},
-			{
-				"Sr. #": 144,
-				"Plot #": 144,
-				Location: "FP",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "SYED AKHTAR HUSSAIN ZAIDI",
-				Registration: "VC12604"
-			},
-			{
-				"Sr. #": 145,
-				"Plot #": 145,
-				Location: "Corner + FP",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "UMER FAROOQ MALIK",
-				Registration: "VC121139"
-			},
-			{
-				"Sr. #": 146,
-				"Plot #": 146,
-				Location: "Corner",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "FATIMA RIZWAN ",
-				Registration: "VC12196"
-			},
-			{
-				"Sr. #": 147,
-				"Plot #": 147,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "TAHIR RASHID",
-				Registration: "VC12690"
-			},
-			{
-				"Sr. #": 148,
-				"Plot #": 148,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "AHMAD BILAL",
-				Registration: "VC01215"
-			},
-			{
-				"Sr. #": 149,
-				"Plot #": 149,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "TAHIR RASHID",
-				Registration: "VC12688"
-			},
-			{
-				"Sr. #": 150,
-				"Plot #": 150,
-				Location: "FP",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "SHABANA YASMIN",
-				Registration: "VC01267"
-			},
-			{
-				"Sr. #": 161,
-				"Plot #": 161,
-				Location: "Corner",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "ADREES ARIF",
-				Registration: "VC121546"
-			},
-			{
-				"Sr. #": 162,
-				"Plot #": 162,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MUHAMMAD YOUNAS",
-				Registration: "VC121157"
-			},
-			{
-				"Sr. #": 163,
-				"Plot #": 163,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "SHAHIDA PARVEEN",
-				Registration: "VC12103"
-			},
-			{
-				"Sr. #": 164,
-				"Plot #": 164,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "NASRIN BEGUM ",
-				Registration: "VC12187"
-			},
-			{
-				"Sr. #": 165,
-				"Plot #": 165,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "SYED IFTIKHAR BUKHARI",
-				Registration: "VC121134"
-			},
-			{
-				"Sr. #": 166,
-				"Plot #": 166,
-				Location: "Normal",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "SAIMA NOMAN",
-				Registration: "VC12725"
-			},
-			{
-				"Sr. #": 167,
-				"Plot #": 167,
-				Location: "Corner",
-				"Category ": "Residential",
-				Size: "5 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "1st Ballot",
-				"Client Name": "MATLOOB AKRAM ",
-				Registration: "VC121322"
-			},
-			{
-				"Sr. #": 117,
-				"Plot #": 117,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Faiz Ullah",
-				Registration: "VC11836"
-			},
-			{
-				"Sr. #": 118,
-				"Plot #": 118,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Faiz Ullah",
-				Registration: "VC11835"
-			},
-			{
-				"Sr. #": 140,
-				"Plot #": 140,
-				Location: "Corner",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"Client Name": "Ahmed Bakhsh",
-				Registration: "VC111328"
-			},
-			{
-				"Sr. #": 141,
-				"Plot #": 141,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"Client Name": "Kaneezan Bibi",
-				Registration: "VC11889"
-			},
-			{
-				"Sr. #": 142,
-				"Plot #": 142,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"Client Name": "Waqas Majeed",
-				Registration: "VC111738"
-			},
-			{
-				"Sr. #": 143,
-				"Plot #": 143,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"Client Name": "Muhammad Aslam",
-				Registration: "VC11670"
-			},
-			{
-				"Sr. #": 144,
-				"Plot #": 144,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"Client Name": "Murtaza Masood",
-				Registration: "VC11719"
-			},
-			{
-				"Sr. #": 147,
-				"Plot #": 147,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Arslan",
-				Registration: "VC11552"
-			},
-			{
-				"Sr. #": 148,
-				"Plot #": 148,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Sajid Munir",
-				Registration: "VC1741"
-			},
-			{
-				"Sr. #": 149,
-				"Plot #": 149,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Syed Solat Abbas",
-				Registration: "VC111604"
-			},
-			{
-				"Sr. #": 150,
-				"Plot #": 150,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Tahir Nazir",
-				Registration: "VC111583"
-			},
-			{
-				"Sr. #": 160,
-				"Plot #": 160,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Fahmeeda Kausar",
-				Registration: "VC111585"
-			},
-			{
-				"Sr. #": 165,
-				"Plot #": 165,
-				Location: "Corner",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Amin",
-				Registration: "VC11268"
-			},
-			{
-				"Sr. #": 166,
-				"Plot #": 166,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Nadeem Atif",
-				Registration: "VC11286"
-			},
-			{
-				"Sr. #": 167,
-				"Plot #": 167,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Abdul Basit / Kashif Akhter",
-				Registration: "VC11900"
-			},
-			{
-				"Sr. #": 168,
-				"Plot #": 168,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Ishfaq",
-				Registration: "VC11282"
-			},
-			{
-				"Sr. #": 169,
-				"Plot #": 169,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Eid Nazeer",
-				Registration: "VC11642"
-			},
-			{
-				"Sr. #": 170,
-				"Plot #": 170,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Eid Nazeer",
-				Registration: "VC11912"
-			},
-			{
-				"Sr. #": 171,
-				"Plot #": 171,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Umar Draz Ali",
-				Registration: "VC111675"
-			},
-			{
-				"Sr. #": 172,
-				"Plot #": 172,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Sadia Umer",
-				Registration: "VC111357"
-			},
-			{
-				"Sr. #": 173,
-				"Plot #": 173,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Kabsha Mahmood",
-				Registration: "VC111681"
-			},
-			{
-				"Sr. #": 174,
-				"Plot #": 174,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Pir Muneeb Rehman",
-				Registration: "VC01151"
-			},
-			{
-				"Sr. #": 175,
-				"Plot #": 175,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Majid Farooq",
-				Registration: "VC111605"
-			},
-			{
-				"Sr. #": 176,
-				"Plot #": 176,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Sajjad Haider",
-				Registration: "VC11822"
-			},
-			{
-				"Sr. #": 177,
-				"Plot #": 177,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Tariq Masih",
-				Registration: "VC111728"
-			},
-			{
-				"Sr. #": 178,
-				"Plot #": 178,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Moazzum Ul Ibad",
-				Registration: "VC11944"
-			},
-			{
-				"Sr. #": 179,
-				"Plot #": 179,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Hamid Ali",
-				Registration: "VC111705"
-			},
-			{
-				"Sr. #": 180,
-				"Plot #": 180,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Hamid Ali",
-				Registration: "VC111704"
-			},
-			{
-				"Sr. #": 181,
-				"Plot #": 181,
-				Location: "Corner",
-				"Category ": "Residential ",
-				Size: "3 Marla",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Abdul Qayyum",
-				Registration: "VC111703"
-			},
-			{
-				"Sr. #": 1,
-				"Plot #": 1,
-				Location: "Corner",
-				"Category ": "Residential ",
-				Size: "3 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Mubeen Ahmed",
-				Registration: "VC11318"
-			},
-			{
-				"Sr. #": 2,
-				"Plot #": 2,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Wasim Abbasi",
-				Registration: "VC01136"
-			},
-			{
-				"Sr. #": 3,
-				"Plot #": 3,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Abdul Basit",
-				Registration: "VC11906"
-			},
-			{
-				"Sr. #": 4,
-				"Plot #": 4,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Ambreen Akhtar",
-				Registration: "VC11206"
-			},
-			{
-				"Sr. #": 5,
-				"Plot #": 5,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Sidra Altaf",
-				Registration: "VC111553"
-			},
-			{
-				"Sr. #": 6,
-				"Plot #": 6,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Jamil Ahmed",
-				Registration: "VC111272"
-			},
-			{
-				"Sr. #": 7,
-				"Plot #": 7,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Waqar Hussain",
-				Registration: "VC111140"
-			},
-			{
-				"Sr. #": 8,
-				"Plot #": 8,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Kaneezan Bibi",
-				Registration: "VC11890"
-			},
-			{
-				"Sr. #": 9,
-				"Plot #": 9,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Nazia Atiq",
-				Registration: "VC01120"
-			},
-			{
-				"Sr. #": 10,
-				"Plot #": 10,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Saeed",
-				Registration: "VC111075"
-			},
-			{
-				"Sr. #": 11,
-				"Plot #": 11,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "IfshaAkhlaq",
-				Registration: "VC111615"
-			},
-			{
-				"Sr. #": 12,
-				"Plot #": 12,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Mahboob Ul Hassan",
-				Registration: "VC111680"
-			},
-			{
-				"Sr. #": 13,
-				"Plot #": 13,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Hina Tayyab",
-				Registration: "VC111221"
-			},
-			{
-				"Sr. #": 14,
-				"Plot #": 14,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "3 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Zohaib Raza",
-				Registration: "VC111601"
-			},
-			{
-				"Sr. #": 15,
-				"Plot #": 15,
-				Location: "Corner",
-				"Category ": "Residential ",
-				Size: "3 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Khalil Ahmed",
-				Registration: "VC11846"
-			},
-			{
-				"Sr. #": 16,
-				"Plot #": 16,
-				Location: "Corner",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Aurang Zaib Sajjad",
-				Registration: "VC121732"
-			},
-			{
-				"Sr. #": 17,
-				"Plot #": 17,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Ghulam Hussain",
-				Registration: "VC121073"
-			},
-			{
-				"Sr. #": 18,
-				"Plot #": 18,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Madiha Babar",
-				Registration: "VC12617"
-			},
-			{
-				"Sr. #": 19,
-				"Plot #": 19,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Afzal",
-				Registration: "VC121538"
-			},
-			{
-				"Sr. #": 20,
-				"Plot #": 20,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Ahmad",
-				Registration: "VC12594"
-			},
-			{
-				"Sr. #": 21,
-				"Plot #": 21,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Syed Saqlain Shan Naqvi",
-				Registration: "VC12595"
-			},
-			{
-				"Sr. #": 22,
-				"Plot #": 22,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Younas",
-				Registration: "VC121734"
-			},
-			{
-				"Sr. #": 23,
-				"Plot #": 23,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Mian Zeeshan Meraj",
-				Registration: "VC121231"
-			},
-			{
-				"Sr. #": 24,
-				"Plot #": 24,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Rizwan Kauser",
-				Registration: "VC12198"
-			},
-			{
-				"Sr. #": 25,
-				"Plot #": 25,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Rizwana",
-				Registration: "VC12816"
-			},
-			{
-				"Sr. #": 26,
-				"Plot #": 26,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Anwar Ul Haque",
-				Registration: "VC12382"
-			},
-			{
-				"Sr. #": 27,
-				"Plot #": 27,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Anwar Ul Haque",
-				Registration: "VC12381"
-			},
-			{
-				"Sr. #": 28,
-				"Plot #": 28,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Ali Afzal",
-				Registration: "VC121718"
-			},
-			{
-				"Sr. #": 29,
-				"Plot #": 29,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Shahbaz Ali",
-				Registration: "VC121725"
-			},
-			{
-				"Sr. #": 55,
-				"Plot #": 55,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Sundas Ali Malik",
-				Registration: "VC121602"
-			},
-			{
-				"Sr. #": 56,
-				"Plot #": 56,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Miftah Ud Din",
-				Registration: "VC121595"
-			},
-			{
-				"Sr. #": 57,
-				"Plot #": 57,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Ahsan Ullah",
-				Registration: "VC121586"
-			},
-			{
-				"Sr. #": 58,
-				"Plot #": 58,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Naeem Nasir",
-				Registration: "VC121519"
-			},
-			{
-				"Sr. #": 59,
-				"Plot #": 59,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Naeem Nasir",
-				Registration: "VC121518"
-			},
-			{
-				"Sr. #": 60,
-				"Plot #": 60,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Naeem Nasir",
-				Registration: "VC121517"
-			},
-			{
-				"Sr. #": 61,
-				"Plot #": 61,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Fozia Ashfaq",
-				Registration: "VC12653"
-			},
-			{
-				"Sr. #": 62,
-				"Plot #": 62,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Qasim",
-				Registration: "VC12675"
-			},
-			{
-				"Sr. #": 63,
-				"Plot #": 63,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Iram Hamayun",
-				Registration: "VC1747"
-			},
-			{
-				"Sr. #": 64,
-				"Plot #": 64,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Iram Hamayun",
-				Registration: "VC1746"
-			},
-			{
-				"Sr. #": 65,
-				"Plot #": 65,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Ahsan Shahzad Khan",
-				Registration: "VC121633"
-			},
-			{
-				"Sr. #": 66,
-				"Plot #": 66,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Waqas",
-				Registration: "VC121668"
-			},
-			{
-				"Sr. #": 67,
-				"Plot #": 67,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Azam",
-				Registration: "VC121667"
-			},
-			{
-				"Sr. #": 68,
-				"Plot #": 68,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Nisar Ahmad",
-				Registration: "VC12942"
-			},
-			{
-				"Sr. #": 69,
-				"Plot #": 69,
-				Location: "Corner",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Syed Khuram Ali",
-				Registration: "VC12536"
-			},
-			{
-				"Sr. #": 94,
-				"Plot #": 94,
-				Location: "Corner",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Faisal Mehmood",
-				Registration: "VC12367"
-			},
-			{
-				"Sr. #": 95,
-				"Plot #": 95,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Naqash Ahmad",
-				Registration: "VC12869"
-			},
-			{
-				"Sr. #": 96,
-				"Plot #": 96,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Junaid Ali Suleri",
-				Registration: "VC121403"
-			},
-			{
-				"Sr. #": 97,
-				"Plot #": 97,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Arif Mukhtar Rana",
-				Registration: "VC12305"
-			},
-			{
-				"Sr. #": 98,
-				"Plot #": 98,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Farzana Munir Khan",
-				Registration: "VC121189"
-			},
-			{
-				"Sr. #": 99,
-				"Plot #": 99,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Uzair Shafqat",
-				Registration: "VC12452"
-			},
-			{
-				"Sr. #": 100,
-				"Plot #": 100,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Uzair Shafqat",
-				Registration: "VC12453"
-			},
-			{
-				"Sr. #": 101,
-				"Plot #": 101,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Ayesha Saqib",
-				Registration: "VC121652"
-			},
-			{
-				"Sr. #": 102,
-				"Plot #": 102,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Raza Iqbal",
-				Registration: "VC12943"
-			},
-			{
-				"Sr. #": 103,
-				"Plot #": 103,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Hafiz Rana Raheel Shafqat",
-				Registration: "VC00123"
-			},
-			{
-				"Sr. #": 104,
-				"Plot #": 104,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Hafiz Muhammad Zain Zahid Butt",
-				Registration: "VC121627"
-			},
-			{
-				"Sr. #": 105,
-				"Plot #": 105,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Umer Hassam",
-				Registration: "VC121400"
-			},
-			{
-				"Sr. #": 106,
-				"Plot #": 106,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Adeela Kashif",
-				Registration: "VC121378"
-			},
-			{
-				"Sr. #": 107,
-				"Plot #": 107,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Azher Tahir",
-				Registration: "VC121379"
-			},
-			{
-				"Sr. #": 108,
-				"Plot #": 108,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Jahangir Khan",
-				Registration: "VC12100"
-			},
-			{
-				"Sr. #": 109,
-				"Plot #": 109,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Syed Mowahid Hussain",
-				Registration: "VC12104"
-			},
-			{
-				"Sr. #": 110,
-				"Plot #": 110,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Sharafat Ali",
-				Registration: "VC121735"
-			},
-			{
-				"Sr. #": 111,
-				"Plot #": 111,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Sheikh Muhammad Iqbal",
-				Registration: "VC12936"
-			},
-			{
-				"Sr. #": 112,
-				"Plot #": 112,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Syeda Hina Fayyaz",
-				Registration: "VC121454"
-			},
-			{
-				"Sr. #": 113,
-				"Plot #": 113,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Muhammad Zubair",
-				Registration: "VC121623"
-			},
-			{
-				"Sr. #": 114,
-				"Plot #": 114,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Zeeshan Javed",
-				Registration: "VC12747"
-			},
-			{
-				"Sr. #": 115,
-				"Plot #": 115,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Faiz Ullah",
-				Registration: "VC121431"
-			},
-			{
-				"Sr. #": 116,
-				"Plot #": 116,
-				Location: "Normal",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Syed Imran Ali",
-				Registration: "VC12551"
-			},
-			{
-				"Sr. #": 117,
-				"Plot #": 117,
-				Location: "Corner",
-				"Category ": "Residential ",
-				Size: "5 Marla ",
-				"Allotted / Vacant": "ALLOTTED",
-				"1st / 2nd Ballot": "2nd Ballot",
-				"Client Name": "Syed Hussain Ali Rehmat",
-				Registration: "VC12535"
-			},
-			{
-				"Sr. #": 1,
-				"Plot #": 47,
-				Location: "Normal",
-				"Category ": "ALLOTTED",
-				Size: "1st Ballot",
-				"Allotted / Vacant": "FAISAL SAMROZ HASHMI",
-				Registration: "VC271533"
-			},
-			{
-				"Sr. #": 2,
-				"Plot #": 48,
-				Location: "Normal",
-				"Category ": "ALLOTTED",
-				Size: "1st Ballot",
-				"Allotted / Vacant": "MUHAMMAD ASIF SHARIF",
-				Registration: "VC271534"
-			},
-			{
-				"Sr. #": 3,
-				"Plot #": 49,
-				Location: "Normal",
-				"Category ": "ALLOTTED",
-				Size: "1st Ballot",
-				"Allotted / Vacant": "MUHAMMAD AHSAAN",
-				Registration: "VC271535"
-			},
-			{
-				"Sr. #": 4,
-				"Plot #": 50,
-				Location: "Normal",
-				"Category ": "ALLOTTED",
-				Size: "1st Ballot",
-				"Allotted / Vacant": "SHAIKH MUHAMMAD ZAHID",
-				Registration: "VC271536"
-			},
-			{
-				"Sr. #": 5,
-				"Plot #": 51,
-				Location: "Normal",
-				"Category ": "ALLOTTED",
-				Size: "1st Ballot",
-				"Allotted / Vacant": "MUHAMMAD IMRAN SOHAIL",
-				Registration: "VC271537"
-			},
-			{
-				"Sr. #": 6,
-				"Plot #": 52,
-				Location: "Normal",
-				"Category ": "ALLOTTED",
-				Size: "1st Ballot",
-				"Allotted / Vacant": "MUHAMMAD ALTAF",
-				Registration: "VC271538"
-			},
-			{
-				"Sr. #": 7,
-				"Plot #": 53,
-				Location: "Normal",
-				"Category ": "ALLOTTED",
-				Size: "1st Ballot",
-				"Allotted / Vacant": "SABIR ALI",
-				Registration: "VC271539"
-			},
-			{
-				"Sr. #": 8,
-				"Plot #": 54,
-				Location: "Normal",
-				"Category ": "ALLOTTED",
-				Size: "1st Ballot",
-				"Allotted / Vacant": "SAQIB ISRAR",
-				Registration: "VC271540"
-			},
-			{
-				"Sr. #": 9,
-				"Plot #": 55,
-				Location: "Normal",
-				"Category ": "ALLOTTED",
-				Size: "1st Ballot",
-				"Allotted / Vacant": "TAHIRA ARSHAD",
-				Registration: "VC271541"
-			},
-			{
-				"Sr. #": 10,
-				"Plot #": 56,
-				Location: "Normal",
-				"Category ": "ALLOTTED",
-				Size: "1st Ballot",
-				"Allotted / Vacant": "ABDUL REHMAN",
-				Registration: "VC271542"
-			},
-			{
-				"Sr. #": 11,
-				"Plot #": 57,
-				Location: "Normal",
-				"Category ": "ALLOTTED",
-				Size: "1st Ballot",
-				"Allotted / Vacant": "MUHAMMAD JAHANZAIB",
-				Registration: "VC271543"
-			},
-			{
-				"Sr. #": 12,
-				"Plot #": 58,
-				Location: "Normal",
-				"Category ": "ALLOTTED",
-				Size: "1st Ballot",
-				"Allotted / Vacant": "MUHAMMAD FAROOQ",
-				Registration: "VC271544"
-			},
-			{
-				"Sr. #": 57,
-				"Plot #": "87/1",
-				Location: "Normal",
-				"Category ": "ALLOTTED",
-				Size: "2nd Ballot",
-				"Allotted / Vacant": "Khurram Waheed",
-				Registration: "VC271545"
-			},
-			{
-				"Sr. #": 60,
-				"Plot #": "88/2",
-				Location: "Normal",
-				"Category ": "ALLOTTED",
-				Size: "2nd Ballot",
-				"Allotted / Vacant": "Jamila Akhtar",
-				Registration: "VC271546"
-			},
-			{
-				"Sr. #": 61,
-				"Plot #": "89/1",
-				Location: "Normal",
-				"Category ": "ALLOTTED",
-				Size: "2nd Ballot",
-				"Allotted / Vacant": "Naeem Butt",
-				Registration: "VC271547"
-			},
-			{
-				"Sr. #": 62,
-				"Plot #": "89/2",
-				Location: "Normal",
-				"Category ": "ALLOTTED",
-				Size: "2nd Ballot",
-				"Allotted / Vacant": "Mubasher Hussain",
-				Registration: "VC271548"
-			},
-			{
-				"Sr. #": 63,
-				"Plot #": "90/1",
-				Location: "Normal",
-				"Category ": "ALLOTTED",
-				Size: "2nd Ballot",
-				"Allotted / Vacant": "Mubasher Hussain",
-				Registration: "VC271549"
-			},
-			{
-				"Sr. #": 64,
-				"Plot #": "90/2",
-				Location: "Normal",
-				"Category ": "ALLOTTED",
-				Size: "2nd Ballot",
-				"Allotted / Vacant": "Mubasher Hussain",
-				Registration: "VC271550"
-			},
-			{
-				"Sr. #": 65,
-				"Plot #": "90/3",
-				Location: "Normal",
-				"Category ": "ALLOTTED",
-				Size: "2nd Ballot",
-				"Allotted / Vacant": "Mubasher Hussain",
-				Registration: "VC271551"
-			},
-			{
-				"Sr. #": 66,
-				"Plot #": "90/4",
-				Location: "Corner",
-				"Category ": "ALLOTTED",
-				Size: "2nd Ballot",
-				"Allotted / Vacant": "Mubasher Hussain",
-				Registration: "VC271552"
+				"Member Name": "Ahsan Ahmed",
+				VC: "VC111772",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				"Plot ": 7,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 2,
+				"Member Name": "Umer Zahid",
+				VC: "VC111773",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 10,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 3,
+				"Member Name": "Muhammad Arif",
+				VC: "VC11827",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 11,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 4,
+				"Member Name": "Muhammad Javed",
+				VC: "VC111314",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 12,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 5,
+				"Member Name": "Rohail Angelo",
+				VC: "VC121421",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "Umer",
+				Plot: 19,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 6,
+				"Member Name": "Muhammad Mohsin",
+				VC: "VC12372",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "Umer",
+				Plot: 20,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 7,
+				"Member Name": "Amir Baig",
+				VC: "VC12114",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "Umer",
+				Plot: 21,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 8,
+				"Member Name": "Mir Maqsood Ul Rehman Hamdani",
+				VC: "VC121070",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "Umer",
+				Plot: 22,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 9,
+				"Member Name": "Nasir ALI Khan",
+				VC: "VC12176",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "Umer",
+				Plot: 23,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 10,
+				"Member Name": "Nasir ALI Khan",
+				VC: "VC12177",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "Umer",
+				Plot: 24,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 11,
+				"Member Name": "Nimra Khan",
+				VC: "VC12184",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "Umer",
+				Plot: 25,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 12,
+				"Member Name": "Mohammad ALI Khan",
+				VC: "VC12182",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "Umer",
+				Plot: 26,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 13,
+				"Member Name": "Haya Ghazali",
+				VC: "VC121248",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "Umer",
+				Plot: 27,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 14,
+				"Member Name": "NAZAM AMIN",
+				VC: "VC121466",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "Umer",
+				Plot: 28,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 15,
+				"Member Name": "Muhammad Awais Attari",
+				VC: "VC121638",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "Umer",
+				Plot: 29,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 16,
+				"Member Name": "Hassan Nawaz",
+				VC: "VC12174",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla",
+				Block: "Umer",
+				Plot: 30,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 17,
+				"Member Name": "MASOOD AKHTAR",
+				VC: "VC111503",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 31,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 18,
+				"Member Name": "ASIM BASHIR ",
+				VC: "VC11137",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 32,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 19,
+				"Member Name": "M. RASHID MAHMOOD ",
+				VC: "VC11940",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 33,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 20,
+				"Member Name": "MAHMOOD FATEH AHSAN",
+				VC: "VC11102",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 34,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 21,
+				"Member Name": "QASIM ALI",
+				VC: "VC11709",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 35,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 22,
+				"Member Name": "SANIA CHUDHARY",
+				VC: "VC11878",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 36,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 23,
+				"Member Name": "AZEEM UL REHMAN",
+				VC: "VC111244",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 37,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 24,
+				"Member Name": "SOHAIL LATIF",
+				VC: "VC111401",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 38,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 25,
+				"Member Name": "M. OMAR QURESHI",
+				VC: "VC11365",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 39,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 26,
+				"Member Name": "ANIQA MAHOOR",
+				VC: "VC111213",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 40,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 27,
+				"Member Name": "MIAN TANVEER BASHIR ",
+				VC: "VC11266",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 41,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 28,
+				"Member Name": "SADAF ZEESHAN",
+				VC: "VC11668",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 42,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 29,
+				"Member Name": "MUHAMMAD ASLAM ZAHID",
+				VC: "VC111520",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 43,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 30,
+				"Member Name": "AROOBA AZHAR ",
+				VC: "VC11307",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 44,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 31,
+				"Member Name": "SAFIA AFZAL",
+				VC: "VC111330",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 45,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 32,
+				"Member Name": "AWAIS TAUFIQ",
+				VC: "VC111137",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 46,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 33,
+				"Member Name": "MEHBOOB ELAHIE",
+				VC: "VC111512",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 47,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 34,
+				"Member Name": "FATIMA SABIR ",
+				VC: "VC11780",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 48,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 35,
+				"Member Name": "BILAL MEHMOOD ",
+				VC: "VC111325",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 49,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 36,
+				"Member Name": "SHAHZAD AHMAD CH.",
+				VC: "VC11679",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 50,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 37,
+				"Member Name": "MEHREEN AHMED ",
+				VC: "VC11195",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 51,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 38,
+				"Member Name": "MIZLA IFTIKHAR",
+				VC: "VC111463",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 52,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 39,
+				"Member Name": "MOHSIN MUKHTAR",
+				VC: "VC111363",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 53,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 40,
+				"Member Name": "MUHAMMAD SAAD TARIQ",
+				VC: "VC11151",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 54,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 41,
+				"Member Name": "SYEDA FARIDA BANO ",
+				VC: "VC11874",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 55,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 42,
+				"Member Name": "SYEDA FARIDA BANO ",
+				VC: "VC11875",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 56,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 43,
+				"Member Name": "AFSHAN ARSHAD ",
+				VC: "VC11234",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 57,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 44,
+				"Member Name": "BEENISH QASIM ",
+				VC: "VC11674",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 58,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 45,
+				"Member Name": "MUHAMMAD AWAIS ZIA",
+				VC: "VC111202",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 59,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 46,
+				"Member Name": "MUHAMMAD IMRAN ",
+				VC: "VC11681",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 60,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 47,
+				"Member Name": "FAISAL EJAZ",
+				VC: "VC111081",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 61,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 48,
+				"Member Name": "HAFIZ M. NAUMAN QURESHI",
+				VC: "VC11737",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 62,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 49,
+				"Member Name": "MUHAMMAD SHAFAQAT SAEED",
+				VC: "VC111492",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 63,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 50,
+				"Member Name": "NASIR ALI",
+				VC: "VC11261",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 64,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 51,
+				"Member Name": "ADNAN MANZOOR",
+				VC: "VC111226",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 65,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 52,
+				"Member Name": "MUHAMMAD ALI",
+				VC: "VC111361",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 66,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 53,
+				"Member Name": "MUHAMMAD ABU-BAKAR",
+				VC: "VC111374",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 67,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 54,
+				"Member Name": "MUHAMMAD YAQOOB",
+				VC: "VC111175",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 68,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 55,
+				"Member Name": "SOBIA MUHAMMAD IMRAN ",
+				VC: "VC11840",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 69,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 56,
+				"Member Name": "MIAN TANVEER BASHIR ",
+				VC: "VC11265",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 70,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 57,
+				"Member Name": "MASOOD AKHTAR",
+				VC: "VC111504",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 71,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 58,
+				"Member Name": "HABIB-UR-REHMAN",
+				VC: "VC11275",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 72,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 59,
+				"Member Name": "Samrooz Abbas",
+				VC: "VC111571",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 73,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 60,
+				"Member Name": "MUHAMMAD AHMAD ZAIB",
+				VC: "VC11374",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 74,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 61,
+				"Member Name": "SANAULLAH",
+				VC: "VC111132",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 75,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 62,
+				"Member Name": "MUKHTAR AHMAD",
+				VC: "VC111417",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 76,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 63,
+				"Member Name": "SANA HABIB",
+				VC: "VC11443",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 77,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 64,
+				"Member Name": "FIDA HUSSAIN ",
+				VC: "VC111200",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 78,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 65,
+				"Member Name": "AZRA ZIA",
+				VC: "VC11433",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 79,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 66,
+				"Member Name": "FARHAN RASHID",
+				VC: "VC01170",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 80,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 67,
+				"Member Name": "IMRAN NAEEM",
+				VC: "VC11358",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 81,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 68,
+				"Member Name": "TOQEER AHMAD ",
+				VC: "VC11274",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 82,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 69,
+				"Member Name": "WASIM ABBASI",
+				VC: "VC01135",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 83,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 70,
+				"Member Name": "M. WASEEM ANWAR ",
+				VC: "VC11330",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 84,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 71,
+				"Member Name": "SYED HASHIM ALI SHAH",
+				VC: "VC111072",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 85,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 72,
+				"Member Name": "MOHAMMAD EJAZ",
+				VC: "VC11698",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 86,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 73,
+				"Member Name": "ISHFAQ AHMAD",
+				VC: "VC11752",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 87,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 74,
+				"Member Name": "SHAHZAD AHMAD CH. ",
+				VC: "VC11678",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 88,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 75,
+				"Member Name": "ROBINA SHAHEEN ",
+				VC: "VC11667",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 89,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 76,
+				"Member Name": "RUBINA MAHBOOB",
+				VC: "VC11635",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 90,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 77,
+				"Member Name": "ABDUL QAYYUM",
+				VC: "VC111372",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 91,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 78,
+				"Member Name": "SYED NAZIR HASAN",
+				VC: "VC11449",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 92,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 79,
+				"Member Name": "SEYYAD ZISHAN ALI ",
+				VC: "VC11209",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 93,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 80,
+				"Member Name": "TAHIRA IMRAN",
+				VC: "VC11355",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 94,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 81,
+				"Member Name": "KHURRAM SHAHZAD",
+				VC: "VC111086",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 95,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 82,
+				"Member Name": "MUHAMMAD SHAFI",
+				VC: "VC11404",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 96,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 83,
+				"Member Name": "MUHAMMAD ALTAF",
+				VC: "VC111405",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 97,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 84,
+				"Member Name": "ATTA ULLAH",
+				VC: "VC11386",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 98,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 85,
+				"Member Name": "SAJID ALI",
+				VC: "VC11391",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 99,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 86,
+				"Member Name": "ARHAM IMRAN",
+				VC: "VC11357",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 100,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 87,
+				"Member Name": "MUBASHIR REHMAN",
+				VC: "VC11713",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 101,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 88,
+				"Member Name": "AKIF RASHEED",
+				VC: "VC111250",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 102,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 89,
+				"Member Name": "MUDASAR ALI",
+				VC: "VC11385",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 103,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 90,
+				"Member Name": "KASHIF ILYAS ",
+				VC: "VC11716",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 104,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 91,
+				"Member Name": "ASSIA TARIQ",
+				VC: "VC11432",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 105,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 92,
+				"Member Name": "M. FARHAN QURESHI",
+				VC: "VC11738",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 106,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 93,
+				"Member Name": "SHAGUFTA JABEEN",
+				VC: "VC11735",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 107,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 94,
+				"Member Name": "S TAHIR SAJJAD BOKHARI",
+				VC: "VC01142",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 108,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 95,
+				"Member Name": "SOBIA RIZWAN ",
+				VC: "VC11204",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 109,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 96,
+				"Member Name": "ZESHAN ALI ",
+				VC: "VC11781",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 110,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 97,
+				"Member Name": "SYED MASOOD ALI",
+				VC: "VC11574",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 111,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 98,
+				"Member Name": "SANIA CHUDHARY",
+				VC: "VC11879",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 112,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 99,
+				"Member Name": "SHAHBAZ ALI",
+				VC: "VC111477",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 113,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 100,
+				"Member Name": "MUHAMMAD MOHSIN BHATTI",
+				VC: "VC111510",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 114,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 101,
+				"Member Name": "IQBAL BASHIR",
+				VC: "VC11602",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 115,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 102,
+				"Member Name": "MUHAMMAD MOHSIN BHATTI",
+				VC: "VC111514",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 116,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 103,
+				"Member Name": "RIDA SHAKIL",
+				VC: "VC111496",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 117,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 104,
+				"Member Name": "MUHAMMAD KASHIF ",
+				VC: "VC111017",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 118,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 105,
+				"Member Name": "MUHAMMAD IMRAN",
+				VC: "VC11881",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 119,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 106,
+				"Member Name": "ATIF AKHTAR BHATTI ",
+				VC: "VC11193",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 120,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 107,
+				"Member Name": "UZAIR BIN IMRAN",
+				VC: "VC11356",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 121,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 108,
+				"Member Name": "IQRA SITAR",
+				VC: "VC11314",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 122,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 109,
+				"Member Name": "ROBINA SHAHEEN ",
+				VC: "VC11664",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 123,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 110,
+				"Member Name": "ASIM RASHEED",
+				VC: "VC111257",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 124,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 111,
+				"Member Name": "ZAIN UL ABIDEEN",
+				VC: "VC111247",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 125,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 112,
+				"Member Name": "RANA EJAZ AHMED",
+				VC: "VC11194",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 126,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 113,
+				"Member Name": "ABDUL REHMAN",
+				VC: "VC111513",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 127,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 114,
+				"Member Name": "SIDRA AMIR",
+				VC: "VC111570",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 128,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 115,
+				"Member Name": "USMAN AHMAD",
+				VC: "VC111539",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 129,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 116,
+				"Member Name": "ASIM RASHEED",
+				VC: "VC111258",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 130,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 117,
+				"Member Name": "RANA DILDAR AHMAD",
+				VC: "VC11616",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 131,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 118,
+				"Member Name": "BATOOL EJAZ",
+				VC: "VC01137",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 132,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 119,
+				"Member Name": "MUHAMMAD ADIL KHAN ",
+				VC: "VC111039",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 133,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 120,
+				"Member Name": "NAVEED AHMED",
+				VC: "VC01186",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 134,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 121,
+				"Member Name": "HAFSA ASHFAQ",
+				VC: "VC11896",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 135,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 122,
+				"Member Name": "FAISAL WAHEED KHAN",
+				VC: "VC11469",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 136,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 123,
+				"Member Name": "FAISAL WAHEED KHAN",
+				VC: "VC11468",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 137,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 124,
+				"Member Name": "SALMA BIBI",
+				VC: "VC111262",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 138,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 125,
+				"Member Name": "MARIYAM FAHAD",
+				VC: "VC11694",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 139,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 126,
+				"Member Name": "SHUMAILA MOHSIN",
+				VC: "VC111297",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 140,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 127,
+				"Member Name": "SAQIB LATIF",
+				VC: "VC11696",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 141,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 128,
+				"Member Name": "MUHAMMAD TAHIR BASHIR",
+				VC: "VC111212",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 142,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 129,
+				"Member Name": "MAHEEN IMRAN",
+				VC: "VC11359",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 143,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 130,
+				"Member Name": "MUHAMMAD IMRAN",
+				VC: "VC111135",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 144,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 131,
+				"Member Name": "BASHIR AHMAD",
+				VC: "VC111215",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 145,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 132,
+				"Member Name": "FAHAD ISLAM",
+				VC: "VC11140",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 146,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 133,
+				"Member Name": "MUHAMMAD MOON SHAHZAD",
+				VC: "VC111506",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 147,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 134,
+				"Member Name": "TOOBA HASSAN",
+				VC: "VC111524",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 148,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 135,
+				"Member Name": "SAIMA TARIQ",
+				VC: "VC111263",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 149,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 136,
+				"Member Name": "UMAIR SABIR",
+				VC: "VC11671",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 150,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 137,
+				"Member Name": "MUHAMMAD AHMAD ZAIB",
+				VC: "VC11375",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 151,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 138,
+				"Member Name": "MUHAMMAD AKRAM ",
+				VC: "VC11631",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 152,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 139,
+				"Member Name": "IJAZ AHMAD",
+				VC: "VC11478",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 153,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 140,
+				"Member Name": "MUHAMMAD AWAIS",
+				VC: "VC11410",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 154,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 141,
+				"Member Name": "ARSHAD JAVED",
+				VC: "VC111203",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 155,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 142,
+				"Member Name": "AQSA IZHAR",
+				VC: "VC11436",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 156,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 143,
+				"Member Name": "MUHAMMAD ADIL KHAN ",
+				VC: "VC11980",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 157,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 144,
+				"Member Name": "MARYUM MAHMOOD ",
+				VC: "VC11153",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 158,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 145,
+				"Member Name": "AYESHA AHMED ",
+				VC: "VC11623",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 159,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 146,
+				"Member Name": "MOUZAM JAVED ",
+				VC: "VC11179",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 160,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 147,
+				"Member Name": "FAISAL EJAZ",
+				VC: "VC111082",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 161,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 148,
+				"Member Name": "SOBIA NOUMAN",
+				VC: "VC11789",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 162,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 149,
+				"Member Name": "MUHAMMAD IMRAN",
+				VC: "VC11882",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 163,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 150,
+				"Member Name": "MUHAMMAD KAMRAN",
+				VC: "VC111474",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 164,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 151,
+				"Member Name": "MUHAMMAD KHALID ",
+				VC: "VC11945",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 165,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 152,
+				"Member Name": "MUHAMMAD JAVED",
+				VC: "VC111505",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 166,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 153,
+				"Member Name": "RANA HAFEEZ ULLAH",
+				VC: "VC11431",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 167,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 154,
+				"Member Name": "FATIMA AFZAAL",
+				VC: "VC111229",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 168,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 155,
+				"Member Name": "ROBINA SHAHEEN ",
+				VC: "VC11665",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 169,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 156,
+				"Member Name": "ROBINA SHAHEEN ",
+				VC: "VC11666",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 170,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 157,
+				"Member Name": "YASIR IQBAL",
+				VC: "VC11390",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 171,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 158,
+				"Member Name": "YASIR IQBAL",
+				VC: "VC11388",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 172,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 159,
+				"Member Name": "YASIR IQBAL",
+				VC: "VC11389",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 173,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 160,
+				"Member Name": "SYED KANWAL ZAIDI",
+				VC: "VC11450",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 174,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 161,
+				"Member Name": "MUHAMMAD SHAKEEL",
+				VC: "VC11625",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 176,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 162,
+				"Member Name": "AKIF RASHEED",
+				VC: "VC111251",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 177,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 163,
+				"Member Name": "SHAGUFTA JABEEN",
+				VC: "VC11736",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 178,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 164,
+				"Member Name": "HINA QAISER",
+				VC: "VC11774",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 179,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 165,
+				"Member Name": "BALAL AHMAD",
+				VC: "VC11101",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 180,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 166,
+				"Member Name": "SHAZIA TASNEEM",
+				VC: "VC11348",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 181,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 167,
+				"Member Name": "IZMA ANWAR",
+				VC: "VC111085",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 182,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 168,
+				"Member Name": "MUHAMMAD BASHIR ",
+				VC: "VC11782",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 183,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 169,
+				"Member Name": "M. AZEEM QURESHI",
+				VC: "VC11351",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 184,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 170,
+				"Member Name": "ZILE HUMA",
+				VC: "VC111365",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 185,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 171,
+				"Member Name": "MUHAMMAD BILAL",
+				VC: "VC11408",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 186,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 172,
+				"Member Name": "SHAHZADA ANJUM",
+				VC: "VC11790",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 187,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 173,
+				"Member Name": "MUHAMMAD ZEESHAN",
+				VC: "VC11830",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 188,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 174,
+				"Member Name": "MUHAMMAD NASIR",
+				VC: "VC01168",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 189,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 175,
+				"Member Name": "ROBINA SHAHEEN ",
+				VC: "VC11663",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 190,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 176,
+				"Member Name": "ZUHAIB KHALID",
+				VC: "VC11228",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 191,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 177,
+				"Member Name": "FATIMA HABIB",
+				VC: "VC01178",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 192,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 178,
+				"Member Name": "USMAN AHMAD",
+				VC: "VC11772",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 193,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 179,
+				"Member Name": "GHULAM ALI",
+				VC: "VC111471",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 194,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 180,
+				"Member Name": "SHAHZAD AHMAD CHAUDHARY ",
+				VC: "VC11677",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 195,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 181,
+				"Member Name": "AKIF RASHEED",
+				VC: "VC111252",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 196,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 182,
+				"Member Name": "BIBI RUKHSANA",
+				VC: "VC111367",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 197,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 183,
+				"Member Name": "ZULQARNAIN HABIB",
+				VC: "VC111302",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 199,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 184,
+				"Member Name": "KASHIF ILYAS ",
+				VC: "VC11715",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 200,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 185,
+				"Member Name": "KASHIF ILYAS ",
+				VC: "VC11714",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 201,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 186,
+				"Member Name": "ASAD TARIQ ",
+				VC: "VC11158",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 202,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 187,
+				"Member Name": "MUHAMMAD YOUNAS",
+				VC: "VC111228",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 203,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 188,
+				"Member Name": "AYESHA SAQIB",
+				VC: "VC111315",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 204,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 189,
+				"Member Name": "MUHAMMAD ARSLAN",
+				VC: "VC111425",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 205,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 190,
+				"Member Name": "JAVARIA SALEEM",
+				VC: "VC111034",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 206,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 191,
+				"Member Name": "TOOBA HASSAN",
+				VC: "VC111521",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 207,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 192,
+				"Member Name": "Maqsood Ahmad",
+				VC: "VC111661",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 208,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 193,
+				"Member Name": "Zukhruf Umair",
+				VC: "VC11466",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 209,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 194,
+				"Member Name": "SAJID MUNIR",
+				VC: "VC111460",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 210,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 195,
+				"Member Name": "SAJID MUNIR",
+				VC: "VC111461",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 211,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 196,
+				"Member Name": "MEHBOOB UL HASSAN",
+				VC: "VC111543",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 212,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 197,
+				"Member Name": "Samrooz Abbas",
+				VC: "VC111572",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 213,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 198,
+				"Member Name": "Murad ALI",
+				VC: "VC11371",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 214,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 199,
+				"Member Name": "Ch. Sohil",
+				VC: "VC11392",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 215,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 200,
+				"Member Name": "Ch. Sohil",
+				VC: "VC11393",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 216,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 201,
+				"Member Name": "Ch. Sohil",
+				VC: "VC11394",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 217,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 202,
+				"Member Name": "Ch. Sohil",
+				VC: "VC11395",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 218,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 203,
+				"Member Name": "ALI Hamza",
+				VC: "VC11398",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 219,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 204,
+				"Member Name": "ALI Hamza",
+				VC: "VC11399",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 220,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 205,
+				"Member Name": "ALI Hamza",
+				VC: "VC11400",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 221,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 206,
+				"Member Name": "ALI Hamza",
+				VC: "VC11401",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 222,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 207,
+				"Member Name": "Kouser Parveen",
+				VC: "VC11446",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 223,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 208,
+				"Member Name": "Muhammad Aslam Tabasum",
+				VC: "VC11427",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 224,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 209,
+				"Member Name": "Fakhar Husnain",
+				VC: "VC11473",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 225,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 210,
+				"Member Name": "Muhammad Umer ALI Usmani / Muhammad ALI",
+				VC: "VC111774",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 226,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 211,
+				"Member Name": "Muhammad Javed",
+				VC: "VC11396",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 227,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 212,
+				"Member Name": "Sameer Ahmad",
+				VC: "VC1756",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 228,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 213,
+				"Member Name": "Zeeshan Nazir",
+				VC: "VC11384",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 229,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 214,
+				"Member Name": "Muhammad Shafique",
+				VC: "VC111791",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 230,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 215,
+				"Member Name": "Nayab Imtiaz",
+				VC: "VC111717",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 231,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 216,
+				"Member Name": "Muhammad Iqbal",
+				VC: "VC11918",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 232,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 217,
+				"Member Name": "Faizan Tariq",
+				VC: "VC111584",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 233,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 218,
+				"Member Name": "SAJID ALI",
+				VC: "VC111541",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 234,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 219,
+				"Member Name": "MEHBOOB UL HASSAN",
+				VC: "VC111545",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 235,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 220,
+				"Member Name": "MUHAMMAD AMJAD",
+				VC: "VC111555",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 236,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 221,
+				"Member Name": "Muhammad Attique",
+				VC: "VC11216",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 238,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 222,
+				"Member Name": "MEHBOOB UL HASSAN",
+				VC: "VC111542",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 239,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 223,
+				"Member Name": "Kashif Raza",
+				VC: "VC111426",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 240,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 224,
+				"Member Name": "MEHBOOB UL HASSAN",
+				VC: "VC111544",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 241,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 225,
+				"Member Name": "Abdul Rehman",
+				VC: "VC111660",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 242,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 226,
+				"Member Name": "Nisha Uzair",
+				VC: "VC01131",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 243,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 227,
+				"Member Name": "Zeeshan Arif",
+				VC: "VC111610",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 244,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 228,
+				"Member Name": "Akbar ALI",
+				VC: "VC111781",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 245,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 229,
+				"Member Name": "Nadeem Ahmed",
+				VC: "VC11898",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 246,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 230,
+				"Member Name": "Muhammad Qasim",
+				VC: "VC11596",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 247,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 231,
+				"Member Name": "Abdul Raheem Hussain",
+				VC: "VC11697",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 248,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 232,
+				"Member Name": "Mian Waqar Ahmed",
+				VC: "VC111183",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 249,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 233,
+				"Member Name": "Muhammad Faraz Ul Haq",
+				VC: "VC11273",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 250,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 234,
+				"Member Name": "ALI Ahmad",
+				VC: "VC01139",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 251,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 235,
+				"Member Name": "Muhammad Adnan Haider",
+				VC: "VC11159",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 252,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 236,
+				"Member Name": "Shan Saleem",
+				VC: "VC111402",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 253,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 237,
+				"Member Name": "Zeeshan ALI",
+				VC: "VC111036",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 254,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 238,
+				"Member Name": "Qaisar Ashraf",
+				VC: "VC111727",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 255,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 239,
+				"Member Name": "Shahzad Ahmad Khan",
+				VC: "VC111766",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 256,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 240,
+				"Member Name": "Muhammad Asif Naeem",
+				VC: "VC11373",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 257,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 241,
+				"Member Name": "Muhammad Shafi",
+				VC: "VC11403",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 258,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 242,
+				"Member Name": "Syed Sajjad Hussain",
+				VC: "VC11258",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 259,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 243,
+				"Member Name": "Jawad USMAN",
+				VC: "VC111324",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 260,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 244,
+				"Member Name": "Mushtaq Zauque Diamond",
+				VC: "VC111693",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 261,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 245,
+				"Member Name": "Muhammad Younas",
+				VC: "VC111763",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 262,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 246,
+				"Member Name": "Tasleem Kousar",
+				VC: "VC111662",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 263,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 247,
+				"Member Name": "Ghulam Mustafa Nayyer Alvi",
+				VC: "VC111457",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 264,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 248,
+				"Member Name": "Rafia Tabassum",
+				VC: "VC111589",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 265,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 249,
+				"Member Name": "Muhammad Munir Khan",
+				VC: "VC11885",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 266,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 250,
+				"Member Name": "Muhammad Munir Khan",
+				VC: "VC11884",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 267,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 251,
+				"Member Name": "Muhammad Touqeer Tariq",
+				VC: "VC01153",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 268,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 252,
+				"Member Name": "Tanveer Ahmad",
+				VC: "VC111491",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 269,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 253,
+				"Member Name": "Mah Noor Karim",
+				VC: "VC11825",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 270,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 254,
+				"Member Name": "Waqar Ahmad",
+				VC: "VC11649",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 271,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 255,
+				"Member Name": "Waqar Ahmad",
+				VC: "VC11650",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 272,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 256,
+				"Member Name": "Kiran Aftab",
+				VC: "VC11643",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 273,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 257,
+				"Member Name": "Haroon Mansha",
+				VC: "VC11648",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "Umer",
+				Plot: 274,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 258,
+				"Member Name": "RIDA ASHFAQ",
+				VC: "VC12757",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 1,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 259,
+				"Member Name": "MIAN MOHAMMAD ASLAM",
+				VC: "VC12213",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 2,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 260,
+				"Member Name": "ZUBAIR AHMAD WASEEM",
+				VC: "VC12110",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 3,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 261,
+				"Member Name": "MUHAMMAD AWAIS",
+				VC: "VC121223",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 4,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 262,
+				"Member Name": "AHMAD WAQAR ",
+				VC: "VC12871",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 5,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 263,
+				"Member Name": "MAMOONA RIAZ",
+				VC: "VC12769",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 6,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 264,
+				"Member Name": "SABA BABAR ",
+				VC: "VC12989",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 7,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 265,
+				"Member Name": "AYESHA BIBI ",
+				VC: "VC121439",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 8,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 266,
+				"Member Name": "MUHAMMAD AHMAD ZAIB",
+				VC: "VC121078",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 9,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 267,
+				"Member Name": "AMIR SHAHZAD",
+				VC: "VC12406",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 10,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 268,
+				"Member Name": "MUHAMMAD WAQAS SABIR ",
+				VC: "VC12633",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 11,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 269,
+				"Member Name": "SAHJEED HUSSAIN",
+				VC: "VC12886",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 12,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 270,
+				"Member Name": "S. TAHIR SAJJAD BUKHARI",
+				VC: "VC121430",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 13,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 271,
+				"Member Name": "IFFAT ALIA",
+				VC: "VC01284",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 14,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 272,
+				"Member Name": "HUSNAIN RAZA",
+				VC: "VC121304",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 15,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 273,
+				"Member Name": "IMRAN AHMAD QURESHI",
+				VC: "VC121397",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 16,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 274,
+				"Member Name": "SAQIB ISRAR",
+				VC: "VC01217",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 17,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 275,
+				"Member Name": "IMRAN NAEEM",
+				VC: "VC12684",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 18,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 276,
+				"Member Name": "RANA HASSAN MUMTAZ",
+				VC: "VC12304",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 19,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 277,
+				"Member Name": "HAMZAH RAAFEH KHANZADA ",
+				VC: "VC121433",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 20,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 278,
+				"Member Name": "UMER FAROOQ MALIK",
+				VC: "VC121138",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 21,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 279,
+				"Member Name": "ASHFAQ MAHMOOD",
+				VC: "VC121083",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 22,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 280,
+				"Member Name": "MUHAMMAD HASSAN",
+				VC: "VC121557",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 23,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 281,
+				"Member Name": "MUHAMMAD HASSAN",
+				VC: "VC121558",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 24,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 282,
+				"Member Name": "MEHBOOB UL HASSAN",
+				VC: "VC121547",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 25,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 283,
+				"Member Name": "MUKHTAR AHMAD",
+				VC: "VC121416",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 26,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 284,
+				"Member Name": "MADIHA BABAR",
+				VC: "VC121458",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 27,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 285,
+				"Member Name": "HAMZA MUKHTAR",
+				VC: "VC12776",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 28,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 286,
+				"Member Name": "MUHAMMAD SHAFIQUE ",
+				VC: "VC12807",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 29,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 287,
+				"Member Name": "AMJAD RASOOL AWAN",
+				VC: "VC12726",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 30,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 288,
+				"Member Name": "MUHAMMAD ZAHEER",
+				VC: "VC01299",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 31,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 289,
+				"Member Name": "MOHAMMAD ZAFAR IQBAL ",
+				VC: "VC12586",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 32,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 290,
+				"Member Name": "UMER SHEHZAD",
+				VC: "VC12508",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 33,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 291,
+				"Member Name": "MUHAMMAD SHAFIQUE ",
+				VC: "VC12808",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 34,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 292,
+				"Member Name": "ZULFIQAR ALI",
+				VC: "VC121162",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 35,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 293,
+				"Member Name": "FARHAN YOUSAF",
+				VC: "VC121380",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 36,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 294,
+				"Member Name": "NABEEL ANJUM",
+				VC: "VC12160",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 37,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 295,
+				"Member Name": "BUSHRA ALI",
+				VC: "VC12217",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 38,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 296,
+				"Member Name": "Syed Saqlain Raza Shah Naqvi (Dual Ownership)",
+				VC: "VC12902",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 39,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 297,
+				"Member Name": "M. FAWAD NASEEM ABBASI",
+				VC: "VC01274",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 40,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 298,
+				"Member Name": "MUHAMMAD SUFYAN ",
+				VC: "VC12990",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 41,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 299,
+				"Member Name": "ZEESHAN AFZAL",
+				VC: "VC01281",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 42,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 300,
+				"Member Name": "NAZIR AHMAD",
+				VC: "VC121285",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 43,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 301,
+				"Member Name": "NAIMA ARAB CHOUDHARY",
+				VC: "VC121136",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 44,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 302,
+				"Member Name": "NAZISH ZAFAR",
+				VC: "VC121067",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 45,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 303,
+				"Member Name": "SAIMA NOMAN",
+				VC: "VC12724",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 46,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 304,
+				"Member Name": "TAHIR RASHID",
+				VC: "VC12686",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 47,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 305,
+				"Member Name": "AMNA HASSAN",
+				VC: "VC121166",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 48,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 306,
+				"Member Name": "SYED AKHTAR HUSSAIN ZAIDI",
+				VC: "VC12603",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 49,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 307,
+				"Member Name": "SYED GHUFRAN AHMAD",
+				VC: "VC121283",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 50,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 308,
+				"Member Name": "SHAHID RASHEED",
+				VC: "VC12593",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 51,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 309,
+				"Member Name": "MUHAMMAD AHMAD ZAIB",
+				VC: "VC121127",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 52,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 310,
+				"Member Name": "MUHAMMAD SADIQ",
+				VC: "VC121158",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 55,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 311,
+				"Member Name": "MUHAMMAD AHMAD ZAIB",
+				VC: "VC121126",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 56,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 312,
+				"Member Name": "IMRAN AHMAD QURESHI",
+				VC: "VC121396",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 57,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 313,
+				"Member Name": "BADAR JAMAL",
+				VC: "VC12437",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 58,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 314,
+				"Member Name": "IQRA SARWAR",
+				VC: "VC121532",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 59,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 315,
+				"Member Name": "FARHAN RASHID",
+				VC: "VC01269",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 60,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 316,
+				"Member Name": "KINZA ARIF ",
+				VC: "VC12276",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 61,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 317,
+				"Member Name": "USMAN KHALID WARAICH ",
+				VC: "VC12335",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 62,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 318,
+				"Member Name": "SHAKEELA BASHARAT ",
+				VC: "VC121429",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 63,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 319,
+				"Member Name": "MALIK RIZWAN",
+				VC: "VC121480",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 64,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 320,
+				"Member Name": "NASEER AHMAD BUTT",
+				VC: "VC121254",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 65,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 321,
+				"Member Name": "RUSHNA SAFIA",
+				VC: "VC121295",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 66,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 322,
+				"Member Name": "MUHAMMAD WAQAS",
+				VC: "VC121296",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 67,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 323,
+				"Member Name": "SARFRAZ IQBAL",
+				VC: "VC121184",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 68,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 324,
+				"Member Name": "ABDUL GHAFFAR",
+				VC: "VC121149",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 69,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 325,
+				"Member Name": "QAMAR UN NISA",
+				VC: "VC01293",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 70,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 326,
+				"Member Name": "ABDULLAH RAAKEH KHANZADA ",
+				VC: "VC121435",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 71,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 327,
+				"Member Name": "MEHBOOB UL HASSAN",
+				VC: "VC121548",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 72,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 328,
+				"Member Name": "AHMAD BILAL",
+				VC: "VC01214",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 73,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 329,
+				"Member Name": "TAHIR RASHID",
+				VC: "VC12687",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 74,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 330,
+				"Member Name": "WAQAS AHMAD",
+				VC: "VC01298",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 75,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 331,
+				"Member Name": "MUHAMMAD HASEEB",
+				VC: "VC121255",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 76,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 332,
+				"Member Name": "TOOBA HASSAN",
+				VC: "VC121522",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 77,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 333,
+				"Member Name": "REHANA KAUSAR ",
+				VC: "VC12946",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 78,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 334,
+				"Member Name": "MUHAMMAD AHSAAN",
+				VC: "VC121291",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 79,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 335,
+				"Member Name": "BABER ALI",
+				VC: "VC121133",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 80,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 336,
+				"Member Name": "MUTAHAR AHMAD KHAN",
+				VC: "VC12257",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 81,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 337,
+				"Member Name": "ZEESHAN ALI ",
+				VC: "VC12685",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 82,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 338,
+				"Member Name": "MUHAMMAD SALIK TARIQ",
+				VC: "VC12152",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 85,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 339,
+				"Member Name": "FEHMIDA FAISAL",
+				VC: "VC12641",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 86,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 340,
+				"Member Name": "TAHIR RASHID",
+				VC: "VC12689",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 87,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 341,
+				"Member Name": "LUBNA WAHEED ",
+				VC: "VC12297",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 88,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 342,
+				"Member Name": "HAMID SHOAIB",
+				VC: "VC121478",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 89,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 343,
+				"Member Name": "ANUM KAMRAN",
+				VC: "VC01246",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 90,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 344,
+				"Member Name": "MUHAMMAD ADIL KHAN ",
+				VC: "VC12981",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 91,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 345,
+				"Member Name": "MEHBOOB UL HASSAN",
+				VC: "VC121549",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 92,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 346,
+				"Member Name": "SAQIB ISRAR",
+				VC: "VC01216",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 93,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 347,
+				"Member Name": "TOOBA HASSAN",
+				VC: "VC121523",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 94,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 348,
+				"Member Name": "AJMAL BUTT",
+				VC: "VC12704",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 95,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 349,
+				"Member Name": "SAEED AKRAM",
+				VC: "VC121180",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 96,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 350,
+				"Member Name": "HASSAN RIAZ",
+				VC: "VC12132",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 97,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 351,
+				"Member Name": "ZAFEER BASHIR",
+				VC: "VC121051",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 98,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 352,
+				"Member Name": "MUHAMMAD ASHRAF",
+				VC: "VC12854",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 99,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 353,
+				"Member Name": "QASIM ALI",
+				VC: "VC12710",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 100,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 354,
+				"Member Name": "MUHAMMAD ANEES ABBASI ",
+				VC: "VC121437",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 101,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 355,
+				"Member Name": "MUHAMMAD AKHTAR",
+				VC: "VC121090",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 102,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 356,
+				"Member Name": "SHAHEEN AKBAR",
+				VC: "VC12651",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 103,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 357,
+				"Member Name": "BILAL AHMED MIRZA",
+				VC: "VC12106",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 104,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 358,
+				"Member Name": "BUSHRA MAAHNOOR NAEEM",
+				VC: "VC12575",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 105,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 359,
+				"Member Name": "KHAWAR MAQBOOL",
+				VC: "VC121141",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 106,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 360,
+				"Member Name": "FAIZA ARSHID",
+				VC: "VC121507",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 107,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 361,
+				"Member Name": "SABRINA HUMAYUN",
+				VC: "VC12411",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 108,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 362,
+				"Member Name": "MUHAMMAD MAHROZ ",
+				VC: "VC12186",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 109,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 363,
+				"Member Name": "JAHANGEER",
+				VC: "VC121225",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 110,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 364,
+				"Member Name": "AAFIA BATOOL ",
+				VC: "VC12867",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 111,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 365,
+				"Member Name": "MUSHTAQ AHMAD",
+				VC: "VC121554",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 112,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 366,
+				"Member Name": "Durdana Sabahat",
+				VC: "VC12511",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 113,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 367,
+				"Member Name": "Ahsan Ahmed",
+				VC: "VC121770",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 114,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 368,
+				"Member Name": "Furqan Khan",
+				VC: "VC121179",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 115,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 369,
+				"Member Name": "Salma Zafar",
+				VC: "VC121185",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 116,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 370,
+				"Member Name": "Asma Ashiq",
+				VC: "VC121197",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 117,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 371,
+				"Member Name": "Abeera Saad",
+				VC: "VC121041",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 118,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 372,
+				"Member Name": "Omer Zahid Sheikh",
+				VC: "VC131593",
+				Category: "Residential",
+				"Size (Marlas)": "10 Marla",
+				Block: "TOUHEED",
+				Plot: 119,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 373,
+				"Member Name": "Shama Parveen",
+				VC: "VC131609",
+				Category: "Residential",
+				"Size (Marlas)": "10 Marla",
+				Block: "TOUHEED",
+				Plot: 120,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 374,
+				"Member Name": "Nasir ALI Khan",
+				VC: "VC13175",
+				Category: "Residential",
+				"Size (Marlas)": "10 Marla",
+				Block: "TOUHEED",
+				Plot: 121,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 375,
+				"Member Name": "Rizwana Shahbaz",
+				VC: "VC13785",
+				Category: "Residential",
+				"Size (Marlas)": "10 Marla",
+				Block: "TOUHEED",
+				Plot: 122,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 376,
+				"Member Name": "Tahira Kausar",
+				VC: "VC13269",
+				Category: "Residential",
+				"Size (Marlas)": "10 Marla",
+				Block: "TOUHEED",
+				Plot: 123,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 377,
+				"Member Name": "Syed Faraz Hassan Zaidi",
+				VC: "VC13148",
+				Category: "Residential",
+				"Size (Marlas)": "10 Marla",
+				Block: "TOUHEED",
+				Plot: 124,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 378,
+				"Member Name": "Habib Ullah",
+				VC: "VC121093",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 138,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 379,
+				"Member Name": "Wasim Qaiser",
+				VC: "VC121722",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 139,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 380,
+				"Member Name": "SABA BABAR ",
+				VC: "VC121227",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 140,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 381,
+				"Member Name": "ASJED RAUF ",
+				VC: "VC12870",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 141,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 382,
+				"Member Name": "AFSHAN ARSHAD ",
+				VC: "VC12235",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 142,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 383,
+				"Member Name": "NABEELA RIAZ",
+				VC: "VC121169",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 143,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 384,
+				"Member Name": "SYED AKHTAR HUSSAIN ZAIDI",
+				VC: "VC12604",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 144,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 385,
+				"Member Name": "UMER FAROOQ MALIK",
+				VC: "VC121139",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 145,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 386,
+				"Member Name": "FATIMA RIZWAN ",
+				VC: "VC12196",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 146,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 387,
+				"Member Name": "TAHIR RASHID",
+				VC: "VC12690",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 147,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 388,
+				"Member Name": "AHMAD BILAL",
+				VC: "VC01215",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 148,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 389,
+				"Member Name": "TAHIR RASHID",
+				VC: "VC12688",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 149,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 390,
+				"Member Name": "SHABANA YASMIN",
+				VC: "VC01267",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 150,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 391,
+				"Member Name": "Muhammad Sameer Murad",
+				VC: "VC121767",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 151,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 392,
+				"Member Name": "Ahsan Ahmed",
+				VC: "VC121771",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 152,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 393,
+				"Member Name": "Shoukat ALI",
+				VC: "VC01243",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 153,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 394,
+				"Member Name": "Ghulam Mustafa",
+				VC: "VC121798",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 154,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 395,
+				"Member Name": "Muhammad Zubair",
+				VC: "VC121256",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 155,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 396,
+				"Member Name": "MUHAMMAD NAEEM NASIR",
+				VC: "VC121516",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 156,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 397,
+				"Member Name": "MUHAMMAD NAEEM NASIR",
+				VC: "VC121515",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 157,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 398,
+				"Member Name": "UMER ZAHID",
+				VC: "VC121769",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 158,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 399,
+				"Member Name": "ADREES ARIF",
+				VC: "VC121546",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 161,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 400,
+				"Member Name": "MUHAMMAD YOUNAS",
+				VC: "VC121157",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 162,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 401,
+				"Member Name": "SHAHIDA PARVEEN",
+				VC: "VC12103",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 163,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 402,
+				"Member Name": "NASRIN BEGUM ",
+				VC: "VC12187",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 164,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 403,
+				"Member Name": "SYED IFTIKHAR BUKHARI",
+				VC: "VC121134",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 165,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 404,
+				"Member Name": "SAIMA NOMAN",
+				VC: "VC12725",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 166,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 405,
+				"Member Name": "MATLOOB AKRAM ",
+				VC: "VC121322",
+				Category: "Residential",
+				"Size (Marlas)": "5 Marla",
+				Block: "TOUHEED",
+				Plot: 167,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 406,
+				"Member Name": "Muhammad Uzair Ahmed",
+				VC: "VC111234",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 15,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 407,
+				"Member Name": "Muhammad Jahanzaib",
+				VC: "VC111442",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 16,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 408,
+				"Member Name": "Muhammad Ejaz Bashir",
+				VC: "VC111794",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 107,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 409,
+				"Member Name": "Mazhar Qayyum",
+				VC: "VC111796",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 108,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 410,
+				"Member Name": "Faiz Ullah",
+				VC: "VC11836",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 117,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 411,
+				"Member Name": "Faiz Ullah",
+				VC: "VC11835",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 118,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 412,
+				"Member Name": "Sumaira Saqib",
+				VC: 111686,
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 130,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 413,
+				"Member Name": "Haroon Mansha",
+				VC: "VC11647",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 131,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 414,
+				"Member Name": "Muhammad Ahmad",
+				VC: "VC11646",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 132,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 415,
+				"Member Name": "Kausar Parveen",
+				VC: "VC01180",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 133,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 416,
+				"Member Name": "Saira Chaudhry",
+				VC: "VC111759",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 134,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 417,
+				"Member Name": "Tazeem Asim",
+				VC: "VC11418",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 135,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 418,
+				"Member Name": "Nasreen Akhtar",
+				VC: "VC111760",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 136,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 419,
+				"Member Name": "Jamila Riaz",
+				VC: "VC11826",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 137,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 420,
+				"Member Name": "Syed Sajjad Hussain",
+				VC: "VC11259",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 138,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 421,
+				"Member Name": "Ahmed Bakhsh",
+				VC: "VC111328",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 140,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 422,
+				"Member Name": "Kaneezan Bibi",
+				VC: "VC11889",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 141,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 423,
+				"Member Name": "Waqas Majeed",
+				VC: "VC111738",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 142,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 424,
+				"Member Name": "Muhammad Aslam",
+				VC: "VC11670",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 143,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 425,
+				"Member Name": "Murtaza Masood",
+				VC: "VC11719",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 144,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 426,
+				"Member Name": "Hina Awais",
+				VC: "VC11105",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 145,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 427,
+				"Member Name": "Amjad Hussain",
+				VC: "VC11812",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 146,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 428,
+				"Member Name": "Muhammad Arslan",
+				VC: "VC11552",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 147,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 429,
+				"Member Name": "Sajid Munir",
+				VC: "VC1741",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 148,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 430,
+				"Member Name": "Syed Solat Abbas",
+				VC: "VC111604",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 149,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 431,
+				"Member Name": "Tahir Nazir",
+				VC: "VC111583",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 150,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 432,
+				"Member Name": "Fahmeeda Kausar",
+				VC: "VC111585",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 160,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 433,
+				"Member Name": "Muhammad Amin",
+				VC: "VC11268",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 165,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 434,
+				"Member Name": "Muhammad Nadeem Atif",
+				VC: "VC11286",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 166,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 435,
+				"Member Name": "Abdul Basit / Kashif Akhter",
+				VC: "VC11900",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 167,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 436,
+				"Member Name": "Muhammad Ishfaq",
+				VC: "VC11282",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 168,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 437,
+				"Member Name": "Eid Nazeer",
+				VC: "VC11642",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 169,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 438,
+				"Member Name": "Eid Nazeer",
+				VC: "VC11912",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 170,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 439,
+				"Member Name": "Umar Draz ALI",
+				VC: "VC111675",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 171,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 440,
+				"Member Name": "Sadia Umer",
+				VC: "VC111357",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 172,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 441,
+				"Member Name": "Kabsha Mahmood",
+				VC: "VC111681",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 173,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 442,
+				"Member Name": "Pir Muneeb Rehman",
+				VC: "VC01151",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 174,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 443,
+				"Member Name": "Majid Farooq",
+				VC: "VC111605",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 175,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 444,
+				"Member Name": "Sajjad Haider",
+				VC: "VC11822",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 176,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 445,
+				"Member Name": "Tariq Masih",
+				VC: "VC111728",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 177,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 446,
+				"Member Name": "Muhammad Moazzum Ul Ibad",
+				VC: "VC11944",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 178,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 447,
+				"Member Name": "Hamid ALI",
+				VC: "VC111705",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 179,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 448,
+				"Member Name": "Hamid ALI",
+				VC: "VC111704",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 180,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 449,
+				"Member Name": "Abdul Qayyum",
+				VC: "VC111703",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla",
+				Block: "USMAN",
+				Plot: 181,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 450,
+				"Member Name": "Mubeen Ahmed",
+				VC: "VC11318",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 1,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 451,
+				"Member Name": "Wasim Abbasi",
+				VC: "VC01136",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 2,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 452,
+				"Member Name": "Abdul Basit",
+				VC: "VC11906",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 3,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 453,
+				"Member Name": "Ambreen Akhtar",
+				VC: "VC11206",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 4,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 454,
+				"Member Name": "Sidra Altaf",
+				VC: "VC111553",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 5,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 455,
+				"Member Name": "Jamil Ahmed",
+				VC: "VC111272",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 6,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 456,
+				"Member Name": "Muhammad Waqar Hussain",
+				VC: "VC111140",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 7,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 457,
+				"Member Name": "Kaneezan Bibi",
+				VC: "VC11890",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 8,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 458,
+				"Member Name": "Nazia Atiq",
+				VC: "VC01120",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 9,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 459,
+				"Member Name": "Muhammad Saeed",
+				VC: "VC111075",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 10,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 460,
+				"Member Name": "IfshaAkhlaq",
+				VC: "VC111615",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 11,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 461,
+				"Member Name": "Mahboob Ul Hassan",
+				VC: "VC111680",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 12,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 462,
+				"Member Name": "Hina Tayyab",
+				VC: "VC111221",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 13,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 463,
+				"Member Name": "Zohaib Raza",
+				VC: "VC111601",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 14,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 464,
+				"Member Name": "Khalil Ahmed",
+				VC: "VC11846",
+				Category: "Residential ",
+				"Size (Marlas)": "3 Marla ",
+				Block: "ALI",
+				Plot: 15,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 465,
+				"Member Name": "Aurang Zaib Sajjad",
+				VC: "VC121732",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 16,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 466,
+				"Member Name": "Ghulam Hussain",
+				VC: "VC121073",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 17,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 467,
+				"Member Name": "Madiha Babar",
+				VC: "VC12617",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 18,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 468,
+				"Member Name": "Muhammad Afzal",
+				VC: "VC121538",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 19,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 469,
+				"Member Name": "Muhammad Ahmad",
+				VC: "VC12594",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 20,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 470,
+				"Member Name": "Syed Saqlain Shan Naqvi",
+				VC: "VC12595",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 21,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 471,
+				"Member Name": "Muhammad Younas",
+				VC: "VC121734",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 22,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 472,
+				"Member Name": "Mian Zeeshan Meraj",
+				VC: "VC121231",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 23,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 473,
+				"Member Name": "Rizwan Kauser",
+				VC: "VC12198",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 24,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 474,
+				"Member Name": "Rizwana",
+				VC: "VC12816",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 25,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 475,
+				"Member Name": "Muhammad Anwar Ul Haque",
+				VC: "VC12382",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 26,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 476,
+				"Member Name": "Muhammad Anwar Ul Haque",
+				VC: "VC12381",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 27,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 477,
+				"Member Name": "ALI Afzal",
+				VC: "VC121718",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 28,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 478,
+				"Member Name": "Muhammad Shahbaz ALI",
+				VC: "VC121725",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 29,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 479,
+				"Member Name": "Tahir Masood Rana",
+				VC: "VC12226",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 30,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 480,
+				"Member Name": "Haroon Saeed",
+				VC: "VC121399",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 31,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 481,
+				"Member Name": "Asghar ALI",
+				VC: "VC12988",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 32,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 482,
+				"Member Name": "Amir Masood Rana",
+				VC: "VC12320",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 33,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 483,
+				"Member Name": "Nadia Maqbool",
+				VC: "VC121552",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 34,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 484,
+				"Member Name": "Muhammad Aqeel Rasheed",
+				VC: "VC121673",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 35,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 485,
+				"Member Name": "Haziq Naeem",
+				VC: "VC12702",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 36,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 486,
+				"Member Name": "Muhammad Fiaz",
+				VC: "VC121054",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 37,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 487,
+				"Member Name": "Zafar ALI Khan",
+				VC: "VC121621",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 38,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 488,
+				"Member Name": "Kashif Mehboob",
+				VC: "VC121387",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 39,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 489,
+				"Member Name": "Muhammad Uzair Ahmed",
+				VC: "VC121123",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 40,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 490,
+				"Member Name": "Muhammad Jahanzaib",
+				VC: "VC121120",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 41,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 491,
+				"Member Name": "Malik Tanveer Ahmad",
+				VC: "VC121205",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 42,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 492,
+				"Member Name": "Malik Tanveer Ahmad",
+				VC: "VC121206",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 43,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 493,
+				"Member Name": "Malik Tanveer Ahmad",
+				VC: "VC121207",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 44,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 494,
+				"Member Name": "Malik Tanveer Ahmad",
+				VC: "VC121208",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 45,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 495,
+				"Member Name": "Malik Tanveer Ahmad",
+				VC: "VC121209",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 46,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 496,
+				"Member Name": "Malik Tanveer Ahmad",
+				VC: "VC121210",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 47,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 497,
+				"Member Name": "Malik Tanveer Ahmad",
+				VC: "VC121211",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 48,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 498,
+				"Member Name": "Muhammad Tahir Nadeem",
+				VC: "VC121088",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 49,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 499,
+				"Member Name": "Nida Atif",
+				VC: "VC121411",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 50,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 500,
+				"Member Name": "Syed Shabbir Hussain Shah",
+				VC: "VC121452",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 51,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 501,
+				"Member Name": "Abdul Rauf",
+				VC: "VC12496",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 52,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 502,
+				"Member Name": "Muhammad Sharif",
+				VC: "VC01244",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 53,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 503,
+				"Member Name": "Abdul Wahab",
+				VC: "VC01250",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 54,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 504,
+				"Member Name": "Sundas ALI Malik",
+				VC: "VC121602",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 55,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 505,
+				"Member Name": "Miftah Ud Din",
+				VC: "VC121595",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 56,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 506,
+				"Member Name": "Ahsan Ullah",
+				VC: "VC121586",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 57,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 507,
+				"Member Name": "Muhammad Naeem Nasir",
+				VC: "VC121519",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 58,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 508,
+				"Member Name": "Muhammad Naeem Nasir",
+				VC: "VC121518",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 59,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 509,
+				"Member Name": "Muhammad Naeem Nasir",
+				VC: "VC121517",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 60,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 510,
+				"Member Name": "Fozia Ashfaq",
+				VC: "VC12653",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 61,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 511,
+				"Member Name": "Muhammad Qasim",
+				VC: "VC12675",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 62,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 512,
+				"Member Name": "Iram Hamayun",
+				VC: "VC1747",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 63,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 513,
+				"Member Name": "Iram Hamayun",
+				VC: "VC1746",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 64,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 514,
+				"Member Name": "Ahsan Shahzad Khan",
+				VC: "VC121633",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 65,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 515,
+				"Member Name": "Muhammad Waqas",
+				VC: "VC121668",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 66,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 516,
+				"Member Name": "Muhammad Azam",
+				VC: "VC121667",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 67,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 517,
+				"Member Name": "Nisar Ahmad",
+				VC: "VC12942",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 68,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 518,
+				"Member Name": "Syed Khuram ALI",
+				VC: "VC12536",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 69,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 519,
+				"Member Name": "Sajid ALI",
+				VC: "VC121220",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 70,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 520,
+				"Member Name": "Muhammad Iqbal Bhatti",
+				VC: "VC121527",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 71,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 521,
+				"Member Name": "Muhammad Iqbal Bhatti",
+				VC: "VC121528",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 72,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 522,
+				"Member Name": "Muhammad Rameez",
+				VC: "VC01275",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 73,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 523,
+				"Member Name": "Muhammad Yaser",
+				VC: "VC121484",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 74,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 524,
+				"Member Name": "Shahzad ALI",
+				VC: "VC1757",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 75,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 525,
+				"Member Name": "Saqib ALI",
+				VC: "VC121776",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 76,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 526,
+				"Member Name": "Muhammad Waqar",
+				VC: "VC12759",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 77,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 527,
+				"Member Name": "Farah Iqbal",
+				VC: "VC121321",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 78,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 528,
+				"Member Name": "Ayesha Irfan",
+				VC: "VC12287",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 79,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 529,
+				"Member Name": "Haseeb ALI",
+				VC: "VC12260",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 80,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 530,
+				"Member Name": "Moeed Ejaz Ghauree",
+				VC: "VC12293",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 81,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 531,
+				"Member Name": "Ahmed Zubair",
+				VC: "VC121608",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 82,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 532,
+				"Member Name": "Zishan Javed",
+				VC: "VC12718",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 83,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 533,
+				"Member Name": "Muhammad Saad Cheema",
+				VC: "VC121580",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 84,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 534,
+				"Member Name": "Zakariya Irshad",
+				VC: "VC121027",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 85,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 535,
+				"Member Name": "Ahsan Iqbal Bela",
+				VC: "VC121147",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 86,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 536,
+				"Member Name": "Shahid Ijaz",
+				VC: "VC121436",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 87,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 537,
+				"Member Name": "Muhammad Younas",
+				VC: "VC121459",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 88,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 538,
+				"Member Name": "Muneeb Awais Sheikh",
+				VC: "VC12180",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 89,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 539,
+				"Member Name": "Muhammad Ejaz Bashir / Mazhar Qayyum",
+				VC: "VC121793",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 90,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 540,
+				"Member Name": "Nasir Siddique",
+				VC: "121530",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 91,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 541,
+				"Member Name": "Zahid Nafeer",
+				VC: "121050",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 92,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 542,
+				"Member Name": "Syeda Gulshan Mubashir",
+				VC: "VC1753",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 93,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 543,
+				"Member Name": "Faisal Mehmood",
+				VC: "VC12367",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 94,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 544,
+				"Member Name": "Naqash Ahmad",
+				VC: "VC12869",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 95,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 545,
+				"Member Name": "Junaid ALI Suleri",
+				VC: "VC121403",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 96,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 546,
+				"Member Name": "Arif Mukhtar Rana",
+				VC: "VC12305",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 97,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 547,
+				"Member Name": "Farzana Munir Khan",
+				VC: "VC121189",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 98,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 548,
+				"Member Name": "Uzair Shafqat",
+				VC: "VC12452",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 99,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 549,
+				"Member Name": "Uzair Shafqat",
+				VC: "VC12453",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 100,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 550,
+				"Member Name": "Ayesha Saqib",
+				VC: "VC121652",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 101,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 551,
+				"Member Name": "Muhammad Raza Iqbal",
+				VC: "VC12943",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 102,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 552,
+				"Member Name": "Hafiz Rana Raheel Shafqat",
+				VC: "VC00123",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 103,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 553,
+				"Member Name": "Hafiz Muhammad Zain Zahid Butt",
+				VC: "VC121627",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 104,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 554,
+				"Member Name": "Umer Hassam",
+				VC: "VC121400",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 105,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 555,
+				"Member Name": "Adeela Kashif",
+				VC: "VC121378",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 106,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 556,
+				"Member Name": "Azher Tahir",
+				VC: "VC121379",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 107,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 557,
+				"Member Name": "Muhammad Jahangir Khan",
+				VC: "VC12100",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 108,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 558,
+				"Member Name": "Syed Mowahid Hussain",
+				VC: "VC12104",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 109,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 559,
+				"Member Name": "Sharafat ALI",
+				VC: "VC121735",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 110,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 560,
+				"Member Name": "Sheikh Muhammad Iqbal",
+				VC: "VC12936",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 111,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 561,
+				"Member Name": "Syeda Hina Fayyaz",
+				VC: "VC121454",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 112,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 562,
+				"Member Name": "Muhammad Zubair",
+				VC: "VC121623",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 113,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 563,
+				"Member Name": "Zeeshan Javed",
+				VC: "VC12747",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 114,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 564,
+				"Member Name": "Faiz Ullah",
+				VC: "VC121431",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 115,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 565,
+				"Member Name": "Syed Imran ALI",
+				VC: "VC12551",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 116,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 566,
+				"Member Name": "Syed Hussain ALI Rehmat",
+				VC: "VC12535",
+				Category: "Residential ",
+				"Size (Marlas)": "5 Marla ",
+				Block: "ALI",
+				Plot: 117,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 567,
+				"Member Name": "FAISAL SAMROZ HASHMI",
+				VC: "VC271533",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: 47,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 568,
+				"Member Name": "MUHAMMAD ASIF SHARIF",
+				VC: "VC271424",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: 48,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 569,
+				"Member Name": "MUHAMMAD AHSAAN",
+				VC: "VC271269",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: 49,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 570,
+				"Member Name": "SHAIKH MUHAMMAD ZAHID",
+				VC: "VC271525",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: 50,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 571,
+				"Member Name": "MUHAMMAD IMRAN SOHAIL",
+				VC: "VC271344",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: 51,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 572,
+				"Member Name": "MUHAMMAD ALTAF",
+				VC: "VC271406",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: 52,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 573,
+				"Member Name": "SABIR ALI",
+				VC: "VC271186",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: 53,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 574,
+				"Member Name": "SAQIB ISRAR",
+				VC: "VC271014",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: 54,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 575,
+				"Member Name": "TAHIRA ARSHAD",
+				VC: "VC271060",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: 55,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 576,
+				"Member Name": "ABDUL REHMAN",
+				VC: "VC271479",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: 56,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 577,
+				"Member Name": "MUHAMMAD JAHANZAIB",
+				VC: "VC271091",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: 57,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 578,
+				"Member Name": "MUHAMMAD FAROOQ",
+				VC: "VC271293",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: 58,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 579,
+				"Member Name": "Muhammad Ejaz Bashir",
+				VC: "VC271792",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: "73/1",
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 580,
+				"Member Name": "Mazhar Qayyum",
+				VC: "VC271795",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: "73/2",
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 581,
+				"Member Name": "Khurram Waheed",
+				VC: "VC271712",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: "87/1",
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 582,
+				"Member Name": "Jamila Akhtar",
+				VC: "VC271649",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: "88/2",
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 583,
+				"Member Name": "Naeem Butt",
+				VC: "VC271144",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: "89/1",
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 584,
+				"Member Name": "Mubasher Hussain",
+				VC: "VC271699",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: "89/2",
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 585,
+				"Member Name": "Mubasher Hussain",
+				VC: "VC271698",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: "90/1",
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 586,
+				"Member Name": "Mubasher Hussain",
+				VC: "VC271697",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: "90/2",
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 587,
+				"Member Name": "Mubasher Hussain",
+				VC: "VC271696",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: "90/3",
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 588,
+				"Member Name": "Mubasher Hussain",
+				VC: "VC271695",
+				Category: "Commercial",
+				"Size (Marlas)": "2 Marla",
+				Block: "CCA",
+				Plot: "90/4",
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 589,
+				"Member Name": "Syeda Rizwana Jafri",
+				VC: "VC221637",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 91,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 590,
+				"Member Name": "Khurram Zahid",
+				VC: "VC22155",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 96,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 591,
+				"Member Name": "Muhammad Nadeem",
+				VC: "VC221779",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 100,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 592,
+				"Member Name": "Rang Zaib",
+				VC: "VC221780",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 101,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 593,
+				"Member Name": "Arshman Asif",
+				VC: "VC22538",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 103,
+				Location: "Corner"
+			},
+			{
+				"Sr. ": 594,
+				"Member Name": "Muhammad Imran Saeed",
+				VC: "VC22803",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 104,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 595,
+				"Member Name": "Shaheen Shahid",
+				VC: "VC221040",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 105,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 596,
+				"Member Name": "MUHAMMAD AMJAD KHAN",
+				VC: "VC22777",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 106,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 597,
+				"Member Name": "AHMAD HASSAN",
+				VC: "VC221446",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 107,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 598,
+				"Member Name": "ASHFAQ MAHMOOD",
+				VC: "VC22758",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 108,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 599,
+				"Member Name": "KASHIF NOOR",
+				VC: "VC22699",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 109,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 600,
+				"Member Name": "SAMINA KOUSAR",
+				VC: "VC221500",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 110,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 601,
+				"Member Name": "MUHAMMAD ASIF",
+				VC: "VC221445",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 111,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 602,
+				"Member Name": "AMIR SHAHZAD",
+				VC: "VC00226",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 112,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 603,
+				"Member Name": "ABDUL SHAKOOR BHUTTA",
+				VC: "VC22751",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 113,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 604,
+				"Member Name": "MAZHAR RAHIM ",
+				VC: "VC221062",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 114,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 605,
+				"Member Name": "AADIL MANZOOR",
+				VC: "VC221502",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 115,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 606,
+				"Member Name": "ZULFIQAR ALI",
+				VC: "VC221163",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 116,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 607,
+				"Member Name": "Mian Amjad Iqbal",
+				VC: "VC221663",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 117,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 608,
+				"Member Name": "Muhammad Yasin",
+				VC: "VC02256",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 118,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 609,
+				"Member Name": "Chaudary Shahzad Anwar",
+				VC: "VC221655",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 119,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 610,
+				"Member Name": "Rizwan Akbar Bajwa",
+				VC: 22749,
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 121,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 611,
+				"Member Name": "Tahir Masood Rana",
+				VC: "22225",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 122,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 612,
+				"Member Name": "ALI Farrukh Islam",
+				VC: "VC221736",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 123,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 613,
+				"Member Name": "Saad Farooq",
+				VC: "VC221192",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 124,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 614,
+				"Member Name": "Mohammad Sharif",
+				VC: "VC221778",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 145,
+				Location: "Corner + FP"
+			},
+			{
+				"Sr. ": 615,
+				"Member Name": "BUSHRA SHAHBAZ",
+				VC: "VC221316",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 161,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 616,
+				"Member Name": "MAHMOOD AHMAD ",
+				VC: "VC22956",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 162,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 617,
+				"Member Name": "AASIA SALEEM BAIG",
+				VC: "VC22350",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 163,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 618,
+				"Member Name": "SAHJEED HUSSAIN",
+				VC: "VC22903",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 164,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 619,
+				"Member Name": "SAMINA KOUSAR",
+				VC: "VC221499",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 165,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 620,
+				"Member Name": "MUHAMMAD YASIN",
+				VC: "VC02255",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 166,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 621,
+				"Member Name": "SAMINA KOUSAR",
+				VC: "VC221498",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 167,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 622,
+				"Member Name": "MOBEEN FAISAL ",
+				VC: "VC22986",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 168,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 623,
+				"Member Name": "ADNAN SIDDIQ",
+				VC: "VC221434",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 169,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 624,
+				"Member Name": "SAMINA KOUSAR",
+				VC: "VC221497",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 170,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 625,
+				"Member Name": "AHMED HASSAN KHAN",
+				VC: "VC221376",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 171,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 626,
+				"Member Name": "ZEESHAN JAVED",
+				VC: "VC22746",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 172,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 627,
+				"Member Name": "Muhammad Abu Baker",
+				VC: "VC22562",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 185,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 628,
+				"Member Name": "M. Jahanzaib",
+				VC: "VC221092",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 93,
+				Location: "FP"
+			},
+			{
+				"Sr. ": 629,
+				"Member Name": "M. Uzair Ahmed",
+				VC: "VC221089",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 94,
+				Location: "Normal"
+			},
+			{
+				"Sr. ": 630,
+				"Member Name": "Ahmad Ishaq",
+				VC: "VC221764",
+				Category: "Commercial",
+				"Size (Marlas)": "5 Marla",
+				Block: "CCA",
+				Plot: 95,
+				Location: "Normal"
 			}
 		];
+
 		let arr = [];
 		try {
 			const result = data.map(async (item) => {
 				const location = item["Location"];
-				const VC_NO = item["Registration"];
+				const VC_NO = item["VC"];
+				console.log(VC_NO);
+				console.log(location);
 				// res.status(200).json({ status: 200,Message:"Updated Status SuccessFullyyyyyyy" , data: {VC_NO, location} });
 				const myLocation = await MYLocation.findOne({
 					where: { Plot_Location: location }

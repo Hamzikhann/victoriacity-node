@@ -81,9 +81,17 @@ const upload = multer({ dest: "uploads/" });
 const router = express.Router();
 
 router.post("/test", UserController.test);
+router.post("/ballot", UserController.ballotSearch);
 router.post("/genrate", UserController.generate);
 router.post("/login", UserController.Login);
+router.post("/change", UserController.changePassword);
 router.post("/expire", UserController.timeExpire);
 router.post("/file/get", FileIssueController.getFiles); //Create and Add new file
+// router.post("/surcharge", UserController.surcharges); //Create and Add new file
+
+router.get("/booking/id/getStatementFile", BookingController.createStatement);
+
+router.post("/booking/plotNoAllot", BookingController.plotNumberAllot);
+router.post("/booking/locationAssign", BookingController.locationAssign);
 
 module.exports = router;

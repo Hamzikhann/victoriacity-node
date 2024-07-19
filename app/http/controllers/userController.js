@@ -25,8 +25,24 @@ const Employee = require("../../models/Employee.js");
 const { Sequelize } = require("sequelize");
 const UserRole = require("../../models/UserRole.js");
 const UserGroup = require("../../models/User_Group.js");
-const { Booking, Member } = require("../../models/index.js");
+const {
+	Booking,
+	Member,
+	BookingInstallmentDetails,
+	InstallmentReceipts,
+	MemNominee,
+	UnitType,
+	PlotSize,
+	PaymentPlan,
+	UnitNature,
+	Phase,
+	Sector,
+	Unit,
+	Block,
+	MYLocation
+} = require("../../models/index.js");
 
+const { Op } = require("sequelize");
 const { query } = require("express");
 dotenv.config();
 const fs = require("fs");
@@ -833,6 +849,112 @@ class UserController {
 		}
 
 		return result;
+	};
+
+	static surcharges = async (req, res, next) => {
+		try {
+			let vcNo = req.body.vcno;
+			let id = (await Booking.findOne({ where: { Reg_Code_Disply: vcNo } })).BK_ID;
+			InstallmentReceipts.findAll({
+				where: { BK_ID: id },
+				include: [
+					{
+						as: "Booking_Installment_Details",
+						model: BookingInstallmentDetails,
+						where: { InsType_ID: 1, BKI_TYPE: null }
+					}
+				]
+			})
+				.then(async (response) => {
+					let arr = [];
+					let arr2 = [];
+					const surchargeRate = 0.001;
+					var surcharge = 0;
+					for (let i = 0; i < response.length; i++) {
+						const ircDate = new Date(response[i].IRC_Date);
+						const dueDate = new Date(response[i].Booking_Installment_Details.Due_Date);
+
+						// Calculate the difference in milliseconds
+						const differenceInMilliseconds = ircDate - dueDate;
+
+						// Convert the difference from milliseconds to days
+						const millisecondsInOneDay = 1000 * 60 * 60 * 24;
+						const differenceInDays = differenceInMilliseconds / millisecondsInOneDay;
+						arr.push(differenceInDays);
+						if (differenceInDays < 0) {
+							// surcharge = parseFloat(response[0].Installment_Due) * surchargeRate * differenceInDays;
+							let updateSurchare = await BookingInstallmentDetails.update(
+								{ surCharges: 0 },
+								{ where: { BKI_DETAIL_ID: response[i].BKI_DETAIL_ID, BKI_TYPE: null } }
+							);
+							// response[i].BookingInstallmentDetails.surCharges = surcharge;
+						} else {
+							surcharge = parseInt(response[i].Installment_Due) * surchargeRate * differenceInDays;
+							arr2.push(surcharge);
+							let updateSurchare = await BookingInstallmentDetails.update(
+								{ surCharges: surcharge },
+								{ where: { BKI_DETAIL_ID: response[i].BKI_DETAIL_ID, BKI_TYPE: null } }
+							);
+						}
+					}
+					return true;
+					// res.send({ arr, arr2, message: response });
+					// Parse the dates
+				})
+				.catch((err) => {
+					res.status(500).send({
+						message: err.message || "Some error occurred."
+					});
+				});
+		} catch (err) {
+			res.status(500).send({
+				message: err.message || "Some error occurred."
+			});
+		}
+	};
+
+	static ballotSearch = async (req, res, next) => {
+		try {
+			// const cnic = "35202-2626119-3";
+			const cnic = req.body.cnic;
+
+			Booking.findAll({
+				include: [
+					{
+						as: "Member",
+						model: Member,
+						where: {
+							BuyerCNIC: cnic
+						},
+						attributes: ["MEMBER_ID", "BuyerName", "BuyerContact", "BuyerCNIC"]
+					},
+					{ as: "UnitType", model: UnitType, attributes: ["Name"] },
+					{ as: "PlotSize", model: PlotSize, attributes: ["Name"] },
+					{ as: "Phase", model: Phase, attributes: ["NAME"] },
+					{ as: "Sector", model: Sector, attributes: ["NAME"] },
+					{
+						as: "Unit",
+						model: Unit,
+						attributes: ["Plot_No"],
+						include: { as: "Block", model: Block, attributes: ["Name"] }
+					},
+					{ as: "Location", model: MYLocation, attributes: ["Plot_Location"] }
+				],
+				attributes: ["BK_ID", "Reg_Code_Disply"]
+			})
+				.then((response) => {
+					res.send({ message: "info", data: response });
+				})
+				.catch((err) => {
+					res.status(500).send({
+						message: err.message || "Some error occurred."
+					});
+				});
+		} catch (err) {
+			res.status(500).send({
+				message: err.message || "Some error occurred."
+			});
+		}
 	};
 }
 
