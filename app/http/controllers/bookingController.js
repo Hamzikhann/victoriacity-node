@@ -1310,47 +1310,47 @@ class BookingController {
 			id = (await Booking.findOne({ where: { Reg_Code_Disply: vcNo } })).BK_ID;
 		}
 
-		let detailBooking = await InstallmentReceipts.findAll({
-			where: { BK_ID: id },
-			include: [
-				{
-					as: "Booking_Installment_Details",
-					model: BookingInstallmentDetails,
-					where: { InsType_ID: 1, BKI_TYPE: null }
-				}
-			]
-		});
-		let arr = [];
-		let arr2 = [];
-		const surchargeRate = 0.001;
-		var surcharge = 0;
-		for (let i = 0; i < detailBooking.length; i++) {
-			const ircDate = new Date(detailBooking[i].IRC_Date);
-			const dueDate = new Date(detailBooking[i].Booking_Installment_Details.Due_Date);
+		// let detailBooking = await InstallmentReceipts.findAll({
+		// 	where: { BK_ID: id },
+		// 	include: [
+		// 		{
+		// 			as: "Booking_Installment_Details",
+		// 			model: BookingInstallmentDetails,
+		// 			where: { InsType_ID: 1, BKI_TYPE: null }
+		// 		}
+		// 	]
+		// });
+		// let arr = [];
+		// let arr2 = [];
+		// const surchargeRate = 0.001;
+		// var surcharge = 0;
+		// for (let i = 0; i < detailBooking.length; i++) {
+		// 	const ircDate = new Date(detailBooking[i].IRC_Date);
+		// 	const dueDate = new Date(detailBooking[i].Booking_Installment_Details.Due_Date);
 
-			// Calculate the difference in milliseconds
-			const differenceInMilliseconds = ircDate - dueDate;
+		// 	// Calculate the difference in milliseconds
+		// 	const differenceInMilliseconds = ircDate - dueDate;
 
-			// Convert the difference from milliseconds to days
-			const millisecondsInOneDay = 1000 * 60 * 60 * 24;
-			const differenceInDays = differenceInMilliseconds / millisecondsInOneDay;
-			arr.push(differenceInDays);
-			if (differenceInDays < 0) {
-				// surcharge = parseFloat(detailBooking[0].Installment_Due) * surchargeRate * differenceInDays;
-				let updateSurchare = await BookingInstallmentDetails.update(
-					{ surCharges: 0 },
-					{ where: { BKI_DETAIL_ID: detailBooking[i].BKI_DETAIL_ID, BKI_TYPE: null } }
-				);
-				// detailBooking[i].BookingInstallmentDetails.surCharges = surcharge;
-			} else {
-				surcharge = parseInt(detailBooking[i].Installment_Due) * surchargeRate * differenceInDays;
-				arr2.push(surcharge);
-				let updateSurchare = await BookingInstallmentDetails.update(
-					{ surCharges: surcharge },
-					{ where: { BKI_DETAIL_ID: detailBooking[i].BKI_DETAIL_ID, BKI_TYPE: null } }
-				);
-			}
-		}
+		// 	// Convert the difference from milliseconds to days
+		// 	const millisecondsInOneDay = 1000 * 60 * 60 * 24;
+		// 	const differenceInDays = differenceInMilliseconds / millisecondsInOneDay;
+		// 	arr.push(differenceInDays);
+		// 	if (differenceInDays < 0) {
+		// 		// surcharge = parseFloat(detailBooking[0].Installment_Due) * surchargeRate * differenceInDays;
+		// 		let updateSurchare = await BookingInstallmentDetails.update(
+		// 			{ surCharges: 0 },
+		// 			{ where: { BKI_DETAIL_ID: detailBooking[i].BKI_DETAIL_ID, BKI_TYPE: null } }
+		// 		);
+		// 		// detailBooking[i].BookingInstallmentDetails.surCharges = surcharge;
+		// 	} else {
+		// 		surcharge = parseInt(detailBooking[i].Installment_Due) * surchargeRate * differenceInDays;
+		// 		arr2.push(surcharge);
+		// 		let updateSurchare = await BookingInstallmentDetails.update(
+		// 			{ surCharges: surcharge },
+		// 			{ where: { BKI_DETAIL_ID: detailBooking[i].BKI_DETAIL_ID, BKI_TYPE: null } }
+		// 		);
+		// 	}
+		// }
 
 		try {
 			const booking = await Booking.findByPk(id, {
