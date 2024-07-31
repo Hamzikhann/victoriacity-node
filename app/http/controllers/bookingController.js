@@ -1310,47 +1310,54 @@ class BookingController {
 			id = (await Booking.findOne({ where: { Reg_Code_Disply: vcNo } })).BK_ID;
 		}
 
-		// let detailBooking = await InstallmentReceipts.findAll({
-		// 	where: { BK_ID: id },
-		// 	include: [
-		// 		{
-		// 			as: "Booking_Installment_Details",
-		// 			model: BookingInstallmentDetails,
-		// 			where: { InsType_ID: 1, BKI_TYPE: null }
-		// 		}
-		// 	]
-		// });
-		// let arr = [];
-		// let arr2 = [];
-		// const surchargeRate = 0.001;
-		// var surcharge = 0;
-		// for (let i = 0; i < detailBooking.length; i++) {
-		// 	const ircDate = new Date(detailBooking[i].IRC_Date);
-		// 	const dueDate = new Date(detailBooking[i].Booking_Installment_Details.Due_Date);
+		let detailBooking = await InstallmentReceipts.findAll({
+			where: { BK_ID: id },
+			include: [
+				{
+					as: "Booking_Installment_Details",
+					model: BookingInstallmentDetails,
+					where: { InsType_ID: [1, 2], BKI_TYPE: null }
+				}
+			]
+		});
+		let arr = [];
+		let arr2 = [];
+		const surchargeRate = 0.001;
+		var surcharge = 0;
+		var total = 0;
+		for (let i = 0; i < detailBooking.length; i++) {
+			const ircDate = new Date(detailBooking[i].IRC_Date);
+			const dueDate = new Date(detailBooking[i].Booking_Installment_Details.Due_Date);
 
-		// 	// Calculate the difference in milliseconds
-		// 	const differenceInMilliseconds = ircDate - dueDate;
+			// Calculate the difference in milliseconds
+			const differenceInMilliseconds = ircDate - dueDate;
 
-		// 	// Convert the difference from milliseconds to days
-		// 	const millisecondsInOneDay = 1000 * 60 * 60 * 24;
-		// 	const differenceInDays = differenceInMilliseconds / millisecondsInOneDay;
-		// 	arr.push(differenceInDays);
-		// 	if (differenceInDays < 0) {
-		// 		// surcharge = parseFloat(detailBooking[0].Installment_Due) * surchargeRate * differenceInDays;
-		// 		let updateSurchare = await BookingInstallmentDetails.update(
-		// 			{ surCharges: 0 },
-		// 			{ where: { BKI_DETAIL_ID: detailBooking[i].BKI_DETAIL_ID, BKI_TYPE: null } }
-		// 		);
-		// 		// detailBooking[i].BookingInstallmentDetails.surCharges = surcharge;
-		// 	} else {
-		// 		surcharge = parseInt(detailBooking[i].Installment_Due) * surchargeRate * differenceInDays;
-		// 		arr2.push(surcharge);
-		// 		let updateSurchare = await BookingInstallmentDetails.update(
-		// 			{ surCharges: surcharge },
-		// 			{ where: { BKI_DETAIL_ID: detailBooking[i].BKI_DETAIL_ID, BKI_TYPE: null } }
-		// 		);
-		// 	}
-		// }
+			// Convert the difference from milliseconds to days
+			const millisecondsInOneDay = 1000 * 60 * 60 * 24;
+			const differenceInDays = differenceInMilliseconds / millisecondsInOneDay;
+			arr.push(differenceInDays);
+			if (differenceInDays < 0) {
+				// surcharge = parseFloat(detailBooking[0].Installment_Due) * surchargeRate * differenceInDays;
+				let updateSurchare = await InstallmentReceipts.update(
+					{ surCharges: 0 },
+					{ where: { INS_RC_ID: detailBooking[i].INS_RC_ID } }
+				);
+				// detailBooking[i].BookingInstallmentDetails.surCharges = surcharge;
+			} else {
+				surcharge = parseInt(detailBooking[i].Installment_Due) * surchargeRate * differenceInDays;
+				arr2.push(surcharge);
+				total = total + surcharge;
+				let updateSurchare = await InstallmentReceipts.update(
+					{ surCharges: surcharge },
+					{
+						where: {
+							INS_RC_ID: detailBooking[i].INS_RC_ID
+						}
+					}
+				);
+			}
+		}
+		const updateBooking = await Booking.update({ totalSurcharges: total }, { where: { Reg_Code_Disply: vcNo } });
 
 		try {
 			const booking = await Booking.findByPk(id, {
@@ -1395,7 +1402,8 @@ class BookingController {
 				booking,
 				installmentReceipts: installmentPaidReceipts,
 				dcInsRecpData,
-				insRecpData
+				insRecpData,
+				total
 			});
 		} catch (error) {
 			return next(error);
@@ -1831,49 +1839,1255 @@ class BookingController {
 	static ballotAllotLetter = async (req, res, next) => {
 		const data = [
 			{
-				Sr: 1,
-				Block: "TOUHEED",
+				"Sr.": "1",
+				"Member Name": "Muhammad Shafique",
+				VC: "VC111791",
 				Category: "Residential",
-				Size: "5 Marla",
-				Plot: 156,
-				ClientName: "Muhammad Naeem Nasir",
-				Registration: "VC121516"
-			},
-			{
-				Sr: 2,
+				Size: "3 Marlas",
 				Block: "Umer",
-				Category: "Residential",
-				Size: "3 Marla",
-				Plot: 12,
-				ClientName: "Muhammad Javed",
-				Registration: "VC111314"
+				Plot: "230"
 			},
 			{
-				Sr: 3,
-				Block: "ALI",
+				"Sr.": "2",
+				"Member Name": "Rohail Angelo",
+				VC: "VC121421",
 				Category: "Residential",
-				Size: "5 Marla",
-				Plot: 51,
-				ClientName: "Syed Shabbir Hussain Shah",
-				Registration: "VC121452"
+				Size: "5 Marlas",
+				Block: "Umer",
+				Plot: "19"
 			},
 			{
-				Sr: 4,
+				"Sr.": "3",
+				"Member Name": "Muhammad Mohsin",
+				VC: "VC12372",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Umer",
+				Plot: "20"
+			},
+			{
+				"Sr.": "4",
+				"Member Name": "Rizwan Akbar Bajwa",
+				VC: "VC22749",
+				Category: "Commertial",
+				Size: "5 Marlas",
 				Block: "CCA",
-				Category: "Commercial",
-				Size: "5 Marla",
-				Plot: 185,
-				ClientName: "Muhammad Abu Bakar",
-				Registration: "VC22562"
+				Plot: "121"
 			},
 			{
-				Sr: 5,
-				Block: "ALI",
+				"Sr.": "5",
+				"Member Name": "Samrooz Abbas",
+				VC: "VC111571",
 				Category: "Residential",
-				Size: "5 Marla",
-				Plot: 52,
-				ClientName: "Abdul Rauf",
-				Registration: "VC12496"
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "73"
+			},
+			{
+				"Sr.": "6",
+				"Member Name": "Samrooz Abbas",
+				VC: "VC111572",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "213"
+			},
+			{
+				"Sr.": "7",
+				"Member Name": "Murad Ali",
+				VC: "VC11371",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "214"
+			},
+			{
+				"Sr.": "8",
+				"Member Name": "Ch. Sohil",
+				VC: "VC11392",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "215"
+			},
+			{
+				"Sr.": "9",
+				"Member Name": "Ch. Sohil",
+				VC: "VC11393",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "216"
+			},
+			{
+				"Sr.": "10",
+				"Member Name": "Ch. Sohil",
+				VC: "VC11394",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "217"
+			},
+			{
+				"Sr.": "11",
+				"Member Name": "Ch. Sohil",
+				VC: "VC11395",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "218"
+			},
+			{
+				"Sr.": "12",
+				"Member Name": "Ali Hamza",
+				VC: "VC11398",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "219"
+			},
+			{
+				"Sr.": "13",
+				"Member Name": "Ali Hamza",
+				VC: "VC11399",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "220"
+			},
+			{
+				"Sr.": "14",
+				"Member Name": "Ali Hamza",
+				VC: "VC11400",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "221"
+			},
+			{
+				"Sr.": "15",
+				"Member Name": "Ali Hamza",
+				VC: "VC11401",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "222"
+			},
+			{
+				"Sr.": "16",
+				"Member Name": "Mir Maqsood Ul Rehman Hamdani",
+				VC: "VC121070",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Umer",
+				Plot: "22"
+			},
+			{
+				"Sr.": "17",
+				"Member Name": "Nasir Ali Khan",
+				VC: "VC13175",
+				Category: "Residential",
+				Size: "10 Marlas",
+				Block: "Touheed",
+				Plot: "121"
+			},
+			{
+				"Sr.": "18",
+				"Member Name": "Nasir Ali Khan",
+				VC: "VC12176",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Umer",
+				Plot: "23"
+			},
+			{
+				"Sr.": "19",
+				"Member Name": "Nasir Ali Khan",
+				VC: "VC12177",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Umer",
+				Plot: "24"
+			},
+			{
+				"Sr.": "20",
+				"Member Name": "Nimra Khan",
+				VC: "VC12184",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Umer",
+				Plot: "25"
+			},
+			{
+				"Sr.": "21",
+				"Member Name": "Kouser Parveen",
+				VC: "VC11446",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "223"
+			},
+			{
+				"Sr.": "22",
+				"Member Name": "Muhammad Aslam Tabasum",
+				VC: "VC11427",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "224"
+			},
+			{
+				"Sr.": "23",
+				"Member Name": "Fakhar Husnain",
+				VC: "VC11473",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "225"
+			},
+			{
+				"Sr.": "24",
+				"Member Name": "Mohammad Ali Khan",
+				VC: "VC12182",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Umer",
+				Plot: "26"
+			},
+			{
+				"Sr.": "25",
+				"Member Name": "Muhammad Umer Ali Usmani / Muhammad Ali",
+				VC: "VC111774",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "226"
+			},
+			{
+				"Sr.": "26",
+				"Member Name": "Muhammad Iqbal Bhatti",
+				VC: "VC121527",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "71"
+			},
+			{
+				"Sr.": "27",
+				"Member Name": "Muhammad Iqbal Bhatti",
+				VC: "VC121528",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "72"
+			},
+			{
+				"Sr.": "28",
+				"Member Name": "Khurram Zahid",
+				VC: "VC22155",
+				Category: "Commertial",
+				Size: "5 Marlas",
+				Block: "CCA",
+				Plot: "96"
+			},
+			{
+				"Sr.": "29",
+				"Member Name": "Muhammad Javed",
+				VC: "VC11396",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "227"
+			},
+			{
+				"Sr.": "30",
+				"Member Name": "Sameer Ahmad",
+				VC: "VC1756",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "228"
+			},
+			{
+				"Sr.": "31",
+				"Member Name": "Zeeshan Nazir",
+				VC: "VC11384",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "229"
+			},
+			{
+				"Sr.": "32",
+				"Member Name": "Rizwana Shahbaz",
+				VC: "VC13785",
+				Category: "Residential",
+				Size: "10 Marlas",
+				Block: "Touheed",
+				Plot: "122"
+			},
+			{
+				"Sr.": "33",
+				"Member Name": "Nayab Imtiaz",
+				VC: "VC111717",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "231"
+			},
+			{
+				"Sr.": "34",
+				"Member Name": "Amjad Hussain",
+				VC: "VC11812",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Usman",
+				Plot: "146"
+			},
+			{
+				"Sr.": "35",
+				"Member Name": "Syed Saqlain Raza Shah Naqvi (Dual Ownership)",
+				VC: "VC12902",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Touheed",
+				Plot: "39"
+			},
+			{
+				"Sr.": "36",
+				"Member Name": "Faizan Tariq",
+				VC: "VC111584",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "233"
+			},
+			{
+				"Sr.": "37",
+				"Member Name": "Muhammad Arif",
+				VC: "VC11827",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "11"
+			},
+			{
+				"Sr.": "38",
+				"Member Name": "Muhammad Attique",
+				VC: "VC11216",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "237"
+			},
+			{
+				"Sr.": "39",
+				"Member Name": "Kashif Raza",
+				VC: "VC111426",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "240"
+			},
+			{
+				"Sr.": "40",
+				"Member Name": "Abdul Rehman",
+				VC: "VC111660",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "242"
+			},
+			{
+				"Sr.": "41",
+				"Member Name": "Nisha Uzair",
+				VC: "VC01131",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "243"
+			},
+			{
+				"Sr.": "42",
+				"Member Name": "Zeeshan Arif",
+				VC: "VC111610",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "244"
+			},
+			{
+				"Sr.": "43",
+				"Member Name": "Haya Ghazali",
+				VC: "VC121248",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Umer",
+				Plot: "27"
+			},
+			{
+				"Sr.": "44",
+				"Member Name": "Haseeb Ahmad Khilji",
+				VC: "VC121246",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Touheed",
+				Plot: "29"
+			},
+			{
+				"Sr.": "45",
+				"Member Name": "Akbar Ali",
+				VC: "VC111781",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "245"
+			},
+			{
+				"Sr.": "46",
+				"Member Name": "Muhammad Awais Attari",
+				VC: "VC121638",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Umer",
+				Plot: "29"
+			},
+			{
+				"Sr.": "47",
+				"Member Name": "Hassan Nawaz",
+				VC: "VC12174",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Umer",
+				Plot: "30"
+			},
+			{
+				"Sr.": "48",
+				"Member Name": "Sajid Ali",
+				VC: "VC121220",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "70"
+			},
+			{
+				"Sr.": "49",
+				"Member Name": "Muhammad Rameez",
+				VC: "VC01275",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "73"
+			},
+			{
+				"Sr.": "50",
+				"Member Name": "Nadeem Ahmed",
+				VC: "VC11898",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "246"
+			},
+			{
+				"Sr.": "51",
+				"Member Name": "Muhammad Yaser",
+				VC: "VC121484",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "74"
+			},
+			{
+				"Sr.": "52",
+				"Member Name": "Shahzad Ali",
+				VC: "VC1757",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "75"
+			},
+			{
+				"Sr.": "53",
+				"Member Name": "Saqib Ali",
+				VC: "VC121776",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "76"
+			},
+			{
+				"Sr.": "54",
+				"Member Name": "Muhammad Waqar",
+				VC: "VC12759",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "77"
+			},
+			{
+				"Sr.": "55",
+				"Member Name": "Farah Iqbal",
+				VC: "VC121321",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "78"
+			},
+			{
+				"Sr.": "56",
+				"Member Name": "Salma Zafar",
+				VC: "VC121185",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Touheed",
+				Plot: "116"
+			},
+			{
+				"Sr.": "57",
+				"Member Name": "Asma Ashiq",
+				VC: "VC121197",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Touheed",
+				Plot: "117"
+			},
+			{
+				"Sr.": "58",
+				"Member Name": "Tahira Kausar",
+				VC: "VC13269",
+				Category: "Residential",
+				Size: "10 Marlas",
+				Block: "Touheed",
+				Plot: "123"
+			},
+			{
+				"Sr.": "59",
+				"Member Name": "Ayesha Irfan",
+				VC: "VC12287",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "79"
+			},
+			{
+				"Sr.": "60",
+				"Member Name": "Haseeb Ali",
+				VC: "VC12260",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "80"
+			},
+			{
+				"Sr.": "61",
+				"Member Name": "Moeed Ejaz Ghauree",
+				VC: "VC12293",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "81"
+			},
+			{
+				"Sr.": "62",
+				"Member Name": "Ahmed Zubair",
+				VC: "VC121608",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "82"
+			},
+			{
+				"Sr.": "63",
+				"Member Name": "Zishan Javed",
+				VC: "VC12718",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "83"
+			},
+			{
+				"Sr.": "64",
+				"Member Name": "Muhammad Saad Cheema",
+				VC: "VC121580",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "84"
+			},
+			{
+				"Sr.": "65",
+				"Member Name": "Zakariya Irshad",
+				VC: "VC121027",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "85"
+			},
+			{
+				"Sr.": "66",
+				"Member Name": "Hina Awais",
+				VC: "VC11105",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Usman",
+				Plot: "145"
+			},
+			{
+				"Sr.": "67",
+				"Member Name": "Ahsan Iqbal Bela",
+				VC: "VC121147",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "86"
+			},
+			{
+				"Sr.": "68",
+				"Member Name": "Muhammad Qasim",
+				VC: "VC11596",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "247"
+			},
+			{
+				"Sr.": "69",
+				"Member Name": "Shahid Ijaz",
+				VC: "VC121436",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "87"
+			},
+			{
+				"Sr.": "70",
+				"Member Name": "Abdul Raheem Hussain",
+				VC: "VC11697",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "248"
+			},
+			{
+				"Sr.": "71",
+				"Member Name": "Saad Farooq",
+				VC: "VC221192",
+				Category: "Commertial",
+				Size: "5 Marlas",
+				Block: "CCA",
+				Plot: "124"
+			},
+			{
+				"Sr.": "72",
+				"Member Name": "Muhammad Younas",
+				VC: "VC121459",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "88"
+			},
+			{
+				"Sr.": "73",
+				"Member Name": "Muneeb Awais Sheikh",
+				VC: "VC12180",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "89"
+			},
+			{
+				"Sr.": "74",
+				"Member Name": "Mian Waqar Ahmed",
+				VC: "VC111183",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "249"
+			},
+			{
+				"Sr.": "76",
+				"Member Name": "Nasir Siddique",
+				VC: "VC121530",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "91"
+			},
+			{
+				"Sr.": "77",
+				"Member Name": "Zahid Nafeer",
+				VC: "VC121050",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "92"
+			},
+			{
+				"Sr.": "78",
+				"Member Name": "Tahir Masood Rana",
+				VC: "VC22225",
+				Category: "Commertial",
+				Size: "5 Marlas",
+				Block: "CCA",
+				Plot: "122"
+			},
+			{
+				"Sr.": "79",
+				"Member Name": "Tahir Masood Rana",
+				VC: "VC12226",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "30"
+			},
+			{
+				"Sr.": "80",
+				"Member Name": "Furqan Khan",
+				VC: "VC121179",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Touheed",
+				Plot: "115"
+			},
+			{
+				"Sr.": "81",
+				"Member Name": "Haroon Saeed",
+				VC: "VC121399",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "31"
+			},
+			{
+				"Sr.": "82",
+				"Member Name": "Asghar Ali",
+				VC: "VC12988",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "32"
+			},
+			{
+				"Sr.": "83",
+				"Member Name": "Muhammad Faraz Ul Haq",
+				VC: "VC11273",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "250"
+			},
+			{
+				"Sr.": "84",
+				"Member Name": "Ali Ahmad",
+				VC: "VC01139",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "251"
+			},
+			{
+				"Sr.": "85",
+				"Member Name": "Muhammad Adnan Haider",
+				VC: "VC11159",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "252"
+			},
+			{
+				"Sr.": "86",
+				"Member Name": "Shan Saleem",
+				VC: "VC111402",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "253"
+			},
+			{
+				"Sr.": "87",
+				"Member Name": "Zeeshan Ali",
+				VC: "VC111036",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "254"
+			},
+			{
+				"Sr.": "88",
+				"Member Name": "Qaisar Ashraf",
+				VC: "VC111727",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "255"
+			},
+			{
+				"Sr.": "89",
+				"Member Name": "Shahzad Ahmad Khan",
+				VC: "VC111766",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "256"
+			},
+			{
+				"Sr.": "90",
+				"Member Name": "Amir Masood Rana",
+				VC: "VC12320",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "33"
+			},
+			{
+				"Sr.": "91",
+				"Member Name": "Muhammad Asif Naeem",
+				VC: "VC11373",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "257"
+			},
+			{
+				"Sr.": "92",
+				"Member Name": "Durdana Sabahat",
+				VC: "VC12511",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Touheed",
+				Plot: "113"
+			},
+			{
+				"Sr.": "93",
+				"Member Name": "Abeera Saad",
+				VC: "VC121041",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Touheed",
+				Plot: "118"
+			},
+			{
+				"Sr.": "94",
+				"Member Name": "Habib Ullah",
+				VC: "VC121093",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Touheed",
+				Plot: "138"
+			},
+			{
+				"Sr.": "95",
+				"Member Name": "Muhammad Shafi",
+				VC: "VC11403",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "258"
+			},
+			{
+				"Sr.": "96",
+				"Member Name": "Syed Sajjad Hussain",
+				VC: "VC11258",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "259"
+			},
+			{
+				"Sr.": "97",
+				"Member Name": "Wasim Qaiser",
+				VC: "VC121722",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Touheed",
+				Plot: "139"
+			},
+			{
+				"Sr.": "98",
+				"Member Name": "Muhammad Zubair",
+				VC: "VC121256",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Touheed",
+				Plot: "155"
+			},
+			{
+				"Sr.": "99",
+				"Member Name": "Syed Sajjad Hussain",
+				VC: "VC11259",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Usman",
+				Plot: "138"
+			},
+			{
+				"Sr.": "100",
+				"Member Name": "Amir Baig",
+				VC: "VC12114",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Umer",
+				Plot: "21"
+			},
+			{
+				"Sr.": "101",
+				"Member Name": "Jawad Usman",
+				VC: "VC111324",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "260"
+			},
+			{
+				"Sr.": "102",
+				"Member Name": "Syeda Gulshan Mubashir",
+				VC: "VC1753",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "93"
+			},
+			{
+				"Sr.": "103",
+				"Member Name": "Mushtaq Zauque Diamond",
+				VC: "VC111693",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "261"
+			},
+			{
+				"Sr.": "104",
+				"Member Name": "Muhammad Younas",
+				VC: "VC111763",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "262"
+			},
+			{
+				"Sr.": "106",
+				"Member Name": "Tasleem Kousar",
+				VC: "VC111662",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "263"
+			},
+			{
+				"Sr.": "107",
+				"Member Name": "Ghulam Mustafa Nayyer Alvi",
+				VC: "VC111457",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "264"
+			},
+			{
+				"Sr.": "108",
+				"Member Name": "Jamshaid Mansha",
+				VC: "VC12378",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "34",
+				Plot: "Touheed"
+			},
+			{
+				"Sr.": "109",
+				"Member Name": "Muhammad Hanif",
+				VC: "VC121130",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "68",
+				Plot: "Ali"
+			},
+			{
+				"Sr.": "110",
+				"Member Name": "Jamila Riaz",
+				VC: "VC11826",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Usman",
+				Plot: "137"
+			},
+			{
+				"Sr.": "111",
+				"Member Name": "Rafia Tabassum",
+				VC: "VC111589",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "265"
+			},
+			{
+				"Sr.": "112",
+				"Member Name": "Nasreen Akhtar",
+				VC: "VC111760",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Usman",
+				Plot: "136"
+			},
+			{
+				"Sr.": "113",
+				"Member Name": "Nadia Maqbool",
+				VC: "VC121552",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "34"
+			},
+			{
+				"Sr.": "114",
+				"Member Name": "Muhammad Munir Khan",
+				VC: "VC11885",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "266"
+			},
+			{
+				"Sr.": "115",
+				"Member Name": "Muhammad Aqeel Rasheed",
+				VC: "VC121673",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "35"
+			},
+			{
+				"Sr.": "116",
+				"Member Name": "Muhammad Munir Khan",
+				VC: "VC11884",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "267"
+			},
+			{
+				"Sr.": "117",
+				"Member Name": "Muhammad Touqeer Tariq",
+				VC: "VC01153",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "268"
+			},
+			{
+				"Sr.": "118",
+				"Member Name": "Haziq Naeem",
+				VC: "VC12702",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "36"
+			},
+			{
+				"Sr.": "119",
+				"Member Name": "Tanveer Ahmad",
+				VC: "VC111491",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "269"
+			},
+			{
+				"Sr.": "120",
+				"Member Name": "Muhammad Fiaz",
+				VC: "VC121054",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "37"
+			},
+			{
+				"Sr.": "121",
+				"Member Name": "Syed Faraz Hassan Zaidi",
+				VC: "VC13148",
+				Category: "Residential",
+				Size: "10 Marlas",
+				Block: "Touheed",
+				Plot: "124"
+			},
+			{
+				"Sr.": "122",
+				"Member Name": "Mah Noor Karim",
+				VC: "VC11825",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "270"
+			},
+			{
+				"Sr.": "123",
+				"Member Name": "Waqar Ahmad",
+				VC: "VC11649",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "271"
+			},
+			{
+				"Sr.": "124",
+				"Member Name": "Waqar Ahmad",
+				VC: "VC11650",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "272"
+			},
+			{
+				"Sr.": "125",
+				"Member Name": "Kiran Aftab",
+				VC: "VC11643",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "273"
+			},
+			{
+				"Sr.": "126",
+				"Member Name": "Haroon Mansha",
+				VC: "VC11648",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "274"
+			},
+			{
+				"Sr.": "127",
+				"Member Name": "Haroon Mansha",
+				VC: "VC11647",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Usman",
+				Plot: "131"
+			},
+			{
+				"Sr.": "128",
+				"Member Name": "Muhammad Ahmad",
+				VC: "VC11646",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Usman",
+				Plot: "132"
+			},
+			{
+				"Sr.": "129",
+				"Member Name": "Kausar Parveen",
+				VC: "VC01180",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Usman",
+				Plot: "133"
+			},
+			{
+				"Sr.": "130",
+				"Member Name": "Saira Chaudhry",
+				VC: "VC111759",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Usman",
+				Plot: "134"
+			},
+			{
+				"Sr.": "131",
+				"Member Name": "Zafar Ali Khan",
+				VC: "VC121621",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "38"
+			},
+			{
+				"Sr.": "132",
+				"Member Name": "Kashif Mehboob",
+				VC: "VC121387",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "39"
+			},
+			{
+				"Sr.": "133",
+				"Member Name": "Tazeem Asim",
+				VC: "VC11418",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Usman",
+				Plot: "135"
+			},
+			{
+				"Sr.": "135",
+				"Member Name": "Ali Farrukh Islam",
+				VC: "VC221736",
+				Category: "Commertial",
+				Size: "5 Marlas",
+				Block: "CCA",
+				Plot: "123"
+			},
+			{
+				"Sr.": "137",
+				"Member Name": "Muhammad Sameer Murad",
+				VC: "VC121767",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Touheed",
+				Plot: "151"
+			},
+			{
+				"Sr.": "138",
+				"Member Name": "Muhammad Iqbal",
+				VC: "VC11918",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Umer",
+				Plot: "232"
+			},
+			{
+				"Sr.": "139",
+				"Member Name": "Shoukat Ali",
+				VC: "VC01243",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Touheed",
+				Plot: "153"
+			},
+			{
+				"Sr.": "140",
+				"Member Name": "Muhammad Sharif",
+				VC: "VC01244",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "53"
+			},
+			{
+				"Sr.": "141",
+				"Member Name": "Abdul Wahab",
+				VC: "VC01250",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Ali",
+				Plot: "54"
+			},
+			{
+				"Sr.": "142",
+				"Member Name": "Sumaira Saqib",
+				VC: "VC111686",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Usman",
+				Plot: "130"
+			},
+			{
+				"Sr.": "143",
+				"Member Name": "M. Salman Chaudhary",
+				VC: "VC11281",
+				Category: "Residential",
+				Size: "3 Marlas",
+				Block: "Usman",
+				Plot: "129"
 			}
 		];
 
@@ -1882,7 +3096,7 @@ class BookingController {
 				// console.log('PPPPPPPPPPPPPp',item)
 
 				const file = await Booking.findOne({
-					where: { Reg_Code_Disply: item.Registration },
+					where: { Reg_Code_Disply: item.VC },
 					include: [
 						{ as: "Member", model: Member },
 						{ as: "SecondMember", model: Member },
@@ -1896,7 +3110,7 @@ class BookingController {
 					return next(CustomErrorHandler.notFound("Data not found!"));
 				}
 
-				const userobj = await User.findOne({ where: { id: req.user.id } });
+				// const userobj = await User.findOne({ where: { id: req.user.id } });
 				// console.log('req.user',userobj);
 
 				file.toJSON();

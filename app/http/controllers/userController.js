@@ -853,7 +853,7 @@ class UserController {
 
 	static surcharges = async (req, res, next) => {
 		try {
-			let vcNo = req.body.vcno;
+			let vcNo = "VC11752";
 			let id = (await Booking.findOne({ where: { Reg_Code_Disply: vcNo } })).BK_ID;
 			InstallmentReceipts.findAll({
 				where: { BK_ID: id },
@@ -868,6 +868,7 @@ class UserController {
 				.then(async (response) => {
 					let arr = [];
 					let arr2 = [];
+					let data = [];
 					const surchargeRate = 0.001;
 					var surcharge = 0;
 					for (let i = 0; i < response.length; i++) {
@@ -882,23 +883,39 @@ class UserController {
 						const differenceInDays = differenceInMilliseconds / millisecondsInOneDay;
 						arr.push(differenceInDays);
 						if (differenceInDays < 0) {
-							// surcharge = parseFloat(response[0].Installment_Due) * surchargeRate * differenceInDays;
-							let updateSurchare = await BookingInstallmentDetails.update(
+							// surcharge = parseFloat(detailBooking[0].Installment_Due) * surchargeRate * differenceInDays;
+							let updateSurchare = await InstallmentReceipts.update(
 								{ surCharges: 0 },
-								{ where: { BKI_DETAIL_ID: response[i].BKI_DETAIL_ID, BKI_TYPE: null } }
+								{ where: { INS_RC_ID: response[i].INS_RC_ID } }
 							);
-							// response[i].BookingInstallmentDetails.surCharges = surcharge;
+							// detailBooking[i].BookingInstallmentDetails.surCharges = surcharge;
 						} else {
 							surcharge = parseInt(response[i].Installment_Due) * surchargeRate * differenceInDays;
 							arr2.push(surcharge);
-							let updateSurchare = await BookingInstallmentDetails.update(
+							let updateSurchare = await InstallmentReceipts.update(
 								{ surCharges: surcharge },
-								{ where: { BKI_DETAIL_ID: response[i].BKI_DETAIL_ID, BKI_TYPE: null } }
+								{
+									where: {
+										INS_RC_ID: response[i].INS_RC_ID
+									}
+								}
 							);
 						}
 					}
-					return true;
-					// res.send({ arr, arr2, message: response });
+					// return true;
+
+					let InstallmentReceipt = await InstallmentReceipts.findAll({
+						where: { BK_ID: id },
+						include: [
+							{
+								as: "Booking_Installment_Details",
+								model: BookingInstallmentDetails,
+								where: { InsType_ID: 1, BKI_TYPE: null }
+							}
+						]
+					});
+
+					res.send({ arr, arr2, message: InstallmentReceipt });
 					// Parse the dates
 				})
 				.catch((err) => {
@@ -944,6 +961,56 @@ class UserController {
 			})
 				.then((response) => {
 					res.send({ message: "info", data: response });
+				})
+				.catch((err) => {
+					res.status(500).send({
+						message: err.message || "Some error occurred."
+					});
+				});
+		} catch (err) {
+			res.status(500).send({
+				message: err.message || "Some error occurred."
+			});
+		}
+	};
+
+	static paySurcharges = async (req, res) => {
+		try {
+			let amountToBePaid = parseFloat(req.body.amountToBePaid);
+			let vcno = req.body.vcno;
+			let waveofNo = parseFloat(req.body.waveofNo);
+
+			Booking.findOne({ where: { Reg_Code_Disply: vcno } })
+				.then(async (response) => {
+					let totalSurcharge = parseFloat(response.totalSurcharges);
+					let remainingSurchages = response.remainingSurcharges ? parseFloat(response.remainingSurcharges) : 0;
+					let paidSurcharges = response.paidSurcharges ? parseFloat(response.paidSurcharges) : 0;
+					let finalAmount;
+
+					if (waveofNo > 0) {
+						waveofNo = waveofNo / 100;
+						finalAmount = 0;
+					} else {
+						finalAmount = remainingSurchages - amountToBePaid;
+					}
+
+					console.log(typeof totalSurcharge, totalSurcharge);
+					console.log(typeof finalAmount, finalAmount);
+
+					if (amountToBePaid >= remainingSurchages) {
+						let updateBooking = await Booking.update(
+							{ totalSurcharge: totalSurcharge, remainingSurcharges: 0, paidSurcharges: totalSurcharge },
+							{ where: { Reg_Code_Disply: vcno } }
+						);
+					} else {
+						let updatedPaidSurcharges = paidSurcharges + amountToBePaid;
+						let updateBooking = await Booking.update(
+							{ paidSurcharges: updatedPaidSurcharges, remainingSurcharges: finalAmount },
+							{ where: { Reg_Code_Disply: vcno } }
+						);
+					}
+
+					res.send({ message: "Surcharges Paid" });
 				})
 				.catch((err) => {
 					res.status(500).send({

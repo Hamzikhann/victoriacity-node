@@ -87,7 +87,7 @@ router.post("/login", UserController.Login);
 router.post("/change", UserController.changePassword);
 router.post("/expire", UserController.timeExpire);
 router.post("/file/get", FileIssueController.getFiles); //Create and Add new file
-// router.post("/surcharge", UserController.surcharges); //Create and Add new file
+router.post("/surcharge", UserController.surcharges); //Create and Add new file
 
 router.get("/booking/id/getStatementFile", BookingController.createStatement);
 

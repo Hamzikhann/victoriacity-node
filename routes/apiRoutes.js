@@ -127,6 +127,7 @@ router.post("/expire", UserController.timeExpire);
 router.post("/genrate", UserController.generate);
 router.post("/file/get", FileIssueController.getFiles);
 router.post("/ballot", UserController.ballotSearch);
+router.post("/pay/surcharges", UserController.paySurcharges);
 
 // router.post("/change/status/ballot", UserController.changeBallotStatus);
 router.get("/job/active/list", JobController.getAllActiveJobs);
@@ -467,7 +468,7 @@ router.get("/booking/cnic/list", [checkUserAuth], BookingController.getBookingBy
 
 router.get("/booking/id/getFile", [checkUserAuth], BookingController.createfileAcknowlegmentLetter);
 router.get("/booking/id/sampleLetter", [checkUserAuth], BookingController.sampleLetter);
-router.get("/booking/ballotAllotLetter", [checkUserAuth], BookingController.ballotAllotLetter);
+router.get("/booking/ballotAllotLetter", BookingController.ballotAllotLetter);
 router.get("/booking/developmetChargesLetter", [checkUserAuth], BookingController.developmetChargesLetter);
 router.get("/booking/transferLetter", [checkUserAuth], BookingController.transferLetter);
 router.get("/booking/plotSizeData", [checkUserAuth], BookingController.plotSizeData);

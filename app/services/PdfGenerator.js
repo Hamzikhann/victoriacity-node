@@ -2339,30 +2339,30 @@ class pdfGenerator {
 		arrHeader.push(newArray);
 		arrHeader.push(arrayNewTableData);
 		let array1 = [
+			// {
+			// 	text: "SrNo",
+			// 	alignment: "center",
+			// 	fontSize: 9,
+			// 	bold: true,
+			// 	fillColor: "#D3D3D3",
+			// 	borderColor: " #91CBFF"
+			// },
 			{
-				text: "SrNo",
+				text: "Installment Type/Month",
 				alignment: "center",
 				fontSize: 9,
 				bold: true,
 				fillColor: "#D3D3D3",
 				borderColor: " #91CBFF"
 			},
-			{
-				text: "Installment Type",
-				alignment: "center",
-				fontSize: 9,
-				bold: true,
-				fillColor: "#D3D3D3",
-				borderColor: " #91CBFF"
-			},
-			{
-				text: "Installment Month",
-				alignment: "center",
-				fontSize: 9,
-				bold: true,
-				fillColor: "#D3D3D3",
-				borderColor: " #91CBFF"
-			},
+			// {
+			// 	text: "Installment Month",
+			// 	alignment: "center",
+			// 	fontSize: 9,
+			// 	bold: true,
+			// 	fillColor: "#D3D3D3",
+			// 	borderColor: " #91CBFF"
+			// },
 			{
 				text: "IRC No",
 				alignment: "center",
@@ -2413,6 +2413,14 @@ class pdfGenerator {
 			},
 			{
 				text: "Remaining",
+				alignment: "right",
+				fontSize: 9,
+				bold: true,
+				fillColor: "#D3D3D3",
+				borderColor: " #91CBFF"
+			},
+			{
+				text: "SurCharges",
 				alignment: "right",
 				fontSize: 9,
 				bold: true,
@@ -2563,6 +2571,10 @@ class pdfGenerator {
 		let array8;
 		let array9;
 		let array10;
+
+		let arrayTotalSurCharge;
+		let arrayRemainingSurCharge;
+		let arrayPendingSurCharge;
 		let remain = 0;
 
 		let arr = [];
@@ -2576,6 +2588,7 @@ class pdfGenerator {
 		var remainingOstBreak = 0;
 		let inc = 0;
 		let totalAmounts = 0;
+		var totalSurchagreAmounts = 0;
 		let ostamtnew = await BookingService.outStandingAmount(bookingData.BK_ID);
 		var dcRemainingOst = 0;
 		let dcTillDatePaidAmt = 0;
@@ -2591,6 +2604,9 @@ class pdfGenerator {
 			const IROBJECTS = installmentPaidReceipts.filter((el) => el.BKI_DETAIL_ID === item.BKI_DETAIL_ID);
 			const PaidR = installmentPaidReceipts.find((el) => el.BKI_DETAIL_ID === item.BKI_DETAIL_ID);
 			const paymentMode = PaymentModes.find((el) => el.PMID == IR?.PMID);
+			if (typeof IROBJECTS[k] != null || typeof IROBJECTS[k] != undefined) {
+				totalSurchagreAmounts = totalSurchagreAmounts + IROBJECTS[k]?.surCharges;
+			}
 
 			const FormatedStampDate = formatTimestampf(item.IRC_Date, 1);
 			const FormatedMonth = formatTimestamp(item.Installment_Month, 1);
@@ -2600,7 +2616,7 @@ class pdfGenerator {
 			const instYear = parseInt(item.Installment_Month ? item.Installment_Month.split("-")[0] : "");
 			// console.log('FormatedStampDate', FormatedStampDate);
 			let paidAmt = item.Installment_Paid;
-
+			console.log(IR);
 			let totalPaidAmt = 0;
 			for (var k = 0; k < IROBJECTS.length; k++) {
 				totalPaidAmt += IROBJECTS[k].Installment_Paid;
@@ -2627,25 +2643,25 @@ class pdfGenerator {
 				// remain = totalAmount - paidAmount;
 
 				array2 = [
+					// {
+					// 	text: `${++inc}`,
+					// 	alignment: "left",
+					// 	fontSize: 9,
+					// 	border: [true, true, true, true],
+					// 	borderColor: " #91CBFF"
+					// },
 					{
-						text: `${++inc}`,
-						alignment: "left",
-						fontSize: 9,
-						border: [true, true, true, true],
-						borderColor: " #91CBFF"
-					},
-					{
-						text: `${insType?.Name || ""}`,
+						text: `${++inc} - ${insType?.Name || ""} - ${FormatedMonth}`,
 						fontSize: 8,
 						border: [true, true, true, true],
 						borderColor: " #91CBFF"
 					},
-					{
-						text: `${FormatedMonth}`,
-						fontSize: 8,
-						border: [true, true, true, true],
-						borderColor: " #91CBFF"
-					},
+					// {
+					// 	text: `${FormatedMonth}`,
+					// 	fontSize: 8,
+					// 	border: [true, true, true, true],
+					// 	borderColor: " #91CBFF"
+					// },
 					{
 						text: `${IR ? "VCIRC-" + IR.IRC_NO : ""}`,
 						fontSize: 8,
@@ -2691,6 +2707,13 @@ class pdfGenerator {
 						fontSize: 8,
 						border: [true, true, true, true],
 						borderColor: " #91CBFF"
+					},
+					{
+						text: `${IROBJECTS[i]?.surCharges ? IROBJECTS[i].surCharges : 0}`,
+						alignment: "right",
+						fontSize: 8,
+						border: [true, true, true, true],
+						borderColor: " #91CBFF"
 					}
 				];
 
@@ -2704,6 +2727,9 @@ class pdfGenerator {
 					const FormatedMonthO = formatTimestamp(IROBJECTS[k].Installment_Month, 1);
 					if (PaidR) {
 						paidAmt = IROBJECTS[k].Installment_Paid;
+					}
+					if (typeof IROBJECTS[k] != null || typeof IROBJECTS[k] != undefined) {
+						totalSurchagreAmounts = totalSurchagreAmounts + IROBJECTS[k]?.surCharges;
 					}
 
 					totalAmount += +IROBJECTS[k].Installment_Due;
@@ -2727,25 +2753,25 @@ class pdfGenerator {
 					// remain = totalAmount - paidAmount;
 
 					array2 = [
+						// {
+						// 	text: `${++inc}`,
+						// 	alignment: "left",
+						// 	fontSize: 9,
+						// 	border: [true, true, true, true],
+						// 	borderColor: " #91CBFF"
+						// },
 						{
-							text: `${++inc}`,
-							alignment: "left",
-							fontSize: 9,
-							border: [true, true, true, true],
-							borderColor: " #91CBFF"
-						},
-						{
-							text: `${insTypeO?.Name || ""}`,
+							text: `${++inc} - ${insTypeO?.Name || ""} - ${FormatedMonthO}`,
 							fontSize: 8,
 							border: [true, true, true, true],
 							borderColor: " #91CBFF"
 						},
-						{
-							text: `${FormatedMonthO}`,
-							fontSize: 8,
-							border: [true, true, true, true],
-							borderColor: " #91CBFF"
-						},
+						// {
+						// 	text: `${FormatedMonthO}`,
+						// 	fontSize: 8,
+						// 	border: [true, true, true, true],
+						// 	borderColor: " #91CBFF"
+						// },
 						{
 							text: `${IROBJECTS[k] ? "VCIRC-" + IROBJECTS[k].IRC_NO : ""}`,
 							fontSize: 8,
@@ -2787,6 +2813,13 @@ class pdfGenerator {
 						},
 						{
 							text: `${IROBJECTS[k].Remaining_Amount}`,
+							alignment: "right",
+							fontSize: 8,
+							border: [true, true, true, true],
+							borderColor: " #91CBFF"
+						},
+						{
+							text: `${IROBJECTS[k]?.surCharges ? IROBJECTS[k].surCharges : 0}`,
 							alignment: "right",
 							fontSize: 8,
 							border: [true, true, true, true],
@@ -3019,20 +3052,20 @@ class pdfGenerator {
 		});
 
 		array3 = [
-			{
-				text: "",
-				alignment: "center",
-				fontSize: 9,
-				border: [true, true, true, true],
-				borderColor: " #91CBFF"
-			},
-			{
-				text: "",
-				alignment: "center",
-				fontSize: 9,
-				border: [true, true, true, true],
-				borderColor: " #91CBFF"
-			},
+			// {
+			// 	text: "",
+			// 	alignment: "center",
+			// 	fontSize: 9,
+			// 	border: [true, true, true, true],
+			// 	borderColor: " #91CBFF"
+			// },
+			// {
+			// 	text: "",
+			// 	alignment: "center",
+			// 	fontSize: 9,
+			// 	border: [true, true, true, true],
+			// 	borderColor: " #91CBFF"
+			// },
 			{
 				text: "Total Installment Amount",
 				bold: true,
@@ -3097,23 +3130,31 @@ class pdfGenerator {
 				fontSize: 9,
 				border: [true, true, true, true],
 				borderColor: " #91CBFF"
+			},
+			{
+				text: "",
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF"
 			}
 		];
 		array4 = [
-			{
-				text: "",
-				alignment: "center",
-				fontSize: 9,
-				border: [true, true, true, true],
-				borderColor: " #91CBFF"
-			},
-			{
-				text: "",
-				alignment: "center",
-				fontSize: 9,
-				border: [true, true, true, true],
-				borderColor: " #91CBFF"
-			},
+			// {
+			// 	text: "",
+			// 	alignment: "center",
+			// 	fontSize: 9,
+			// 	border: [true, true, true, true],
+			// 	borderColor: " #91CBFF"
+			// },
+			// {
+			// 	text: "",
+			// 	alignment: "center",
+			// 	fontSize: 9,
+			// 	border: [true, true, true, true],
+			// 	borderColor: " #91CBFF"
+			// },
 			{
 				text: "Pending Ost Amount (Till date)",
 				bold: true,
@@ -3183,24 +3224,32 @@ class pdfGenerator {
 				fontSize: 9,
 				border: [true, true, true, true],
 				borderColor: " #91CBFF"
+			},
+			{
+				text: "",
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF"
 			}
 		];
 
 		array5 = [
-			{
-				text: "",
-				alignment: "center",
-				fontSize: 9,
-				border: [true, true, true, true],
-				borderColor: " #91CBFF"
-			},
-			{
-				text: "",
-				alignment: "center",
-				fontSize: 9,
-				border: [true, true, true, true],
-				borderColor: " #91CBFF"
-			},
+			// {
+			// 	text: "",
+			// 	alignment: "center",
+			// 	fontSize: 9,
+			// 	border: [true, true, true, true],
+			// 	borderColor: " #91CBFF"
+			// },
+			// {
+			// 	text: "",
+			// 	alignment: "center",
+			// 	fontSize: 9,
+			// 	border: [true, true, true, true],
+			// 	borderColor: " #91CBFF"
+			// },
 			{
 				text: "Total Remaining Amount",
 				bold: true,
@@ -3265,8 +3314,293 @@ class pdfGenerator {
 				fontSize: 9,
 				border: [true, true, true, true],
 				borderColor: " #91CBFF"
+			},
+			{
+				text: "",
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF"
 			}
 		];
+
+		arrayTotalSurCharge = [
+			// {
+			// 	text: "",
+			// 	alignment: "center",
+			// 	fontSize: 9,
+			// 	border: [true, true, true, true],
+			// 	borderColor: " #91CBFF"
+			// },
+			// {
+			// 	text: "",
+			// 	alignment: "center",
+			// 	fontSize: 9,
+			// 	border: [true, true, true, true],
+			// 	borderColor: " #91CBFF"
+			// },
+			{
+				text: "Total Surcharge Amount",
+				bold: true,
+				alignment: "right",
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF",
+				colSpan: 5
+			},
+			{
+				text: "",
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF"
+			},
+			{
+				text: "5000000.00",
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF"
+			},
+			{
+				text: "",
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF"
+			},
+			{
+				text: "",
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF"
+			},
+			{
+				// ${paidAmount}
+				text: `${bookingData.totalSurcharges ? bookingData.totalSurcharges : 0}`,
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF",
+				colSpan: 2
+			},
+			{
+				text: "",
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF",
+				colSpan: 2
+			},
+			{
+				text: "",
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF"
+			},
+			{
+				text: "",
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF"
+			}
+		];
+		arrayPendingSurCharge = [
+			// {
+			// 	text: "",
+			// 	alignment: "center",
+			// 	fontSize: 9,
+			// 	border: [true, true, true, true],
+			// 	borderColor: " #91CBFF"
+			// },
+			// {
+			// 	text: "",
+			// 	alignment: "center",
+			// 	fontSize: 9,
+			// 	border: [true, true, true, true],
+			// 	borderColor: " #91CBFF"
+			// },
+			{
+				text: "Paid Surcharge Amount",
+				bold: true,
+				alignment: "right",
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF",
+				colSpan: 5
+			},
+			{
+				text: "",
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF"
+			},
+			{
+				text: "5000000.00",
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF"
+			},
+			{
+				text: "",
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF"
+			},
+			{
+				text: "",
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF"
+			},
+			{
+				// text: `${
+				//   remainingOst - tillDatePaidAmt > 0
+				//     ? remainingOst - tillDatePaidAmt
+				//     : 0
+				// }`,
+				// `${ostamtnew}`
+				text: `${bookingData.paidSurcharges ? bookingData.paidSurcharges : 0}`,
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF",
+				colSpan: 2
+			},
+			{
+				text: "",
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF",
+				colSpan: 2
+			},
+			{
+				text: "",
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF"
+			},
+			{
+				text: "",
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF"
+			}
+		];
+		arrayRemainingSurCharge = [
+			// {
+			// 	text: "",
+			// 	alignment: "center",
+			// 	fontSize: 9,
+			// 	border: [true, true, true, true],
+			// 	borderColor: " #91CBFF"
+			// },
+			// {
+			// 	text: "",
+			// 	alignment: "center",
+			// 	fontSize: 9,
+			// 	border: [true, true, true, true],
+			// 	borderColor: " #91CBFF"
+			// },
+			{
+				text: "Total Remaining Surcharge Amount",
+				bold: true,
+				alignment: "right",
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF",
+				colSpan: 5
+			},
+			{
+				text: "",
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF"
+			},
+			{
+				text: "5000000.00",
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF"
+			},
+			{
+				text: "",
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF"
+			},
+			{
+				text: "",
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF"
+			},
+			{
+				// `${totalAmounts - paidAmount}`
+				text: `${bookingData.remainingSurcharges ? bookingData.remainingSurcharges : 0}`,
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF",
+				colSpan: 2
+			},
+			{
+				text: "",
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF",
+				colSpan: 2
+			},
+			{
+				text: "",
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF"
+			},
+			{
+				text: "",
+				alignment: "right",
+				bold: true,
+				fontSize: 9,
+				border: [true, true, true, true],
+				borderColor: " #91CBFF"
+			}
+		];
+
 		array8 = [
 			{
 				text: "",
@@ -3520,6 +3854,9 @@ class pdfGenerator {
 		arr.push(array3);
 		arr.push(array4);
 		arr.push(array5);
+		arr.push(arrayTotalSurCharge);
+		arr.push(arrayPendingSurCharge);
+		arr.push(arrayRemainingSurCharge);
 		arr6.push(array8);
 		arr6.push(array9);
 		arr6.push(array10);
@@ -3737,8 +4074,8 @@ class pdfGenerator {
 					// Table Section
 					{
 						table: {
-							headerRows: 1,
-							widths: ["6%", "12%", "11%", "10%", "10%", "10%", "12%", "10%", "10%", "10%"],
+							headerRows: 2,
+							widths: ["22%", "9%", "9%", "9%", "10%", "10%", "10%", "10%", "10%"],
 							body: arr
 						},
 
@@ -9612,15 +9949,8 @@ class pdfGenerator {
 					},
 
 					{
-						image:
-							"data:image/jpeg;base64,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",
-						fit: [180, 180],
-						margin: [-35, 15, 0, 0]
-					},
-
-					{
 						text: "Lt.Col. Anwer Mahmood",
-						margin: [0, 15, 0, 0],
+						margin: [0, 80, 0, 0],
 						fontSize: 10
 					},
 					{
