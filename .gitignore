@@ -3,3 +3,4 @@
 .example.env
 package-lock.json
 /uploads
+/file.json

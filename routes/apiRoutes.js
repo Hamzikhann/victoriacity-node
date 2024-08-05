@@ -128,6 +128,7 @@ router.post("/genrate", UserController.generate);
 router.post("/file/get", FileIssueController.getFiles);
 router.post("/ballot", UserController.ballotSearch);
 router.post("/pay/surcharges", UserController.paySurcharges);
+router.post("/search/file", UserController.search);
 
 // router.post("/change/status/ballot", UserController.changeBallotStatus);
 router.get("/job/active/list", JobController.getAllActiveJobs);

@@ -1023,6 +1023,37 @@ class UserController {
 			});
 		}
 	};
+	static search = async (req, res) => {
+		const { card_no } = req.body;
+		console.log(req.body);
+
+		if (!card_no) {
+			return res.status(400).send({ error: "Card_No is required" });
+		}
+
+		// Read the JSON file
+		fs.readFile("file.json", "utf8", (err, data) => {
+			if (err) {
+				return res.status(500).send({ error: "Failed to read file" });
+			}
+
+			let records;
+			try {
+				records = JSON.parse(data);
+			} catch (parseError) {
+				return res.status(500).send({ error: "Failed to parse JSON" });
+			}
+
+			// Search for the object with the given Card_No
+			const result = records.find((record) => record.Card_No === card_no);
+
+			if (result) {
+				res.send(result);
+			} else {
+				res.status(404).send({ error: "Card_No not found" });
+			}
+		});
+	};
 }
 
 // export default UserController;
