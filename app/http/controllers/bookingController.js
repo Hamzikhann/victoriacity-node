@@ -1306,20 +1306,30 @@ class BookingController {
 		const vcNo = req.query.vcNo;
 		// let ser = await BookingService.surcharges(vcNo);
 
-		if (typeof vcNo != "undefined" && vcNo != null) {
-			id = (await Booking.findOne({ where: { Reg_Code_Disply: vcNo } })).BK_ID;
-		}
+		let booking1 = await Booking.findOne({ where: { Reg_Code_Disply: vcNo } });
+		let ostamount = await BookingService.outStandingAmount(booking1.BK_ID);
+
+		// Get the createdAt date
+		const createdAt = new Date(booking1.createdAt);
+		const currentDate = new Date();
 
 		let detailBooking = await InstallmentReceipts.findAll({
-			where: { BK_ID: id },
+			where: {
+				BK_ID: booking1.BK_ID,
+				// Add filter to get records from createdAt month to current date month
+				Installment_Month: {
+					[Op.between]: [createdAt, currentDate]
+				}
+			},
 			include: [
 				{
 					as: "Booking_Installment_Details",
 					model: BookingInstallmentDetails,
-					where: { InsType_ID: [1, 2], BKI_TYPE: null }
+					where: { InsType_ID: 1, BKI_TYPE: null }
 				}
 			]
 		});
+
 		let arr = [];
 		let arr2 = [];
 		const surchargeRate = 0.001;
@@ -1360,6 +1370,8 @@ class BookingController {
 		const updateBooking = await Booking.update({ totalSurcharges: total }, { where: { Reg_Code_Disply: vcNo } });
 
 		try {
+			let id = booking1.BK_ID;
+
 			const booking = await Booking.findByPk(id, {
 				include: [
 					{ as: "Member", model: Member },
@@ -3088,6 +3100,60 @@ class BookingController {
 				Size: "3 Marlas",
 				Block: "Usman",
 				Plot: "129"
+			},
+			{
+				"Sr.": "144",
+				"Member Name": "Aqsa Afnan Ali",
+				VC: "VC121799",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Touheed",
+				Plot: "83"
+			},
+			{
+				"Sr.": "145",
+				"Member Name": "Nagina Nawaz ",
+				VC: "VC121800",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Touheed",
+				Plot: "84"
+			},
+			{
+				"Sr.": "146",
+				"Member Name": "Nagina Nawaz ",
+				VC: "VC121801",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Touheed",
+				Plot: "159"
+			},
+			{
+				"Sr.": "147",
+				"Member Name": "Saira Nabeel Chaudhry ",
+				VC: "VC121802",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Touheed",
+				Plot: "54"
+			},
+			{
+				"Sr.": "148",
+				"Member Name": "Saira Nabeel Chaudhry ",
+				VC: "VC121803",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Touheed",
+				Plot: "53"
+			},
+			{
+				"Sr.": "149",
+				"Member Name": "Muhammad Nawaz ",
+				VC: "VC121804",
+				Category: "Residential",
+				Size: "5 Marlas",
+				Block: "Touheed",
+				Plot: "160"
 			}
 		];
 
