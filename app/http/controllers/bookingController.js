@@ -1307,64 +1307,133 @@ class BookingController {
 		// let ser = await BookingService.surcharges(vcNo);
 
 		let booking1 = await Booking.findOne({ where: { Reg_Code_Disply: vcNo } });
-		let ostamount = await BookingService.outStandingAmount(booking1.BK_ID);
+		let ostamount = await BookingService.outStandingAmountofJuly(booking1.BK_ID);
 
-		// Get the createdAt date
 		const createdAt = new Date(booking1.createdAt);
 		const currentDate = new Date();
 
-		let detailBooking = await InstallmentReceipts.findAll({
-			where: {
-				BK_ID: booking1.BK_ID,
-				// Add filter to get records from createdAt month to current date month
-				Installment_Month: {
-					[Op.between]: [createdAt, currentDate]
-				}
-			},
+		const july2024 = new Date("2024-07-01");
+		const august2024 = new Date("2024-08-01");
+		let whereClause = {
+			BK_ID: booking1.BK_ID
+		};
+
+		// Check if the current date is after August 2024 and if ostamount is greater than 0
+		let applySurcharges = currentDate >= august2024 && ostamount > 0;
+		let find = await InstallmentReceipts.findOne({ where: { BK_ID: booking1.BK_ID, Installment_Month: july2024 } });
+		if (find) {
+			console.log("hi");
+			whereClause.Installment_Month = {
+				[Op.between]: [august2024, currentDate]
+			};
+		} else {
+			whereClause.Installment_Month = {
+				[Op.between]: [createdAt, currentDate]
+			};
+		}
+		console.log(whereClause);
+		let before = await InstallmentReceipts.findAll({
+			where: whereClause,
 			include: [
 				{
 					as: "Booking_Installment_Details",
 					model: BookingInstallmentDetails,
-					where: { InsType_ID: 1, BKI_TYPE: null }
+					where: { InsType_ID: [1,2], BKI_TYPE: null }
 				}
 			]
 		});
-
-		let arr = [];
-		let arr2 = [];
+		console.log(before);
 		const surchargeRate = 0.001;
-		var surcharge = 0;
-		var total = 0;
-		for (let i = 0; i < detailBooking.length; i++) {
-			const ircDate = new Date(detailBooking[i].IRC_Date);
-			const dueDate = new Date(detailBooking[i].Booking_Installment_Details.Due_Date);
+		let surcharge = 0;
+		let total = 0;
 
-			// Calculate the difference in milliseconds
+		for (let i = 0; i < before.length; i++) {
+			const ircDate = new Date(before[i].IRC_Date);
+			const dueDate = new Date(before[i].Booking_Installment_Details.Due_Date);
+
 			const differenceInMilliseconds = ircDate - dueDate;
-
-			// Convert the difference from milliseconds to days
 			const millisecondsInOneDay = 1000 * 60 * 60 * 24;
 			const differenceInDays = differenceInMilliseconds / millisecondsInOneDay;
-			arr.push(differenceInDays);
+
+			// Check if the installment month is July 2024 and if ostamount was 0 during July
 			if (differenceInDays < 0) {
-				// surcharge = parseFloat(detailBooking[0].Installment_Due) * surchargeRate * differenceInDays;
-				let updateSurchare = await InstallmentReceipts.update(
-					{ surCharges: 0 },
-					{ where: { INS_RC_ID: detailBooking[i].INS_RC_ID } }
-				);
-				// detailBooking[i].BookingInstallmentDetails.surCharges = surcharge;
-			} else {
-				surcharge = parseInt(detailBooking[i].Installment_Due) * surchargeRate * differenceInDays;
-				arr2.push(surcharge);
+				await InstallmentReceipts.update({ surCharges: 0 }, { where: { INS_RC_ID: before[i].INS_RC_ID } });
+			} else if (differenceInDays > 0) {
+				surcharge = parseInt(before[i].Installment_Due) * surchargeRate * differenceInDays;
 				total = total + surcharge;
-				let updateSurchare = await InstallmentReceipts.update(
+				await InstallmentReceipts.update(
 					{ surCharges: surcharge },
 					{
+						where: { INS_RC_ID: before[i].INS_RC_ID }
+					}
+				);
+			}
+			// else {
+			// 	await InstallmentReceipts.update({ surCharges: 0 }, { where: { INS_RC_ID: before[i].INS_RC_ID } });
+			// }
+		}
+		let lastInstallmentMonth;
+		let lastPaidInstallment = await InstallmentReceipts.findOne({
+			where: { BK_ID: booking1.BK_ID },
+			order: [["Installment_Month", "DESC"]] // Get the most recent payment
+		});
+		console.log(lastInstallmentMonth);
+
+		if (!lastPaidInstallment) {
+			// lastInstallmentMonth =
+			console.log("No installment records found.");
+		} else {
+		}
+		lastInstallmentMonth = new Date(lastPaidInstallment.Installment_Month);
+		// Step 2: Calculate the next installment month
+		let nextInstallmentMonth = new Date(lastInstallmentMonth);
+
+		const currentDate2 = new Date();
+		let surcharge2 = 0;
+
+		// Loop through each month from the last installment month to the current month
+		while (nextInstallmentMonth < currentDate2) {
+			nextInstallmentMonth.setMonth(nextInstallmentMonth.getMonth() + 1); // Move to the next month
+			let nextInstallmentMonthFormatted = `${nextInstallmentMonth.getFullYear()}-${(nextInstallmentMonth.getMonth() + 1)
+				.toString()
+				.padStart(2, "0")}-10`;
+
+			console.log(`Processing month: ${nextInstallmentMonthFormatted}`);
+
+			// Get the due date for the next installment month
+			let nextInstallmentDetails = await BookingInstallmentDetails.findOne({
+				where: {
+					BK_ID: booking1.BK_ID,
+					Due_Date: nextInstallmentMonthFormatted
+				}
+			});
+
+			if (!nextInstallmentDetails) {
+				console.log(`No installment details found for ${nextInstallmentMonthFormatted}.`);
+				continue;
+			}
+
+			// Step 3: Calculate the surcharge for this installment
+			const dueDate = new Date(nextInstallmentDetails.Due_Date);
+			const differenceInMilliseconds = currentDate2 - dueDate;
+			const millisecondsInOneDay = 1000 * 60 * 60 * 24;
+			const differenceInDays = Math.floor(differenceInMilliseconds / millisecondsInOneDay);
+
+			if (differenceInDays > 0) {
+				surcharge2 = parseInt(nextInstallmentDetails.Installment_Due) * surchargeRate * differenceInDays;
+				total = total + surcharge2;
+				// Update the installment details with the calculated surcharge
+				await BookingInstallmentDetails.update(
+					{ surCharges: surcharge2 },
+					{
 						where: {
-							INS_RC_ID: detailBooking[i].INS_RC_ID
+							BK_ID: booking1.BK_ID,
+							Due_Date: nextInstallmentMonthFormatted
 						}
 					}
 				);
+
+				console.log(`Surcharge applied for ${nextInstallmentMonthFormatted}: ${surcharge2}`);
 			}
 		}
 		const updateBooking = await Booking.update({ totalSurcharges: total }, { where: { Reg_Code_Disply: vcNo } });
@@ -1414,8 +1483,7 @@ class BookingController {
 				booking,
 				installmentReceipts: installmentPaidReceipts,
 				dcInsRecpData,
-				insRecpData,
-				total
+				insRecpData
 			});
 		} catch (error) {
 			return next(error);

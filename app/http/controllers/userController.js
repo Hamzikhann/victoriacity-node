@@ -51,6 +51,7 @@ const CustomErrorHandler = require("../../services/CustomErrorHandler.js");
 const GroupMenu = require("../../models/GroupMenu.js");
 const Menu = require("../../models/Menu.js");
 const pdfGenerator = require("../../services/PdfGenerator.js");
+const BookingService = require("../../services/BookingService.js");
 
 class UserController {
 	static Register = async (req, res) => {
@@ -853,10 +854,35 @@ class UserController {
 
 	static surcharges = async (req, res, next) => {
 		try {
-			let vcNo = "VC11752";
-			let id = (await Booking.findOne({ where: { Reg_Code_Disply: vcNo } })).BK_ID;
-			InstallmentReceipts.findAll({
-				where: { BK_ID: id },
+			let vcNo = req.body.vcno;
+			let booking = await Booking.findOne({ where: { Reg_Code_Disply: vcNo } });
+			let ostamount = await BookingService.outStandingAmountofJuly(booking.BK_ID);
+
+			const createdAt = new Date(booking.createdAt);
+			const currentDate = new Date();
+
+			const july2024 = new Date("2024-07-01");
+			const august2024 = new Date("2024-08-01");
+			let whereClause = {
+				BK_ID: booking.BK_ID
+			};
+
+			// Check if the current date is after August 2024 and if ostamount is greater than 0
+			let applySurcharges = currentDate >= august2024 && ostamount > 0;
+			let find = await InstallmentReceipts.findOne({ where: { BK_ID: booking.BK_ID, Installment_Month: july2024 } });
+			if (find) {
+				console.log("hi");
+				whereClause.Installment_Month = {
+					[Op.between]: [august2024, currentDate]
+				};
+			} else {
+				whereClause.Installment_Month = {
+					[Op.between]: [createdAt, currentDate]
+				};
+			}
+			console.log(whereClause);
+			let before = await InstallmentReceipts.findAll({
+				where: whereClause,
 				include: [
 					{
 						as: "Booking_Installment_Details",
@@ -864,65 +890,115 @@ class UserController {
 						where: { InsType_ID: 1, BKI_TYPE: null }
 					}
 				]
-			})
-				.then(async (response) => {
-					let arr = [];
-					let arr2 = [];
-					let data = [];
-					const surchargeRate = 0.001;
-					var surcharge = 0;
-					for (let i = 0; i < response.length; i++) {
-						const ircDate = new Date(response[i].IRC_Date);
-						const dueDate = new Date(response[i].Booking_Installment_Details.Due_Date);
+			});
+			console.log(before);
+			const surchargeRate = 0.001;
+			let surcharge = 0;
 
-						// Calculate the difference in milliseconds
-						const differenceInMilliseconds = ircDate - dueDate;
+			for (let i = 0; i < before.length; i++) {
+				const ircDate = new Date(before[i].IRC_Date);
+				const dueDate = new Date(before[i].Booking_Installment_Details.Due_Date);
 
-						// Convert the difference from milliseconds to days
-						const millisecondsInOneDay = 1000 * 60 * 60 * 24;
-						const differenceInDays = differenceInMilliseconds / millisecondsInOneDay;
-						arr.push(differenceInDays);
-						if (differenceInDays < 0) {
-							// surcharge = parseFloat(detailBooking[0].Installment_Due) * surchargeRate * differenceInDays;
-							let updateSurchare = await InstallmentReceipts.update(
-								{ surCharges: 0 },
-								{ where: { INS_RC_ID: response[i].INS_RC_ID } }
-							);
-							// detailBooking[i].BookingInstallmentDetails.surCharges = surcharge;
-						} else {
-							surcharge = parseInt(response[i].Installment_Due) * surchargeRate * differenceInDays;
-							arr2.push(surcharge);
-							let updateSurchare = await InstallmentReceipts.update(
-								{ surCharges: surcharge },
-								{
-									where: {
-										INS_RC_ID: response[i].INS_RC_ID
-									}
-								}
-							);
+				const differenceInMilliseconds = ircDate - dueDate;
+				const millisecondsInOneDay = 1000 * 60 * 60 * 24;
+				const differenceInDays = differenceInMilliseconds / millisecondsInOneDay;
+
+				// Check if the installment month is July 2024 and if ostamount was 0 during July
+				if (differenceInDays < 0) {
+					await InstallmentReceipts.update({ surCharges: 0 }, { where: { INS_RC_ID: before[i].INS_RC_ID } });
+				} else if (differenceInDays > 0) {
+					surcharge = parseInt(before[i].Installment_Due) * surchargeRate * differenceInDays;
+					await InstallmentReceipts.update(
+						{ surCharges: surcharge },
+						{
+							where: { INS_RC_ID: before[i].INS_RC_ID }
 						}
+					);
+				}
+				// else {
+				// 	await InstallmentReceipts.update({ surCharges: 0 }, { where: { INS_RC_ID: before[i].INS_RC_ID } });
+				// }
+			}
+			let lastPaidInstallment = await InstallmentReceipts.findOne({
+				where: { BK_ID: booking.BK_ID },
+
+				order: [["Installment_Month", "DESC"]] // Get the most recent payment
+			});
+
+			// if (!lastPaidInstallment) {
+			// 	console.log("No installment records found.");
+			// 	return;
+			// }
+
+			// Step 2: Calculate the next installment month
+			const lastInstallmentMonth = new Date(lastPaidInstallment.Installment_Month);
+			const nextInstallmentMonth = new Date(lastInstallmentMonth);
+			nextInstallmentMonth.setMonth(nextInstallmentMonth.getMonth() + 1); // Move to the next month
+			let nextInstallmentMonthFormatted = `${nextInstallmentMonth.getFullYear()}-${(nextInstallmentMonth.getMonth() + 1)
+				.toString()
+				.padStart(2, "0")}-10`;
+			console.log(nextInstallmentMonthFormatted);
+
+			// Get the due date for the next installment month
+			let nextInstallmentDetails = await BookingInstallmentDetails.findOne({
+				where: {
+					BK_ID: booking.BK_ID,
+					Due_Date: nextInstallmentMonthFormatted
+				}
+			});
+
+			if (!nextInstallmentDetails) {
+				console.log("No next installment details found.");
+				return;
+			}
+
+			// Step 3: Calculate the surcharge
+			const currentDate2 = new Date();
+			const dueDate = new Date(nextInstallmentDetails.Due_Date);
+
+			const differenceInMilliseconds = currentDate2 - dueDate;
+			const millisecondsInOneDay = 1000 * 60 * 60 * 24;
+			const differenceInDays = Math.floor(differenceInMilliseconds / millisecondsInOneDay);
+
+			let surcharge2 = 0;
+
+			if (differenceInDays > 0) {
+				surcharge2 = parseInt(nextInstallmentDetails.Installment_Due) * surchargeRate * differenceInDays;
+			}
+
+			let InstallmentReceipt = await InstallmentReceipts.findAll({
+				where: { BK_ID: booking.BK_ID },
+				include: [
+					{
+						as: "Booking_Installment_Details",
+						model: BookingInstallmentDetails,
+						where: { InsType_ID: 1, BKI_TYPE: null }
 					}
-					// return true;
+				]
+			});
 
-					let InstallmentReceipt = await InstallmentReceipts.findAll({
-						where: { BK_ID: id },
-						include: [
-							{
-								as: "Booking_Installment_Details",
-								model: BookingInstallmentDetails,
-								where: { InsType_ID: 1, BKI_TYPE: null }
-							}
-						]
-					});
+			let updatebookinginstallment = await BookingInstallmentDetails.update(
+				{ surCharges: surcharge2 },
+				{
+					where: {
+						BK_ID: booking.BK_ID,
+						Due_Date: nextInstallmentMonthFormatted
+					}
+				}
+			);
 
-					res.send({ arr, arr2, message: InstallmentReceipt });
-					// Parse the dates
-				})
-				.catch((err) => {
-					res.status(500).send({
-						message: err.message || "Some error occurred."
-					});
-				});
+			res.send({
+				lastPaidInstallment,
+				updatebookinginstallment,
+				ostamount,
+				nextInstallmentMonthFormatted,
+				lastInstallmentMonth,
+				surcharge2,
+				booking,
+				createdAt,
+				currentDate,
+				before
+			});
 		} catch (err) {
 			res.status(500).send({
 				message: err.message || "Some error occurred."

@@ -396,6 +396,85 @@ class BookingService {
 
 		return (outstandingAmt = remainingOst - tillDatePaidAmt);
 	};
+
+	static outStandingAmountofJuly = async (bookingO, type = null) => {
+		let outstandingAmt = 0;
+
+		// Get all plans related to the booking and type
+		const plans = await BookingInstallmentDetails.findAll({
+			order: [["Installment_Code", "ASC"]],
+			where: {
+				BK_ID: bookingO,
+				BKI_TYPE: type,
+				Installment_Month: {
+					[Op.lte]: "2024-07-01"
+				}
+			}
+		});
+
+		// Get all installment receipts related to the booking
+		const installmentPaidReceipts = await InstallmentReceipts.findAll({
+			include: [{ as: "Installment_Type", model: InstallmentType }],
+			where: { BK_ID: bookingO }
+		});
+
+		let remainingPaidOstBreak = 0;
+		var remainingOstBreak = 0;
+		var remainingOst = 0;
+		var tillDatePaidAmt = 0;
+		let month = 0;
+
+		// Define the cutoff date (July 2024)
+		const cutoffMonth = 7; // July
+		const cutoffYear = 2024;
+
+		plans.map((item, i) => {
+			const instMonth = parseInt(item.Installment_Month ? item.Installment_Month.split("-")[1] : "");
+			const instYear = parseInt(item.Installment_Month ? item.Installment_Month.split("-")[0] : "");
+			console.log(instMonth);
+			console.log(instYear);
+
+			// Filter receipts related to the current installment
+			const IROBJECTS = installmentPaidReceipts.filter((el) => el.BKI_DETAIL_ID === item.BKI_DETAIL_ID);
+
+			// Skip installments that are after the cutoff date (after July 2024)
+			if (instYear > cutoffYear || (instYear === cutoffYear && instMonth > cutoffMonth)) {
+				console.log("heyyyyyyy");
+				return;
+			}
+
+			if (instMonth == cutoffMonth && cutoffYear == instYear) {
+				remainingOstBreak = 0;
+			}
+
+			if (remainingOstBreak == 0) {
+				remainingOst += parseFloat(item.Installment_Due);
+
+				for (var k = 0; k < IROBJECTS.length; k++) {
+					if (remainingPaidOstBreak == 1 && instMonth == cutoffMonth && cutoffYear == instYear) {
+						remainingPaidOstBreak = 0;
+					}
+
+					if (remainingPaidOstBreak == 0) {
+						tillDatePaidAmt += +IROBJECTS[k].Installment_Paid;
+					}
+
+					if (instMonth === cutoffMonth && cutoffYear == instYear) {
+						remainingPaidOstBreak = 1;
+					}
+				}
+			}
+
+			if (instMonth == cutoffMonth && cutoffYear == instYear) {
+				remainingOstBreak = 1;
+			}
+			month = instMonth;
+		});
+
+		// Calculate the outstanding amount up to July 2024
+		return (outstandingAmt = remainingOst - tillDatePaidAmt);
+	};
+
 	static checkConsecutiveUnpaidInstallments = async () => {
 		const currentYear = new Date().getFullYear();
 		const currentMonth = new Date().getMonth() + 1; // Get current month (1-12)

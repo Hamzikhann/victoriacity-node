@@ -2616,7 +2616,6 @@ class pdfGenerator {
 			const instYear = parseInt(item.Installment_Month ? item.Installment_Month.split("-")[0] : "");
 			// console.log('FormatedStampDate', FormatedStampDate);
 			let paidAmt = item.Installment_Paid;
-			console.log(IR);
 			let totalPaidAmt = 0;
 			for (var k = 0; k < IROBJECTS.length; k++) {
 				totalPaidAmt += IROBJECTS[k].Installment_Paid;
@@ -2709,7 +2708,7 @@ class pdfGenerator {
 						borderColor: " #91CBFF"
 					},
 					{
-						text: `${IROBJECTS[i]?.surCharges ? IROBJECTS[i].surCharges : 0}`,
+						text: `${IROBJECTS[i]?.surCharges ? IROBJECTS[i].surCharges : item.surCharges}`,
 						alignment: "right",
 						fontSize: 8,
 						border: [true, true, true, true],
@@ -2819,7 +2818,7 @@ class pdfGenerator {
 							borderColor: " #91CBFF"
 						},
 						{
-							text: `${IROBJECTS[k]?.surCharges ? IROBJECTS[k].surCharges : 0}`,
+							text: `${IROBJECTS[k]?.surCharges ? IROBJECTS[k].surCharges : item.surCharges}`,
 							alignment: "right",
 							fontSize: 8,
 							border: [true, true, true, true],
