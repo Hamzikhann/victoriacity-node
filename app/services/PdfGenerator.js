@@ -3564,8 +3564,9 @@ class pdfGenerator {
 				borderColor: " #91CBFF"
 			},
 			{
+				// `${bookingData.remainingSurcharges ? bookingData.remainingSurcharges : 0}`
 				// `${totalAmounts - paidAmount}`
-				text: `${bookingData.remainingSurcharges ? bookingData.remainingSurcharges : 0}`,
+				text: `${parseFloat(bookingData.totalSurcharges) - parseFloat(bookingData.paidSurcharges)}`,
 				alignment: "right",
 				bold: true,
 				fontSize: 9,
@@ -4073,7 +4074,7 @@ class pdfGenerator {
 					// Table Section
 					{
 						table: {
-							headerRows: 2,
+							headerRows: 1,
 							widths: ["22%", "9%", "9%", "9%", "10%", "10%", "10%", "10%", "10%"],
 							body: arr
 						},
