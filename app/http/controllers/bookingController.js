@@ -1338,7 +1338,7 @@ class BookingController {
 				{
 					as: "Booking_Installment_Details",
 					model: BookingInstallmentDetails,
-					where: { InsType_ID: [1,2], BKI_TYPE: null }
+					where: { InsType_ID: [1, 2], BKI_TYPE: null }
 				}
 			]
 		});
@@ -1436,7 +1436,13 @@ class BookingController {
 				console.log(`Surcharge applied for ${nextInstallmentMonthFormatted}: ${surcharge2}`);
 			}
 		}
-		const updateBooking = await Booking.update({ totalSurcharges: total }, { where: { Reg_Code_Disply: vcNo } });
+		let remainingsurcharges = parseFloat(booking1.remainingSurcharges);
+		let paidSurcharges = parseFloat(booking1.paidSurcharges);
+
+		const updateBooking = await Booking.update(
+			{ totalSurcharges: total, remainingSurcharges: total - paidSurcharges },
+			{ where: { Reg_Code_Disply: vcNo } }
+		);
 
 		try {
 			let id = booking1.BK_ID;

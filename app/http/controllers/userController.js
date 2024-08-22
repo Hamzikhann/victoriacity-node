@@ -1052,17 +1052,20 @@ class UserController {
 
 	static paySurcharges = async (req, res) => {
 		try {
-			let amountToBePaid = parseFloat(req.body.amountToBePaid);
+			console.log(req.body);
+			let amountToBePaid = parseFloat(req.body.amount);
 			let vcno = req.body.vcno;
-			let waveofNo = parseFloat(req.body.waveofNo);
+			let waveofNo = parseFloat(req.body.waveoffNo);
 
 			Booking.findOne({ where: { Reg_Code_Disply: vcno } })
 				.then(async (response) => {
 					let totalSurcharge = parseFloat(response.totalSurcharges);
 					let remainingSurchages = response.remainingSurcharges ? parseFloat(response.remainingSurcharges) : 0;
 					let paidSurcharges = response.paidSurcharges ? parseFloat(response.paidSurcharges) : 0;
-					let finalAmount;
+					console.log(typeof remainingSurchages, remainingSurchages);
+					console.log(typeof amountToBePaid, amountToBePaid);
 
+					let finalAmount;
 					if (waveofNo > 0) {
 						waveofNo = waveofNo / 100;
 						finalAmount = 0;
