@@ -12682,7 +12682,10 @@ class pdfGenerator {
 			for (let i = 0; i < bookings.length; i++) {
 				const printer = new Pdfmake(fonts);
 				// ${moment(new Date()).format("DD-MMM-YYYY")}
-				const formattedAddress = this.splitAddress(bookings[i].Member.BuyerAddress, 40);
+				const formattedAddress = this.splitAddress(
+					bookings[i].Member.BuyerAddress ? bookings[i].Member.BuyerAddress : bookings[i].Member.PermanantAddress,
+					40
+				);
 				var filePath;
 				var docDefinition = {
 					pageMargins: [70, 20, 70, 0],
