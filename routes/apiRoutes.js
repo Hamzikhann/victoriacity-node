@@ -134,6 +134,8 @@ router.post("/surcharge", UserController.surcharges);
 router.get("/job/active/list", JobController.getAllActiveJobs);
 router.get("/job/details/:id", JobController.getJobDetailsById);
 router.get("/dashboard/data", UserController.dashboardData);
+router.post("/test", UserController.test);
+
 //protected routes
 
 //Job Routes
@@ -496,6 +498,7 @@ router.get("/booking/id/getPPFile", [checkUserAuth], BookingController.createpay
 //Search Packages by Packages ID
 
 router.get("/booking/id/getStatementFile", [checkUserAuth], BookingController.createStatement);
+router.post("/booking/getStatementFile/bulk", BookingController.createStatementForTest);
 
 // UnvarifiedTransaction Routes
 // router.post('/unvarifiedTransaction/add', [checkUserAuth], UnVarifiedTransactionController.addUnvarifiedTransaction)//Create and Add new UnvarifiedTransactions
