@@ -1841,9 +1841,6 @@ class BookingController {
 		// let booking1 = await Booking.findAll({ where: { Reg_Code_Disply: vcNo } });
 		let booking1 = await Booking.findAll({
 			where: {
-				BK_ID: {
-					[Op.gte]: 1085 // Fetch bookings with BK_ID from 1085 onwards
-				},
 				Reg_Code_Disply: {
 					[Op.notIn]: data // Exclude bookings with Reg_Code_Disply in the data array
 				}
