@@ -12682,10 +12682,18 @@ class pdfGenerator {
 			for (let i = 0; i < bookings.length; i++) {
 				const printer = new Pdfmake(fonts);
 				// ${moment(new Date()).format("DD-MMM-YYYY")}
-				const formattedAddress = this.splitAddress(
-					bookings[i].Member.BuyerAddress ? bookings[i].Member.BuyerAddress : bookings[i].Member.PermanantAddress,
-					40
-				);
+				console.log(bookings[i].BK_ID);
+				var formattedAddress;
+				let address = bookings[i].Member?.BuyerAddress ?? bookings[i].Member?.PermanantAddress ?? null;
+				if (address == null) {
+					formattedAddress = null;
+				} else {
+					formattedAddress = this.splitAddress(
+						bookings[i].Member?.BuyerAddress ?? bookings[i].Member?.PermanantAddress ?? null,
+						40
+					);
+				}
+
 				var filePath;
 				var docDefinition = {
 					pageMargins: [70, 20, 70, 0],
@@ -12708,13 +12716,13 @@ class pdfGenerator {
 							margin: [0, 40, 0, 0], // Add top margin to align with the image
 							stack: [
 								{
-									text: `Name : ${bookings[i].Member.BuyerName}`,
+									text: `Name : ${bookings[i].Member?.BuyerName ? bookings[i].Member.BuyerName : null}`,
 									fontSize: 10,
 									margin: [0, 10, 0, 0],
 									bold: true
 								},
 								{
-									text: `Phone No: ${bookings[i].Member.BuyerContact}`,
+									text: `Phone No: ${bookings[i].Member?.BuyerContact ? bookings[i].Member.BuyerContact : null}`,
 									alignment: "left",
 									fontSize: 10,
 									bold: true,
