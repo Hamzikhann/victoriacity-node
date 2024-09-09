@@ -1,18 +1,7 @@
-// import { Sequelize, DataTypes } from 'sequelize';
-// import dotenv from 'dotenv'
-// dotenv.config()
-// import sequelize from "../../config/connectdb.js"
-// import Employee from './Employee.js';
-// import Customer from './Customer.js';
-
 const { Sequelize, DataTypes } = require("sequelize");
 const dotenv = require("dotenv");
 dotenv.config();
 const sequelize = require("../../config/connectdb.js");
-const Employee = require("./Employee.js");
-const Customer = require("./Customer.js");
-const IncomeCategoryController = require("../http/controllers/incomeCategoryController.js");
-const incomecategory = require("./IncomeCategories.js");
 
 const Project = sequelize.define("project", {
 	name: {

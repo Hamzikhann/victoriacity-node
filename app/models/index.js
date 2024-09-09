@@ -3,6 +3,8 @@ const sequelize = require("../../config/connectdb");
 const User = require("./User");
 const memberAddress= require("../models/MemberAddress");
 const Member_MST = require("./Member_MST");
+const Booking_Mst = require("./Booking_Mst");
+// const SurCharge = require("./SurCharge");
 const db = {};
 
 db.Sequelize = Sequelize;
@@ -42,6 +44,7 @@ db.Liability = require('./Liability')(sequelize, Sequelize);
 db.PayOff = require('./PayOff')(sequelize, Sequelize);
 db.Withdrawal = require('./Withdrawal')(sequelize, Sequelize);
 db.Withdraw = require('./Withdraw')(sequelize, Sequelize);
+db.SurCharge = require("./SurCharge")(sequelize, Sequelize);
 
 db.Sector.belongsTo(db.Phase, { as: 'Phase', foreignKey: 'PHS_ID' });
 db.Block.belongsTo(db.Sector, { as: 'Sector', foreignKey: 'SECT_ID' })
@@ -85,6 +88,9 @@ db.Booking.belongsTo(db.Sector, { as: "Sector", foreignKey: "SECTOR_ID" });
 db.Booking.belongsTo(db.Unit, { as: "Unit", foreignKey: "Unit_ID" });
 db.Booking.belongsTo(User, { as: "User", foreignKey: "USER_ID" });
 db.Booking.belongsTo(db.MYLocation, { as: "Location", foreignKey: "Location_ID" });
+db.Booking.hasMany(db.SurCharge, { as: "SurCharge", foreignKey: "SC_ID"})
+
+db.SurCharge.belongsTo(db.Booking, { as: "Booking", foreignKey: "BK_ID"});
 
 db.Unit.belongsTo(db.Block, { as: "Block", foreignKey: "BLK_ID" });
 db.Unit.belongsTo(db.UnitType, { as: "UnitType", foreignKey: "UType_ID" });

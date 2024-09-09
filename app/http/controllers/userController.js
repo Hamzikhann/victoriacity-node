@@ -39,7 +39,8 @@ const {
 	Sector,
 	Unit,
 	Block,
-	MYLocation
+	MYLocation,
+	SurCharge
 } = require("../../models/index.js");
 
 const { Op } = require("sequelize");
@@ -52,6 +53,8 @@ const GroupMenu = require("../../models/GroupMenu.js");
 const Menu = require("../../models/Menu.js");
 const pdfGenerator = require("../../services/PdfGenerator.js");
 const BookingService = require("../../services/BookingService.js");
+const { type } = require("os");
+const { file } = require("pdfkit");
 
 class UserController {
 	static Register = async (req, res) => {
@@ -1052,44 +1055,109 @@ class UserController {
 
 	static paySurcharges = async (req, res) => {
 		try {
-			console.log(req.body);
-			let amountToBePaid = parseFloat(req.body.amount);
+			console.log("1ssss1",req.body);
+			let amountToBePaid = parseInt(req.body.amount);
 			let vcno = req.body.vcno;
-			let waveofNo = parseFloat(req.body.waveoffNo);
+			let waveofNo = parseInt(req.body.waveOffNo);
 
-			Booking.findOne({ where: { Reg_Code_Disply: vcno } })
+			console.log("Typeeeee",typeof amountToBePaid, amountToBePaid, typeof waveofNo, waveofNo);
+
+			Booking.findOne({
+				 where: { Reg_Code_Disply: vcno },
+				 include: [
+					{ model: UnitType, as: 'UnitType' },
+					{ model: PlotSize, as: 'PlotSize' },
+					{ model: Member, as: 'Member' },
+				  ],
+				})
 				.then(async (response) => {
-					let totalSurcharge = parseFloat(response.totalSurcharges);
-					let remainingSurchages = response.remainingSurcharges ? parseFloat(response.remainingSurcharges) : 0;
-					let paidSurcharges = response.paidSurcharges ? parseFloat(response.paidSurcharges) : 0;
-					console.log(typeof remainingSurchages, remainingSurchages);
-					console.log(typeof amountToBePaid, amountToBePaid);
+					// console.log("respoonse", response);
+					let totalSurcharge = parseInt(response.totalSurcharges);
+						let remainingSurchages = response.remainingSurcharges ? parseInt(response.remainingSurcharges) : 0;
+						let paidSurcharges = response.paidSurcharges ? parseInt(response.paidSurcharges) : 0;
+						// console.log(typeof remainingSurchages, remainingSurchages);
+						// console.log(typeof amountToBePaid, amountToBePaid);
 
-					let finalAmount;
-					if (waveofNo > 0) {
-						waveofNo = waveofNo / 100;
-						finalAmount = 0;
-					} else {
-						finalAmount = remainingSurchages - amountToBePaid;
-					}
+						let finalAmount;
+						if (waveofNo > 0) {
+							waveofNo = waveofNo / 100;
+							let newRemainingSurcharges = waveofNo * remainingSurchages;
+							remainingSurchages = remainingSurchages - newRemainingSurcharges;
+							if(amountToBePaid > remainingSurchages){
+								res.send("Amount you are paying is greater then the Surcharges.")
+							}
+						} else {
+							remainingSurchages = remainingSurchages - amountToBePaid;
+						}
+						// console.log(typeof totalSurcharge, totalSurcharge);
+						// console.log(typeof finalAmount, finalAmount);
 
-					console.log(typeof totalSurcharge, totalSurcharge);
-					console.log(typeof finalAmount, finalAmount);
+						if (amountToBePaid >= remainingSurchages) {
+							let updateBooking = await Booking.update(
+								{ totalSurcharge: totalSurcharge, remainingSurcharges: 0, paidSurcharges: totalSurcharge },
+								{ where: { Reg_Code_Disply: vcno } }
+							);
+						} else {
+							let updatedPaidSurcharges = paidSurcharges + amountToBePaid;
+							let updateBooking = await Booking.update(
+								{ paidSurcharges: updatedPaidSurcharges, remainingSurcharges: remainingSurchages },
+								{ where: { Reg_Code_Disply: vcno } }
+							);
+						}
 
-					if (amountToBePaid >= remainingSurchages) {
-						let updateBooking = await Booking.update(
-							{ totalSurcharge: totalSurcharge, remainingSurcharges: 0, paidSurcharges: totalSurcharge },
-							{ where: { Reg_Code_Disply: vcno } }
-						);
-					} else {
-						let updatedPaidSurcharges = paidSurcharges + amountToBePaid;
-						let updateBooking = await Booking.update(
-							{ paidSurcharges: updatedPaidSurcharges, remainingSurcharges: finalAmount },
-							{ where: { Reg_Code_Disply: vcno } }
-						);
-					}
+						let surcharge;
+						if(response.BK_ID !== null || response.BK_ID !== ""){
+							console.log("In Surcharge Create")
+							surcharge = await SurCharge.create({
+								amount: amountToBePaid,
+								waveOff: waveofNo,
+								paidAt: Date.now(),
+								BK_ID: response.BK_ID,
+							})
+						} else {
+							res.status(403).send({ message: "Booking ID is missing, cannot create surcharge."});
+						}
 
-					res.send({ message: "Surcharges Paid" });
+						const findBookingDetails = await SurCharge.findAll({
+							where: {SC_ID: surcharge.SC_ID, BK_ID: surcharge.BK_ID},
+							include: [
+								{ 
+									model: Booking,
+									as: "Booking",
+									include: [
+										{ as: "UnitType", model: UnitType },
+										{ as: "PlotSize", model: PlotSize },
+										{ as: "Member", model: Member },
+									]
+								}
+							]
+						});
+
+						// console.log("resultttt", findBookingDetails[0])
+
+						let receipt_head = "Surcharge";
+						
+						const pdfBody = {
+							totalSurcharge: findBookingDetails[0].Booking.totalSurcharges,
+							remainingSurcharge: findBookingDetails[0].Booking.remainingSurcharges,
+							paidSurcharge: findBookingDetails[0].Booking.paidSurcharges,
+							paidAt: findBookingDetails[0].paidAt,
+							BK_ID: findBookingDetails[0].BK_ID,
+							unitType: findBookingDetails[0].Booking.UnitType.Name,
+							plotSize: findBookingDetails[0].Booking.PlotSize.Name,
+							member: findBookingDetails[0].Booking.Member.BuyerName,
+							vcno: findBookingDetails[0].Booking.Reg_Code_Disply,
+						}
+						// console.log("PDFFFFFFF",pdfBody)
+
+						let pdf = await pdfGenerator.SurchargeGenerator(pdfBody, findBookingDetails, receipt_head);
+
+
+						return res.status(200).json({
+							status: 200,
+							message: "Surcharges Paid successfully",
+							file: { url: `${process.env.APP_URL}/${pdf}` },
+						});
 				})
 				.catch((err) => {
 					res.status(500).send({
@@ -1102,6 +1170,87 @@ class UserController {
 			});
 		}
 	};
+	static getAllSurcharges = async (req,res) => {
+		try {
+			const findBookingDetails = await SurCharge.findAll({
+				include: [
+					{ 
+						model: Booking,
+						as: "Booking",
+						include: [
+							{ as: "UnitType", model: UnitType },
+							{ as: "PlotSize", model: PlotSize },
+							{ as: "Member", model: Member },
+						]
+					}
+				]
+			});
+
+			return res.status(200).send({
+				message: "Surcharges Paid successfully",
+				data: findBookingDetails,
+			});
+
+
+		} catch (error) {
+
+			res.status(500).send({
+				message: err.message || "Some error occurred.",
+			});
+
+		}
+	}
+	static downloadSurchargeReport = async (req,res) => {
+		try {
+
+			const {scid, bkid} = req.body;
+			
+			const findBookingDetails = await SurCharge.findAll({
+				where: {SC_ID: scid, BK_ID: bkid},
+				include: [
+					{ 
+						model: Booking,
+						as: "Booking",
+						include: [
+							{ as: "UnitType", model: UnitType },
+							{ as: "PlotSize", model: PlotSize },
+							{ as: "Member", model: Member },
+						]
+					}
+				]
+			});
+
+			let receipt_head = "Surcharge";
+			
+			const pdfBody = {
+				totalSurcharge: findBookingDetails[0].Booking.totalSurcharges,
+				remainingSurcharge: findBookingDetails[0].Booking.remainingSurcharges,
+				paidSurcharge: findBookingDetails[0].Booking.paidSurcharges,
+				paidAt: findBookingDetails[0].paidAt,
+				BK_ID: findBookingDetails[0].BK_ID,
+				unitType: findBookingDetails[0].Booking.UnitType.Name,
+				plotSize: findBookingDetails[0].Booking.PlotSize.Name,
+				member: findBookingDetails[0].Booking.Member.BuyerName,
+				vcno: findBookingDetails[0].Booking.Reg_Code_Disply,
+			}
+
+			let pdf = await pdfGenerator.SurchargeGenerator(pdfBody, findBookingDetails, receipt_head);
+
+
+			return res.status(200).json({
+				status: 200,
+				message: "Surcharge found successfully",
+				file: { url: `${process.env.APP_URL}/${pdf}` },
+			});
+
+		} catch (error) {
+			
+			res.status(500).send({
+				message: err.message || "Some error occurred.",
+			});
+
+		}
+	}
 	static search = async (req, res) => {
 		const { card_no } = req.body;
 		console.log(req.body);
