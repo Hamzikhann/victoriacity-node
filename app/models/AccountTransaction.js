@@ -4,9 +4,10 @@ dotenv.config();
 const sequelize = require('../../config/connectdb.js');
 const AccountCategory = require('../models/AccountsCategory.js');
 const EmployeeSalaryHistory = require('../models/EmployeeSalaryHistory.js');
-const { InstallmentReceipts } = require('./index.js');
-const expensecategory = require('./ExpenseCategories.js');
-const incomecategory = require('./IncomeCategories.js');
+// const { InstallmentReceipts } = require('./index.js');
+const InstallmentReceipts = require("../models/Installment_Receipts.js")
+const expensecategory = require('../models/ExpenseCategories.js');
+const incomecategory = require('../models/IncomeCategories.js');
 
 const accounttransaction = sequelize.define('accounttransaction', {
   amount: {
@@ -55,8 +56,8 @@ const accounttransaction = sequelize.define('accounttransaction', {
   },
 });
 // accounttransaction.belongsTo(AccountCategory, {as: 'Category',foreignKey: 'categoryId'});
-accounttransaction.belongsTo(expensecategory, {as: 'categoryExpense',foreignKey: 'categoryId'});
-accounttransaction.belongsTo(incomecategory, {as: 'categoryIncome',foreignKey: 'categoryId'});
-accounttransaction.belongsTo(EmployeeSalaryHistory, {as: 'EmployeeSalaryHistory',foreignKey: 'employeeSalaryHistory'});
-accounttransaction.belongsTo(InstallmentReceipts,{as:'InstallmentReceipts',foreignKey:'receiptId'})
+// accounttransaction.belongsTo(expensecategory, {as: 'categoryExpense',foreignKey: 'categoryId'});
+// accounttransaction.belongsTo(incomecategory, {as: 'categoryIncome',foreignKey: 'categoryId'});
+// accounttransaction.belongsTo(EmployeeSalaryHistory, {as: 'EmployeeSalaryHistory',foreignKey: 'employeeSalaryHistory'});
+// accounttransaction.belongsTo(InstallmentReceipts,{as:'InstallmentReceipts',foreignKey:'receiptId'})
 module.exports = accounttransaction;

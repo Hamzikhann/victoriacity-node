@@ -1227,7 +1227,7 @@ class UserController {
 				  ],
 				})
 				.then(async (response) => {
-					// console.log("respoonse", response);
+					console.log("respoonse", response);
 					let totalSurcharge = parseInt(response.totalSurcharges);
 						let remainingSurchages = response.remainingSurcharges ? parseInt(response.remainingSurcharges) : 0;
 						let paidSurcharges = response.paidSurcharges ? parseInt(response.paidSurcharges) : 0;
@@ -1326,25 +1326,41 @@ class UserController {
 			});
 		}
 	};
+
 	static getAllSurcharges = async (req,res) => {
 		try {
-			const findBookingDetails = await SurCharge.findAll({
+
+			const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
+			const limit = parseInt(req.query.limit) || 25; // Default to 10 items per page if not provided
+			const offset = (page - 1) * limit; // Calculate offset for the query
+
+			const { count, rows } = await SurCharge.findAndCountAll({
 				include: [
-					{ 
+					{
 						model: Booking,
 						as: "Booking",
 						include: [
 							{ as: "UnitType", model: UnitType },
 							{ as: "PlotSize", model: PlotSize },
 							{ as: "Member", model: Member },
-						]
+						],
 					}
-				]
+				],
+				offset: offset,
+				limit: limit,
 			});
+
+			const totalPages = Math.ceil(count / limit); // Calculate total pages
 
 			return res.status(200).send({
 				message: "Surcharges Paid successfully",
-				data: findBookingDetails,
+				data: rows,
+				pagination: {
+					totalItems: count,
+					totalPages: totalPages,
+					currentPage: page,
+					limit: limit,
+				},
 			});
 
 
@@ -1355,7 +1371,8 @@ class UserController {
 			});
 
 		}
-	}
+	};
+
 	static downloadSurchargeReport = async (req,res) => {
 		try {
 

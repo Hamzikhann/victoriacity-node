@@ -76,8 +76,8 @@ db.Voucher.belongsTo(db.TaxTag, { as: 'TaxTag', foreignKey: 'TT_ID' })
 db.PaymentPlan.belongsTo(db.UnitType, {as: "UnitType",foreignKey: "UType_ID",});
 db.PaymentPlan.belongsTo(db.PlotSize, { as: "PlotSize", foreignKey: "PS_ID" });
 
-db.Booking.belongsTo(db.Member, { as: "Member", foreignKey: "MEMBER_ID" });
 db.Booking.belongsTo(db.Member, { as: "SecondMember", foreignKey: "Sec_MEM_ID" });
+db.Booking.belongsTo(db.Member, { as: "Member", foreignKey: "MEMBER_ID" });
 db.Booking.belongsTo(db.MemNominee, { as: "MemNominee", foreignKey: "MN_ID" });
 db.Booking.belongsTo(db.UnitType, { as: "UnitType", foreignKey: "UType_ID" });
 db.Booking.belongsTo(db.PlotSize, { as: "PlotSize", foreignKey: "PS_ID" });
