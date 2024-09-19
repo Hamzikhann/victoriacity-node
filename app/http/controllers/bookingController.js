@@ -25,8 +25,9 @@ const UserRole = require("../../models/UserRole");
 const User = require("../../models/User");
 const Settings = require("../../models/Settings.js");
 const AccountTransaction = require("../../models/AccountTransaction.js");
-const { Op, Sequelize } = require("sequelize");
+const { Op, Sequelize, where } = require("sequelize");
 const BookingService = require("../../services/BookingService.js");
+const Booking_Installment_Details = require("../../models/Booking_Installment_Details.js");
 
 class BookingController {
 	///UPDATE NDC Status
@@ -841,6 +842,89 @@ class BookingController {
 			return next(error);
 		}
 	};
+
+	static getTotalAmountOfAllBookings = async( req, res, next ) => {
+		try {
+			// let totalAmount = 0 ;
+			// const findTotalAmount = await BookingInstallmentDetails.findAll();
+			// findTotalAmount.map((amount)=>{ totalAmount += Number(amount.Installment_Due)});
+			// console.log("Total amount with empty whereeeeee", totalAmount);
+
+			// let totalAmountINS1 = 0;
+			// const findTotalAmountINST1 = await BookingInstallmentDetails.findAll({where: {InsType_ID: 1}});
+			// findTotalAmountINST1.map((amount)=>{ totalAmountINS1 += Number(amount.Installment_Due)});
+			// console.log("Total amount with INS1 whereeeeee", totalAmountINS1);
+
+			// let totalAmountINS2 = 0;
+			// const findTotalAmountINST2 = await BookingInstallmentDetails.findAll({where: {InsType_ID: 2}});
+			// findTotalAmountINST2.map((amount)=>{ totalAmountINS2 += Number(amount.Installment_Due)});
+			// console.log("Total amount with INS2 whereeeeee", totalAmountINS2);
+
+			// let totalAmountINS3 = 0;
+			// const findTotalAmountINST3 = await BookingInstallmentDetails.findAll({where: {InsType_ID: 3}});
+			// findTotalAmountINST3.map((amount)=>{ totalAmountINS3 += Number(amount.Installment_Due)});
+			// console.log("Total amount with INS3 whereeeeee", totalAmountINS3);
+
+			let amountDue = 0;
+			let amountRecieved = 0;
+			let amount = 0;
+			const bookingDetails = await BookingInstallmentDetails.findAll({where: {BKI_TYPE: null, InsType_ID: 1,}});
+			for (let i = 0; i < bookingDetails.length; i++) {
+
+				const detail = bookingDetails[i];
+
+				const installmentPaid = Number(detail.Installment_Paid);
+				const remainingAmount = Number(detail.Remaining_Amount);
+				const installmentDue = Number(detail.Installment_Due);
+
+				amountRecieved += installmentPaid;
+				amount += installmentDue;
+
+				if( installmentPaid === 0 && remainingAmount === 0 ){
+					amountDue += installmentDue;
+				}else if( installmentPaid !== 0 ) {
+					amountDue += remainingAmount;
+				}
+			}
+
+			let amountDue2 = 0;
+			let amountRecieved2 = 0;
+			let amount2 = 0;
+			const bookingDetails2 = await BookingInstallmentDetails.findAll({where: {BKI_TYPE: null, InsType_ID: 2}});
+			for (let i = 0; i < bookingDetails2.length; i++) {
+
+				const detail = bookingDetails2[i];
+
+				const installmentPaid = Number(detail.Installment_Paid);
+				const remainingAmount = Number(detail.Remaining_Amount);
+				const installmentDue = Number(detail.Installment_Due);
+
+				amountRecieved2 += installmentPaid;
+				amount2 = installmentDue;
+
+				if( installmentPaid === 0 && remainingAmount === 0 ){
+					amountDue2 += installmentDue;
+				}else if( installmentPaid !== 0 ) {
+					amountDue2 += remainingAmount;
+				}
+			}
+			let totalDue = amountDue + amountDue2;
+			let totalRecieved = amountRecieved + amountRecieved2;
+			let total = amount + amount2;
+			let data = {
+				totalAmount: total,
+				totalAmountRecieved: totalRecieved,
+				totalAmountDue: totalDue,
+			} 
+
+
+
+			return res.send({mesasge: "Data of BKI_Type null and insType 1,2", data: data });
+		} catch (error) {
+			return next(error);
+		}
+	};
+
 	// SEARCH Booking BY ID
 	static getBookingById = async (req, res, next) => {
 		const BookingId = req.query.id;
@@ -1342,7 +1426,7 @@ class BookingController {
 				}
 			]
 		});
-		console.log(before);
+		console.log("BeFOREeeeeeeeeeeee",before);
 		const surchargeRate = 0.001;
 		let surcharge = 0;
 		let total = 0;

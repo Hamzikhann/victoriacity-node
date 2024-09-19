@@ -45,6 +45,8 @@ db.PayOff = require('./PayOff')(sequelize, Sequelize);
 db.Withdrawal = require('./Withdrawal')(sequelize, Sequelize);
 db.Withdraw = require('./Withdraw')(sequelize, Sequelize);
 db.SurCharge = require("./SurCharge")(sequelize, Sequelize);
+db.CalenderReminder = require("./CalendarReminders")(sequelize, Sequelize);
+db.CalenderComment = require("./CalendarComments")(sequelize, Sequelize);
 
 db.Sector.belongsTo(db.Phase, { as: 'Phase', foreignKey: 'PHS_ID' });
 db.Block.belongsTo(db.Sector, { as: 'Sector', foreignKey: 'SECT_ID' })
@@ -89,8 +91,15 @@ db.Booking.belongsTo(db.Unit, { as: "Unit", foreignKey: "Unit_ID" });
 db.Booking.belongsTo(User, { as: "User", foreignKey: "USER_ID" });
 db.Booking.belongsTo(db.MYLocation, { as: "Location", foreignKey: "Location_ID" });
 db.Booking.hasMany(db.SurCharge, { as: "SurCharge", foreignKey: "SC_ID"})
+db.Booking.hasMany(db.CalenderReminder, { as: "Reminder", foreignKey: "CR_ID"})
 
 db.SurCharge.belongsTo(db.Booking, { as: "Booking", foreignKey: "BK_ID"});
+
+db.CalenderReminder.belongsTo(User, { as: 'User', foreignKey: 'USER_ID' })
+db.CalenderReminder.hasMany(db.CalenderComment, { as: 'Comments', foreignKey: 'COMMENT_ID' })
+db.CalenderReminder.belongsTo(db.Booking, { as: "Booking", foreignKey: "BK_ID"})
+
+db.CalenderComment.belongsTo(db.CalenderReminder, { as: "Reminder", foreignKey: "CR_ID"})
 
 db.Unit.belongsTo(db.Block, { as: "Block", foreignKey: "BLK_ID" });
 db.Unit.belongsTo(db.UnitType, { as: "UnitType", foreignKey: "UType_ID" });
