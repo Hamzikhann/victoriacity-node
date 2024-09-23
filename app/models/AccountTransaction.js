@@ -61,5 +61,5 @@ accounttransaction.belongsTo(EmployeeSalaryHistory, {
 	as: "EmployeeSalaryHistory",
 	foreignKey: "employeeSalaryHistory"
 });
-accounttransaction.belongsTo(InstallmentReceipts, { as: "InstallmentReceipts", foreignKey: "receiptId" });
+// accounttransaction.belongsTo(InstallmentReceipts, { as: "InstallmentReceipts", foreignKey: "receiptId" });
 module.exports = accounttransaction;

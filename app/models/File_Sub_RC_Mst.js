@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-  let FSRC_Code_value
+  // let FSRC_Code_value
   return sequelize.define("File_Sub_RC_Mst", {
     
     FSRC_ID: {

@@ -131,5 +131,8 @@ db.TRSRequest.belongsTo(db.Voucher,{as:"VoucherSellerTaxId", foreignKey:"VOUCHER
 db.TRFS.belongsTo(db.UnitType, { as: 'UnitType', foreignKey: 'UType_ID' })
 db.TRFS.belongsTo(db.PlotSize, { as: "PlotSize", foreignKey: "PS_ID" })
 
+User.hasMany(db.CalenderReminder, {as:"calendarreminders", foreignKey: "CR_ID"});
+User.hasMany(db.FileSubmission, {as:"File_Sub_RC_Mst", foreignKey: "FSRC_ID"});
+
 
 module.exports = db;

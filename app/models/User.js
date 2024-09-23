@@ -10,6 +10,8 @@ dotenv.config();
 const sequelize = require("../../config/connectdb.js");
 const UserRole = require("./UserRole.js");
 const UserGroup = require("./User_Group.js");
+const CalendarReminders = require("./CalendarReminders.js")
+const FileSubmission = require("./File_Sub_RC_Mst.js")
 const User = sequelize.define("users", {
 	name: {
 		type: DataTypes.STRING,
@@ -62,7 +64,7 @@ const User = sequelize.define("users", {
 		type: DataTypes.INTEGER,
 		allowNull: true,
 		notEmpty: true
-	}
+	},
 });
 
 sequelize
@@ -75,5 +77,7 @@ sequelize
 	});
 User.belongsTo(UserRole, { as: "roles", foreignKey: "role" });
 User.belongsTo(UserGroup, { as: "User_Group", foreignKey: "user_group" });
+
+
 
 module.exports = User;

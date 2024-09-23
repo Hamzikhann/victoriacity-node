@@ -847,8 +847,8 @@ class BookingController {
 		try {
 
 
-			const page = req.query.page || 1; // Get the page from request query or default to 1
-			const limit = 25; // Limit the number of documents to 25 per page
+			const page = req.body.page || 1; // Get the page from request query or default to 1
+			const limit = req.body.limit || 25; // Limit the number of documents to 25 per page
 			const offset = (page - 1) * limit; // Calculate the offset based on the current page
 
 			
@@ -874,6 +874,7 @@ class BookingController {
 						required: false,
 					},
 					{ 
+						attributes: ['MEMBER_ID', 'BuyerName', 'BuyerContact', 'BuyerCNIC'], 
 						as: "Member", 
 						model: Member,
 					},
@@ -918,16 +919,17 @@ class BookingController {
 					}
 				}
 				const OSTAmount = await BookingService.outStandingAmount(bookings[i].BK_ID);
+				bookings[i].setDataValue("BK_ID",bookings[i].BK_ID);
+				bookings[i].setDataValue("advanceAmount" , advAmount)
+				bookings[i].setDataValue("totalAmount" , totalAmount)
+				bookings[i].setDataValue("amountPaid" , paidAmount)
+				bookings[i].setDataValue("amountRemaing" , (totalAmount - (paidAmount+advAmount)))
+				bookings[i].setDataValue("InstallmentsUnpaidCount" , (bkiDetailIds.length - uniqueBkiDetailIds.length))
+				bookings[i].setDataValue("oustadingMonthCount" , totalMonthsDiff)
+				bookings[i].setDataValue("outStandingAmount" , OSTAmount)
+
 				data.push({
-					booking: bookings[i],
-					BK_ID: bookings[i].BK_ID,
-					advanceAmount: advAmount,
-					totalAmount:  totalAmount,
-					amountPaid: paidAmount,
-					amountRemaing: (totalAmount - (paidAmount+advAmount)),
-					InstallmentsUnpaid: (bkiDetailIds.length - uniqueBkiDetailIds.length), 
-					oustadingMonthCount: totalMonthsDiff,
-					outStandingAmount: OSTAmount
+					booking: bookings[i],					
 				});
 				bkiDetailIds = [];
 				uniqueBkiDetailIds = [];
