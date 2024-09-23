@@ -8690,7 +8690,7 @@ class pdfGenerator {
 			}
 		};
 
-		console.log("PdfBODYYYYYY", body, rows, receiptHead)
+		console.log("PdfBODYYYYYY", body, rows, receiptHead);
 
 		function formatTimestampf(timestamp, simple) {
 			if (!timestamp) {
@@ -8741,7 +8741,7 @@ class pdfGenerator {
 			return "";
 		}
 
-		let FormatedDueDate = formatTimestampf(body?.paidAt === null ? Date.now() : body?.paidAt );
+		let FormatedDueDate = formatTimestampf(body?.paidAt === null ? Date.now() : body?.paidAt);
 
 		const IRC_FormatedDate = formatTimestampf(Date.now());
 		const printer = new Pdfmake(fonts);
@@ -9428,7 +9428,7 @@ class pdfGenerator {
 							{
 								width: "36%",
 								fontSize: 11,
-								text:"",
+								text: "",
 								alignment: "left",
 								margin: [7, 0, 0, 0]
 							},
@@ -9453,7 +9453,7 @@ class pdfGenerator {
 								fontSize: 10,
 								text: [
 									{
-										text: "Payment Mode : Cash" ,
+										text: "Payment Mode : Cash",
 										bold: true
 									}
 								],
@@ -9463,7 +9463,7 @@ class pdfGenerator {
 							{
 								width: "36%",
 								fontSize: 11,
-								text:"",
+								text: "",
 								alignment: "left",
 								margin: [7, 0, 0, 0]
 							}
@@ -9690,7 +9690,7 @@ class pdfGenerator {
 							{
 								width: "36%",
 								fontSize: 11,
-								text:"",
+								text: "",
 								alignment: "left",
 								margin: [12, 0, 0, 0]
 							},
@@ -9703,7 +9703,7 @@ class pdfGenerator {
 								// decoration: "underline",
 								bold: true,
 								margin: [14, 0, 0, 0]
-							},
+							}
 							// {
 							//   width: "17%",
 							//   fontSize: 11,
@@ -9735,7 +9735,7 @@ class pdfGenerator {
 							{
 								width: "36%",
 								fontSize: 11,
-								text:"",
+								text: "",
 								alignment: "left",
 								margin: [7, 0, 0, 0]
 							},
@@ -9770,7 +9770,7 @@ class pdfGenerator {
 							{
 								width: "36%",
 								fontSize: 11,
-								text:"",
+								text: "",
 								alignment: "left",
 								margin: [7, 0, 0, 0]
 							}
@@ -9895,8 +9895,8 @@ class pdfGenerator {
 			return filePath;
 		} catch (error) {
 			console.log("error==========", error);
-			return "";
-			// return error;
+			// return "";
+			return error;
 			// console.log('error==========', error)
 		}
 	};
