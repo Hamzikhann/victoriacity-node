@@ -92,6 +92,10 @@ db.Booking.belongsTo(User, { as: "User", foreignKey: "USER_ID" });
 db.Booking.belongsTo(db.MYLocation, { as: "Location", foreignKey: "Location_ID" });
 db.Booking.hasMany(db.SurCharge, { as: "SurCharge", foreignKey: "SC_ID"})
 db.Booking.hasMany(db.CalenderReminder, { as: "Reminder", foreignKey: "CR_ID"})
+db.Booking.hasMany(db.BookingInstallmentDetails,{as:"Booking_Installment_Details",foreignKey: "BK_ID"});
+db.Booking.hasMany(db.InstallmentReceipts, {as:"Installment_Receipts", foreignKey: "BK_ID"});
+
+db.BookingInstallmentDetails.belongsTo(db.Booking, { as: "Booking", foreignKey: "BK_ID"});
 
 db.SurCharge.belongsTo(db.Booking, { as: "Booking", foreignKey: "BK_ID"});
 

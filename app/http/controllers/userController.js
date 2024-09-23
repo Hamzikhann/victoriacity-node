@@ -1236,11 +1236,18 @@ class UserController {
 
 						let finalAmount;
 						if (waveofNo > 0) {
-							waveofNo = waveofNo / 100;
-							let newRemainingSurcharges = waveofNo * remainingSurchages;
-							remainingSurchages = remainingSurchages - newRemainingSurcharges;
-							if(amountToBePaid > remainingSurchages){
-								res.send("Amount you are paying is greater then the Surcharges.")
+							// waveofNo = waveofNo / 100;
+							// let newRemainingSurcharges = waveofNo * remainingSurchages;
+							// remainingSurchages = remainingSurchages - newRemainingSurcharges;
+							// if(amountToBePaid > remainingSurchages){
+							// 	res.send("Amount you are paying is greater then the Surcharges.")
+							// }
+							// Convert wave-off percentage to decimal and apply
+							let waveOffPercentage = waveofNo / 100;
+							let waveOffAmount = waveOffPercentage * remainingSurchages;
+							remainingSurchages -= waveOffAmount;
+							if (amountToBePaid > remainingSurchages) {
+								return res.send("Amount you are paying is greater than the remaining surcharges after wave-off.");
 							}
 						} else {
 							remainingSurchages = remainingSurchages - amountToBePaid;
