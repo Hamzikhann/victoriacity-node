@@ -25,8 +25,9 @@ const UserRole = require("../../models/UserRole");
 const User = require("../../models/User");
 const Settings = require("../../models/Settings.js");
 const AccountTransaction = require("../../models/AccountTransaction.js");
-const { Op, Sequelize } = require("sequelize");
+const { Op, Sequelize, where } = require("sequelize");
 const BookingService = require("../../services/BookingService.js");
+const Booking_Installment_Details = require("../../models/Booking_Installment_Details.js");
 
 class BookingController {
 	///UPDATE NDC Status
@@ -841,6 +842,106 @@ class BookingController {
 			return next(error);
 		}
 	};
+
+	static getTotalAmountOfAllBookings = async( req, res, next ) => {
+		try {
+
+
+			const page = req.query.page || 1; // Get the page from request query or default to 1
+			const limit = 25; // Limit the number of documents to 25 per page
+			const offset = (page - 1) * limit; // Calculate the offset based on the current page
+
+			
+
+			let data = [];
+			let uniqueBkiDetailIds = [];
+			let bkiDetailIds = [];
+
+			const bookings = await Booking.findAll({
+				attributes: ['BK_ID', 'Reg_Code_Disply', 'SRForm_No',"Form_Code", "Total_Amt", "Advance_Amt", "Status"], 
+				include: [
+					{ 
+						where: {BKI_TYPE: null},
+						attributes: ['BKI_DETAIL_ID', 'Installment_Month', 'Installment_Due', 'Installment_Paid', 'Remaining_Amount', 'BKI_TYPE'], 
+						as: "Booking_Installment_Details", 
+						model: BookingInstallmentDetails, 
+					},
+					{ 
+						as: "Installment_Receipts", 
+						model: InstallmentReceipts,
+						attributes: ['INS_RC_ID', 'BK_ID', 'Installment_Month', 'Installment_Paid', 'RECEIPT_HEAD','BKI_DETAIL_ID'], 
+						where: { BK_ID: Sequelize.col('Booking_Mst.BK_ID') }, // Match BK_ID from Booking
+						required: false,
+					},
+					{ 
+						as: "Member", 
+						model: Member,
+					},
+				],
+				limit: limit,
+				offset: offset,
+			});
+
+			
+
+			for (let i=0; i<bookings.length; i++){
+				let paidAmount = 0;
+				let totalAmount = 0;
+				let advAmount = 0;
+				let totalMonthsDiff = 0;
+				
+				advAmount += +bookings[i].Advance_Amt;
+				const BID = bookings[i].Booking_Installment_Details
+				for (let j=0; j<BID.length; j++) {
+						let installmentDue = +BID[j].Installment_Due;
+						totalAmount += installmentDue;
+						bkiDetailIds.push(+BID[j].BKI_DETAIL_ID)
+				}
+				const IR = bookings[i].Installment_Receipts;
+				for (let j=0; j<IR.length; j++){
+					paidAmount += +IR[j].Installment_Paid;
+					if(j === (IR.length -1)){
+						const lastInstallmentMonth = IR[j].Installment_Month;
+
+						const lastDate = new Date(lastInstallmentMonth);
+						const currentDate = new Date();
+
+						const yearDiff = currentDate.getFullYear() - lastDate.getFullYear();
+						const monthDiff = currentDate.getMonth() - lastDate.getMonth();
+
+						totalMonthsDiff = yearDiff * 12 + monthDiff;
+
+					}
+					if (IR[j].RECEIPT_HEAD === 'installments' && !uniqueBkiDetailIds.includes(+IR[j].BKI_DETAIL_ID)) {
+						// Add only if BKI_DETAIL_ID is not already in the array
+						uniqueBkiDetailIds.push(+IR[j].BKI_DETAIL_ID);
+					}
+				}
+				const OSTAmount = await BookingService.outStandingAmount(bookings[i].BK_ID);
+				data.push({
+					booking: bookings[i],
+					BK_ID: bookings[i].BK_ID,
+					advanceAmount: advAmount,
+					totalAmount:  totalAmount,
+					amountPaid: paidAmount,
+					amountRemaing: (totalAmount - (paidAmount+advAmount)),
+					InstallmentsUnpaid: (bkiDetailIds.length - uniqueBkiDetailIds.length), 
+					oustadingMonthCount: totalMonthsDiff,
+					outStandingAmount: OSTAmount
+				});
+				bkiDetailIds = [];
+				uniqueBkiDetailIds = [];
+			}
+
+			return res.send({
+				mesasge: "Bookings Retrieved Successfully!", 
+				data: data
+			});
+		} catch (error) {
+			return next(error);
+		}
+	};
+
 	// SEARCH Booking BY ID
 	static getBookingById = async (req, res, next) => {
 		const BookingId = req.query.id;
@@ -1342,7 +1443,7 @@ class BookingController {
 				}
 			]
 		});
-		console.log(before);
+		console.log("BeFOREeeeeeeeeeeee",before);
 		const surchargeRate = 0.001;
 		let surcharge = 0;
 		let total = 0;

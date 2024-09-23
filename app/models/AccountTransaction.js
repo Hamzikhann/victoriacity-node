@@ -4,8 +4,7 @@ dotenv.config();
 const sequelize = require("../../config/connectdb.js");
 const AccountCategory = require("../models/AccountsCategory.js");
 const EmployeeSalaryHistory = require("../models/EmployeeSalaryHistory.js");
-// const { InstallmentReceipts } = require("./index.js");
-const InstallmentReceipts = require("./Installment_Receipts.js");
+const { InstallmentReceipts } = require("./index.js");
 const expensecategory = require("./ExpenseCategories.js");
 const incomecategory = require("./IncomeCategories.js");
 
@@ -62,5 +61,5 @@ accounttransaction.belongsTo(EmployeeSalaryHistory, {
 	as: "EmployeeSalaryHistory",
 	foreignKey: "employeeSalaryHistory"
 });
-// accounttransaction.belongsTo(InstallmentReceipts, { as: "InstallmentReceipts", foreignKey: "receiptId" });
+accounttransaction.belongsTo(InstallmentReceipts, { as: "InstallmentReceipts", foreignKey: "receiptId" });
 module.exports = accounttransaction;
