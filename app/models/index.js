@@ -100,7 +100,7 @@ db.BookingInstallmentDetails.belongsTo(db.Booking, { as: "Booking", foreignKey: 
 db.SurCharge.belongsTo(db.Booking, { as: "Booking", foreignKey: "BK_ID"});
 
 db.CalenderReminder.belongsTo(User, { as: 'User', foreignKey: 'USER_ID' })
-db.CalenderReminder.hasMany(db.CalenderComment, { as: 'Comments', foreignKey: 'COMMENT_ID' })
+db.CalenderReminder.hasMany(db.CalenderComment, { as: 'Comments', foreignKey: 'CR_ID' })
 db.CalenderReminder.belongsTo(db.Booking, { as: "Booking", foreignKey: "BK_ID"})
 
 db.CalenderComment.belongsTo(db.CalenderReminder, { as: "Reminder", foreignKey: "CR_ID"})
