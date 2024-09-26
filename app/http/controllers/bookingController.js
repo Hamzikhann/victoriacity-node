@@ -843,65 +843,73 @@ class BookingController {
 		}
 	};
 
-	static getTotalAmountOfAllBookings = async( req, res, next ) => {
+	static getTotalAmountOfAllBookings = async (req, res, next) => {
 		try {
-
-
 			const page = req.body.page || 1; // Get the page from request query or default to 1
 			const limit = req.body.limit || 25; // Limit the number of documents to 25 per page
 			const offset = (page - 1) * limit; // Calculate the offset based on the current page
-
-			
 
 			let data = [];
 			let uniqueBkiDetailIds = [];
 			let bkiDetailIds = [];
 
 			const bookings = await Booking.findAll({
-				attributes: ['BK_ID', 'Reg_Code_Disply', 'SRForm_No',"Form_Code", "Total_Amt", "Advance_Amt", "Status"], 
+				attributes: ["BK_ID", "Reg_Code_Disply", "SRForm_No", "Form_Code", "Total_Amt", "Advance_Amt", "Status"],
 				include: [
-					{ 
-						where: {BKI_TYPE: null},
-						attributes: ['BKI_DETAIL_ID', 'Installment_Month', 'Installment_Due', 'Installment_Paid', 'Remaining_Amount', 'BKI_TYPE'], 
-						as: "Booking_Installment_Details", 
-						model: BookingInstallmentDetails, 
+					{
+						where: { BKI_TYPE: null },
+						attributes: [
+							"BKI_DETAIL_ID",
+							"Installment_Month",
+							"Installment_Due",
+							"Installment_Paid",
+							"Remaining_Amount",
+							"BKI_TYPE"
+						],
+						as: "Booking_Installment_Details",
+						model: BookingInstallmentDetails
 					},
-					{ 
-						as: "Installment_Receipts", 
+					{
+						as: "Installment_Receipts",
 						model: InstallmentReceipts,
-						attributes: ['INS_RC_ID', 'BK_ID', 'Installment_Month', 'Installment_Paid', 'RECEIPT_HEAD','BKI_DETAIL_ID'], 
-						where: { BK_ID: Sequelize.col('Booking_Mst.BK_ID') }, // Match BK_ID from Booking
-						required: false,
+						attributes: [
+							"INS_RC_ID",
+							"BK_ID",
+							"Installment_Month",
+							"Installment_Paid",
+							"RECEIPT_HEAD",
+							"BKI_DETAIL_ID"
+						],
+						where: { BK_ID: Sequelize.col("Booking_Mst.BK_ID") }, // Match BK_ID from Booking
+						required: false
 					},
-					{ 
-						attributes: ['MEMBER_ID', 'BuyerName', 'BuyerContact', 'BuyerCNIC'], 
-						as: "Member", 
-						model: Member,
-					},
+					{
+						attributes: ["MEMBER_ID", "BuyerName", "BuyerContact", "BuyerCNIC"],
+						as: "Member",
+						model: Member
+					}
 				],
 				limit: limit,
-				offset: offset,
+				offset: offset
 			});
 
-			
-
-			for (let i=0; i<bookings.length; i++){
+			for (let i = 0; i < bookings.length; i++) {
 				let paidAmount = 0;
 				let totalAmount = 0;
 				let advAmount = 0;
 				let totalMonthsDiff = 0;
-				
+
 				advAmount += +bookings[i].Advance_Amt;
-				const BID = bookings[i].Booking_Installment_Details
-				for (let j=0; j<BID.length; j++) {
-						let installmentDue = +BID[j].Installment_Due;
-						totalAmount += installmentDue;
-						bkiDetailIds.push(+BID[j].BKI_DETAIL_ID)
+				const BID = bookings[i].Booking_Installment_Details;
+				for (let j = 0; j < BID.length; j++) {
+					let installmentDue = +BID[j].Installment_Due;
+					totalAmount += installmentDue;
+					bkiDetailIds.push(+BID[j].BKI_DETAIL_ID);
 				}
 				const IR = bookings[i].Installment_Receipts;
-				for (let j=0; j<IR.length; j++){
+				for (let j = 0; j < IR.length; j++) {
 					paidAmount += +IR[j].Installment_Paid;
-					if(j === (IR.length -1)){
+					if (j === IR.length - 1) {
 						const lastInstallmentMonth = IR[j].Installment_Month;
 
 						const lastDate = new Date(lastInstallmentMonth);
@@ -911,32 +919,32 @@ class BookingController {
 						const monthDiff = currentDate.getMonth() - lastDate.getMonth();
 
 						totalMonthsDiff = yearDiff * 12 + monthDiff;
-
 					}
-					if (IR[j].RECEIPT_HEAD === 'installments' && !uniqueBkiDetailIds.includes(+IR[j].BKI_DETAIL_ID)) {
+					if (IR[j].RECEIPT_HEAD === "installments" && !uniqueBkiDetailIds.includes(+IR[j].BKI_DETAIL_ID)) {
 						// Add only if BKI_DETAIL_ID is not already in the array
 						uniqueBkiDetailIds.push(+IR[j].BKI_DETAIL_ID);
 					}
 				}
 				const OSTAmount = await BookingService.outStandingAmount(bookings[i].BK_ID);
-				bookings[i].setDataValue("BK_ID",bookings[i].BK_ID);
-				bookings[i].setDataValue("advanceAmount" , advAmount)
-				bookings[i].setDataValue("totalAmount" , totalAmount)
-				bookings[i].setDataValue("amountPaid" , paidAmount)
-				bookings[i].setDataValue("amountRemaing" , (totalAmount - (paidAmount+advAmount)))
-				bookings[i].setDataValue("InstallmentsUnpaidCount" , (bkiDetailIds.length - uniqueBkiDetailIds.length))
-				bookings[i].setDataValue("oustadingMonthCount" , totalMonthsDiff)
-				bookings[i].setDataValue("outStandingAmount" , OSTAmount)
+				bookings[i].setDataValue("BK_ID", bookings[i].BK_ID);
+				bookings[i].setDataValue("advanceAmount", advAmount);
+				bookings[i].setDataValue("totalAmount", totalAmount);
+				bookings[i].setDataValue("amountPaid", paidAmount);
+				bookings[i].setDataValue("amountRemaing", totalAmount - (paidAmount + advAmount));
+				bookings[i].setDataValue("InstallmentsUnpaidCount", bkiDetailIds.length - uniqueBkiDetailIds.length);
+				bookings[i].setDataValue("oustadingMonthCount", totalMonthsDiff);
+				bookings[i].setDataValue("outStandingAmount", OSTAmount);
+				bookings[i].setDataValue("uniqueBkiDetailIds", uniqueBkiDetailIds.legth);
 
 				data.push({
-					booking: bookings[i],					
+					booking: bookings[i]
 				});
 				bkiDetailIds = [];
 				uniqueBkiDetailIds = [];
 			}
 
 			return res.send({
-				mesasge: "Bookings Retrieved Successfully!", 
+				mesasge: "Bookings Retrieved Successfully!",
 				data: data
 			});
 		} catch (error) {
@@ -1445,7 +1453,7 @@ class BookingController {
 				}
 			]
 		});
-		console.log("BeFOREeeeeeeeeeeee",before);
+		console.log("BeFOREeeeeeeeeeeee", before);
 		const surchargeRate = 0.001;
 		let surcharge = 0;
 		let total = 0;

@@ -137,6 +137,7 @@ router.get("/job/details/:id", JobController.getJobDetailsById);
 router.get("/dashboard/data", UserController.dashboardData);
 router.get("/surcharge/list", UserController.getAllSurcharges);
 router.post("/dashboard", BookingController.getTotalAmountOfAllBookings);
+router.post("/dashboard/detail", BookingController.dashboardDetail);
 //protected routes
 
 //Job Routes
