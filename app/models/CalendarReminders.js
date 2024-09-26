@@ -17,12 +17,12 @@ module.exports = (sequelize, Sequelize) => {
             notEmpty: true,
         },
         Start_Date: {
-            type: Sequelize.DATE,
+            type: Sequelize.STRING,
             allowNull: true,
             notEmpty: true,
         },
         End_Date: {
-            type: Sequelize.DATE,
+            type: Sequelize.STRING,
             allowNull: true,
             notEmpty: true,
         },
@@ -38,6 +38,11 @@ module.exports = (sequelize, Sequelize) => {
         },
         BK_ID: {
             type: Sequelize.INTEGER(11),
+            allowNull: true,
+            notEmpty: true
+        },
+        Event_ID: {
+            type: Sequelize.STRING,
             allowNull: true,
             notEmpty: true
         },

@@ -17,7 +17,8 @@ const {
 	Voucher,
 	Unit,
 	Block,
-	MYLocation
+	MYLocation,
+	Street
 } = require("../../models/index.js");
 const CustomErrorHandler = require("../../services/CustomErrorHandler");
 const pdfGenerator = require("../../services/PdfGenerator.js");
@@ -28,6 +29,28 @@ const AccountTransaction = require("../../models/AccountTransaction.js");
 const { Op, Sequelize, where } = require("sequelize");
 const BookingService = require("../../services/BookingService.js");
 const Booking_Installment_Details = require("../../models/Booking_Installment_Details.js");
+
+function formatBuyersContact(buyersContact) {
+	// Check if the length of the contact with dashes is 12
+	if (buyersContact.length === 12) {
+		// Remove all dashes from the contact number
+		let cleanedNumber = buyersContact.replace(/-/g, '');
+
+		// If the length of the number without dashes is 10, add '0' at the start and format it
+		if (cleanedNumber.length === 10) {
+			cleanedNumber = '0' + cleanedNumber;
+			cleanedNumber = cleanedNumber.slice(0, 4) + '-' + cleanedNumber.slice(4);
+		} else if (cleanedNumber.length === 11) {
+			// If the length of the number without dashes is 11, add a dash after the 4th character
+			cleanedNumber = cleanedNumber.slice(0, 4) + '-' + cleanedNumber.slice(4);
+		}
+
+		return cleanedNumber; // Return the cleaned and formatted number
+	}
+
+	// If the length is not 12, return the original number
+	return buyersContact;
+}
 
 class BookingController {
 	///UPDATE NDC Status
@@ -842,6 +865,7 @@ class BookingController {
 			return next(error);
 		}
 	};
+	
 
 	static getTotalAmountOfAllBookings = async( req, res, next ) => {
 		try {
@@ -878,6 +902,15 @@ class BookingController {
 						as: "Member", 
 						model: Member,
 					},
+					{ as: "UnitType", model: UnitType },
+					{ as: "PlotSize", model: PlotSize },
+					{ as: "Phase", model: Phase },
+					{ as: "Sector", model: Sector },
+					{ as: "Unit", model: Unit, include: [
+						{ as: "Block", model: Block },
+						{ as: "MemNominee", model: MemNominee },
+						{ as: "Street", model: Street }
+					], }
 				],
 				limit: limit,
 				offset: offset,
@@ -919,6 +952,7 @@ class BookingController {
 					}
 				}
 				const OSTAmount = await BookingService.outStandingAmount(bookings[i].BK_ID);
+				let cleanNumber = formatBuyersContact(bookings[i].Member.BuyerContact)
 				bookings[i].setDataValue("BK_ID",bookings[i].BK_ID);
 				bookings[i].setDataValue("advanceAmount" , advAmount)
 				bookings[i].setDataValue("totalAmount" , totalAmount)
@@ -927,6 +961,7 @@ class BookingController {
 				bookings[i].setDataValue("InstallmentsUnpaidCount" , (bkiDetailIds.length - uniqueBkiDetailIds.length))
 				bookings[i].setDataValue("oustadingMonthCount" , totalMonthsDiff)
 				bookings[i].setDataValue("outStandingAmount" , OSTAmount)
+				bookings[i].setDataValue("buyerContact" , cleanNumber)
 
 				data.push({
 					booking: bookings[i],					
