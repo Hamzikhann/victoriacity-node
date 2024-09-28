@@ -117,7 +117,6 @@ const WithdrawalController = require("../app/http/controllers/withdrawalControll
 const WithdrawController = require("../app/http/controllers/withdrawController.js");
 const ReminderController = require("../app/http/controllers/CalendarReminder.js");
 
-
 const upload = multer({ dest: "uploads/" });
 const router = express.Router();
 
@@ -133,7 +132,7 @@ router.post("/pay/surcharges", UserController.paySurcharges);
 router.post("/surcharge/pdf", UserController.downloadSurchargeReport);
 router.post("/search/file", UserController.search);
 router.post("/surcharge", UserController.surcharges);
-router.post('/reminder/create', ReminderController.create);
+router.post("/reminder/create", ReminderController.create);
 router.post("/reminder/getbyid", ReminderController.getById);
 router.post("/reminder/getallbyids", ReminderController.getAllByIds);
 router.post("/reminder/delete", ReminderController.delete);
@@ -144,7 +143,7 @@ router.get("/job/details/:id", JobController.getJobDetailsById);
 router.get("/dashboard/data", UserController.dashboardData);
 router.get("/surcharge/list", UserController.getAllSurcharges);
 router.post("/dashboard", BookingController.getTotalAmountOfAllBookings);
-router.post("/dashboard/detail", BookingController.dashboardDetail);
+// router.post("/dashboard/detail", BookingController.dashboardDetail);
 //protected routes
 
 //Job Routes

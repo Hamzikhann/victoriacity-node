@@ -869,7 +869,7 @@ class BookingController {
 	static getTotalAmountOfAllBookings = async (req, res, next) => {
 		try {
 			const page = req.body.page || 1; // Get the page from request query or default to 1
-			const limit = req.body.limit || 25; // Limit the number of documents to 25 per page
+			const limit = req.body.limit || 5; // Limit the number of documents to 25 per page
 			const offset = (page - 1) * limit; // Calculate the offset based on the current page
 
 			let data = [];
@@ -906,18 +906,16 @@ class BookingController {
 						where: { BK_ID: Sequelize.col("Booking_Mst.BK_ID") }, // Match BK_ID from Booking
 						required: false
 					},
-					{ as: "UnitType", model: UnitType },
-					{ as: "PlotSize", model: PlotSize },
-					{ as: "Phase", model: Phase },
-					{ as: "Sector", model: Sector },
+					{ as: "Member", model: Member, attributes: ["BuyerName", "BuyerContact", "BuyerCNIC"] },
+					{ as: "Phase", model: Phase, attributes: ["NAME"] },
+					{ as: "Sector", model: Sector, attributes: ["NAME"] },
+					{ as: "UnitType", model: UnitType, attributes: ["Name"] },
+					{ as: "PlotSize", model: PlotSize, attributes: ["Name"] },
 					{
 						as: "Unit",
 						model: Unit,
-						include: [
-							{ as: "Block", model: Block },
-							{ as: "MemNominee", model: MemNominee },
-							{ as: "Street", model: Street }
-						]
+						attributes: ["Plot_No"],
+						include: { as: "Block", model: Block, attributes: ["Name"] }
 					}
 				],
 				limit: limit,
@@ -966,6 +964,7 @@ class BookingController {
 				bookings[i].setDataValue("InstallmentsUnpaidCount", bkiDetailIds.length - uniqueBkiDetailIds.length);
 				bookings[i].setDataValue("oustadingMonthCount", totalMonthsDiff);
 				bookings[i].setDataValue("outStandingAmount", OSTAmount);
+				bookings[i].setDataValue("uniqueBkiDetailIds", uniqueBkiDetailIds.length);
 				bookings[i].setDataValue("buyerContact", cleanNumber);
 
 				data.push({
