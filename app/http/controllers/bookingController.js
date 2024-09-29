@@ -866,6 +866,32 @@ class BookingController {
 		}
 	};
 
+	static dashboardTotal = async (rea, res, next) => {
+		try {
+			let totalAmount = 0;
+			let totalOutstandingTillDate = 0;
+			let data = {};
+			const bookings = await Booking.findAll({
+				attributes: ["BK_ID", "Reg_Code_Disply", "SRForm_No", "Form_Code", "Total_Amt", "Advance_Amt", "Status"]
+			});
+			console.log("hit");
+
+			// bookings.forEach(async (booking) => {
+				for(let i=0;i<bookings.length;i++){
+				totalAmount += JSON.parse(bookings[i]?.Total_Amt);
+				const OSTAmount = await BookingService.outStandingAmount(bookings[i]?.BK_ID);
+				totalOutstandingTillDate += OSTAmount;
+			};
+			data = {
+				totalAmount,
+				totalOutstandingTillDate
+			};
+			res.send({ message: "Dashboard Total Counts", data: data });
+		} catch (error) {
+			return next(error);
+		}
+	};
+
 	static getTotalAmountOfAllBookings = async (req, res, next) => {
 		try {
 			const page = req.body.page || 1; // Get the page from request query or default to 1
@@ -875,7 +901,7 @@ class BookingController {
 			let data = [];
 			let uniqueBkiDetailIds = [];
 			let bkiDetailIds = [];
-
+			let overAllTotal = 0;
 			const bookings = await Booking.findAll({
 				attributes: ["BK_ID", "Reg_Code_Disply", "SRForm_No", "Form_Code", "Total_Amt", "Advance_Amt", "Status"],
 				include: [
@@ -967,6 +993,7 @@ class BookingController {
 				bookings[i].setDataValue("uniqueBkiDetailIds", uniqueBkiDetailIds.length);
 				bookings[i].setDataValue("buyerContact", cleanNumber);
 
+				overAllTotal += totalAmount;
 				data.push({
 					booking: bookings[i]
 				});
@@ -976,7 +1003,8 @@ class BookingController {
 
 			return res.send({
 				mesasge: "Bookings Retrieved Successfully!",
-				data: data
+				data: data,
+				overAllTotal
 			});
 		} catch (error) {
 			return next(error);

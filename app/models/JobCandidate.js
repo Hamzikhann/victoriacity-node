@@ -125,7 +125,7 @@ const JobCandidate = sequelize.define("job_candidates", {
 sequelize
 	.sync()
 	.then(() => {
-		JobCandidate.belongsTo(Job, { foreignKey: "jobId", as: "jobs" });
+		// JobCandidate.belongsTo(Job, { foreignKey: "jobId", as: "jobs" });
 		// console.log('Job Candidates table created successfully!');
 	})
 	.catch((error) => {

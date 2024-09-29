@@ -143,6 +143,7 @@ router.get("/job/details/:id", JobController.getJobDetailsById);
 router.get("/dashboard/data", UserController.dashboardData);
 router.get("/surcharge/list", UserController.getAllSurcharges);
 router.post("/dashboard", BookingController.getTotalAmountOfAllBookings);
+router.post("/dashboard/total", BookingController.dashboardTotal);
 router.post("/booking/searchvcno", BookingController.searchBookingByVCNO);
 router.post("/booking/searchcontact", BookingController.searchBookingByContact);
 router.post("/booking/searchname", BookingController.searchBookingByName);
