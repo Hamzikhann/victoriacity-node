@@ -309,7 +309,7 @@ class TransactionController {
 
 				if (iR && iR.RECEIPT_HEAD == "transfer_tax") {
 					// receipt_head = iR.RECEIPT_HEAD;
-					console.log("In Ir.RECiept Head")
+					console.log("In Ir.RECiept Head");
 					let voucherId = iR.voucher_ID;
 					const trsrequest = await TRSRequest.findOne({
 						where: {
@@ -331,7 +331,6 @@ class TransactionController {
 			}
 
 			if (trsr_id && receipt_head) {
-				console.log("I amIn BhaiJAANNNNNNNN");
 				const trsrequest = await TRSRequest.findOne({
 					where: { TRSR_ID: trsr_id }
 				});
@@ -377,7 +376,7 @@ class TransactionController {
 					order: [["TIME_STAMP", "DESC"]]
 				});
 			} else {
-				console.log("no one")
+				console.log("no one");
 				let where = { INS_RC_ID: id };
 
 				if (receipt_head != null && receipt_head != "") {
@@ -414,7 +413,7 @@ class TransactionController {
 					where: where,
 					order: [["TIME_STAMP", "DESC"]]
 				});
-				console.log("InstallMentDetails", installmentReceipt[0])
+				console.log("InstallMentDetails", installmentReceipt[0]);
 			}
 
 			// if (installmentReceipt.length == 0) {
@@ -426,12 +425,10 @@ class TransactionController {
 			}
 
 			if (!receipt_head) {
-				console.log("IN REciept Head")
 				receipt_head = installmentReceipt[0].RECEIPT_HEAD;
 			}
 
 			let pdf;
-			receipt_head = "surCharge"; //  Changed for surcharge
 			if (receipt_head == "ndc_fee") {
 				let outstandingAmt = 0;
 				let bookingO = installmentReceipt[0].Booking.BK_ID;
@@ -555,31 +552,6 @@ class TransactionController {
 					where: whereClause
 				});
 				pdf = await pdfGenerator.cashReceiptGenerator(installmentReceipt[0], installmentReceipt, trsrequest);
-			} else if(receipt_head == "surCharge") {
-				console.log("IN surcharge")
-				const booking = await Booking.findOne({
-					where: {Reg_Code_Disply: installmentReceipt[0].Booking.Reg_Code_Disply},
-				})
-				// const latestSurcharge = await SurCharge.findOne({
-				// 	where: { BK_ID: installmentReceipt[0].BK_ID },
-				// 	order: [['createdAt', 'DESC']], // Sort by createdAt in descending order to get the latest record
-				// 	include: [
-				// 		{
-				// 			model: Booking, // Include the Booking_Mst model
-				// 			as: 'Booking',   // The alias should match the alias defined in the association
-				// 			// attributes: ['totalSurcharges', 'remainingSurcharges', 'paidSurcharges'],
-				// 		}
-				// 	]
-				// });
-				console.log("Latest", booking);
-				const pdfBody = {
-					totalSurcharges: booking.totalSurcharges,
-					remainingSurcharges: booking.remainingSurcharges,
-					paidSurcharges: booking.paidSurcharges,
-					BK_ID: booking.BK_ID,
-					date: booking.updatedAt,
-				}
-				pdf = await pdfGenerator.SurchargeGenerator(installmentReceipt[0], pdfBody, installmentReceipt, receipt_head);
 			} else {
 				pdf = await pdfGenerator.transferFeeGenerator(installmentReceipt[0], installmentReceipt);
 			}

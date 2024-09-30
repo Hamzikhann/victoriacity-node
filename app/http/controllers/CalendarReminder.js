@@ -95,97 +95,119 @@ const deleteEvent = async (eventId) => {
 
 exports.create = async (req, res) => {
 	try {
-		let Summary = req.body.Summary;
-		let Description = req.body.Description;
+		// console.log(req);
+		console.log("entered");
+
+		let callDisposition = req.body.callDisposition;
+		// let Description = req.body.Description;
 		let Reminder_Time = req.body.Reminder_Time;
-		let USER_ID = req.body.USER_ID;
+		let USER_ID = req.user.id;
 		let BK_ID = req.body.BK_ID;
 		let Comment = req.body.Comment ? req.body.Comment : null;
-		console.log(1);
+		console.log(45);
 
 		// Parse the Reminder_Time from the body (user's specified time)
-		let reminderTime = new Date(Date.parse(Reminder_Time));
-
-		console.log(2);
+		// let reminderTime = new Date(Date.parse(Reminder_Time));
 
 		// Event for Google Calendar with provided start and end times
-		let event = {
-			summary: `${Summary}`,
-			description: `${Description}`,
-			start: {
-				dateTime: reminderTime.toISOString(),
-				timeZone: "Asia/Karachi" // Set the time zone to Pakistan
-			},
-			end: {
-				dateTime: new Date(reminderTime.getTime() + 5 * 60 * 1000).toISOString(),
-				timeZone: "Asia/Karachi" // Set the time zone to Pakistan
-			},
-			reminders: {
-				useDefault: false, // Disable default reminders
-				overrides: [
-					{ method: "popup", minutes: 0 } // Trigger exactly at the specified time
-				]
-			}
-		};
+		// let event = {
+		// 	summary: `${Summary}`,
+		// 	description: `${Description}`,
+		// 	start: {
+		// 		dateTime: reminderTime.toISOString(),
+		// 		timeZone: "Asia/Karachi" // Set the time zone to Pakistan
+		// 	},
+		// 	end: {
+		// 		dateTime: new Date(reminderTime.getTime() + 5 * 60 * 1000).toISOString(),
+		// 		timeZone: "Asia/Karachi" // Set the time zone to Pakistan
+		// 	},
+		// 	reminders: {
+		// 		useDefault: false, // Disable default reminders
+		// 		overrides: [
+		// 			{ method: "popup", minutes: 0 } // Trigger exactly at the specified time
+		// 		]
+		// 	}
+		// };
 
-		console.log(3);
+		// const eventId = await insertEvent(event);
 
-		const eventId = await insertEvent(event);
-
-		console.log(4);
-
-		if (!eventId) {
-			return res.status(500).send({ message: "Failed to create calendar event." });
-		}
-
-		console.log(5);
+		// if (!eventId) {
+		// 	return res.status(500).send({ message: "Failed to create calendar event." });
+		// }
 
 		const reminderData = {
-			Summary,
-			Description,
-			Start_Date: reminderTime.toISOString(),
-			End_Date: new Date(reminderTime.getTime() + 5 * 60 * 1000).toISOString(),
+			Start_Date: Reminder_Time,
+			End_Date: Reminder_Time,
+			// End_Date: new Date(Reminder_Time.getTime() + 5 * 60 * 1000).toISOString(),
 			USER_ID,
-			BK_ID,
-			Event_ID: eventId,
-			status: true
+			BK_ID
+			// Event_ID: eventId,
 		};
-
+		let commentObj = {
+			callDisposition,
+			Comment
+		};
 		console.log(6);
 
-		const reminder = await CalenderReminder.create(reminderData);
+		CalenderReminder.findOne({ where: { BK_ID: reminderData.BK_ID } })
+			.then(async (response) => {
+				if (response) {
+					let updatereminder = await CalenderReminder.update(reminderData, {
+						where: { BK_ID: reminderData.BK_ID },
+						returning: true
+					});
+					console.log(updatereminder);
+					commentObj.CR_ID = updatereminder[1];
 
-		const booking = await Booking.findOne({ where: { BK_ID: reminder.BK_ID } });
+					let createComment = await CalenderComment.create(commentObj);
 
-		console.log(booking);
+					res.send({ message: "Reminder Created" });
+				} else {
+					console.log("in else");
+					let createReminder = await CalenderReminder.create(reminderData);
 
-		if (!booking) {
-			res.status(404).send({ message: "Booking not FOund!" });
-		}
+					commentObj.CR_ID = createReminder.CR_ID;
 
-		booking.update({
-			CR_ID: reminder.CR_ID
-		});
+					let createComment = await CalenderComment.create(commentObj);
 
-		if (Comment !== null) {
-			console.log(7);
-			const commentBody = {
-				Comment,
-				CR_ID: reminder.CR_ID
-			};
-			const createComment = await CalenderComment.create(commentBody);
-
-			await reminder.update({
-				COMMENT_ID: createComment.id
+					res.send({ message: "Reminder Created" });
+				}
+			})
+			.catch((err) => {
+				res.status(500).send(err);
 			});
 
-			await reminder.reload();
-		}
+		// const booking = await Booking.findOne({ where: { BK_ID: reminder.BK_ID } });
 
-		res.status(200).send({
-			message: "Reminder created Successfully!",
-			data: reminder
-		});
+		// console.log(booking);
+
+		// if (!booking) {
+		// 	res.status(404).send({ message: "Booking not FOund!" });
+		// }
+
+		// booking.update({
+		// 	CR_ID: reminder.CR_ID
+		// });
+
+		// if (Comment !== null) {
+		// 	console.log(7);
+		// 	const commentBody = {
+		// 		Comment,
+		// 		CR_ID: reminder.CR_ID
+		// 	};
+		// 	const createComment = await CalenderComment.create(commentBody);
+
+		// 	await reminder.update({
+		// 		COMMENT_ID: createComment.id
+		// 	});
+
+		// 	await reminder.reload();
+		// }
+
+		// res.status(200).send({
+		// 	message: "Reminder created Successfully!"
+		// 	// data: reminder
+		// });
 	} catch (error) {
 		res.status(500).send(error);
 	}
