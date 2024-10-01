@@ -143,7 +143,7 @@ router.get("/job/details/:id", JobController.getJobDetailsById);
 router.get("/dashboard/data", UserController.dashboardData);
 router.get("/surcharge/list", UserController.getAllSurcharges);
 router.post("/dashboard", [checkUserAuth], BookingController.getTotalAmountOfAllBookings);
-router.post("/dashboard/total", [checkUserAuth], BookingController.dashboardTotal);
+router.post("/dashboard/total", BookingController.dashboardTotal);
 router.post("/booking/searchvcno", [checkUserAuth], BookingController.searchBookingByVCNO);
 router.post("/booking/searchcontact", [checkUserAuth], BookingController.searchBookingByContact);
 router.post("/booking/searchname", [checkUserAuth], BookingController.searchBookingByName);
@@ -525,6 +525,7 @@ router.post("/booking/getStatementFile/bulk", BookingController.createStatementF
 router.post("/transaction/add", [checkUserAuth], TransactionController.addTransaction); //Create and Add new Transactions
 router.get("/transaction/id/list", [checkUserAuth], TransactionController.getTransactionById); //Search Transactions by Transactions ID
 router.get("/transaction/BK_Reg_Code/list", [checkUserAuth], TransactionController.getTransactionByBK_Reg_Code);
+router.get("/transaction/BK_Reg_Code/date", [checkUserAuth], TransactionController.getTransactionByDate);
 router.get("/transaction/file", [checkUserAuth], TransactionController.transactionPdf); //Search Transactions by Transactions ID
 router.get("/transaction/list", [checkUserAuth], TransactionController.getAllTransactions); //Get the list of all available Transactionss
 router.put("/transaction/update", [checkUserAuth], TransactionController.updateTransaction); //Search Transactions by Id and update

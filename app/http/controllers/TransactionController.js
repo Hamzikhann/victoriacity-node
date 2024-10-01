@@ -158,6 +158,46 @@ class TransactionController {
 			return next(error);
 		}
 	};
+	static getTransactionByDate = async (req, res, next) => {
+		let bkdate = req.query.bkdate;
+		console.log(typeof req.query.bkdate);
+		try {
+			const TransactionById = await InstallmentReceipts.findAll({
+				include: [
+					{ as: "Booking", model: Booking },
+					{ as: "Payment_Mode", model: Payment_Mode },
+					{
+						as: "Booking_Installment_Details",
+						model: BookingInstallmentDetails
+					},
+					{ as: "Installment_Type", model: InstallmentType },
+					{ as: "Member", model: Member },
+					{ as: "User", model: User }
+				],
+				// where: {  '$Booking.bkdate$': BK_Reg_Code },
+				where: {
+					IRC_Date: {
+						[Sequelize.Op.like]: `%${bkdate}%`
+					}
+				}
+			});
+			console.log(TransactionById);
+			if (TransactionById.length > 0) {
+				return res.status(200).send({
+					status: 200,
+					message: "get Transaction successfully",
+					Transaction: TransactionById
+				});
+			} else {
+				return res.status(400).send({
+					status: 404,
+					message: "No Transaction Found against BK_Reg_Code"
+				});
+			}
+		} catch (error) {
+			return next(error);
+		}
+	};
 	// GET ALL AVAILABLE Transactions
 	static getAllTransactions = async (req, res) => {
 		const page = parseInt(req.query.page) - 1 || 0;
