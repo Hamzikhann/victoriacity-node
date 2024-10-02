@@ -993,10 +993,7 @@ class BookingController {
 				bookings[i].setDataValue("amountPaid", paidAmount);
 				bookings[i].setDataValue("amountRemaing", totalAmount - (paidAmount + advAmount));
 				bookings[i].setDataValue("InstallmentsUnpaidCount", bkiDetailIds.length - uniqueBkiDetailIds.length);
-				bookings[i].setDataValue(
-					"oustadingMonthCount",
-					totalMonthsDiff == 0 && OSTAmount.outstandingAmt != 0 ? OSTAmount.count : totalMonthsDiff
-				);
+				bookings[i].setDataValue("oustadingMonthCount", totalMonthsDiff == 0 ? OSTAmount.count : totalMonthsDiff);
 				bookings[i].setDataValue("outStandingAmount", OSTAmount.outstandingAmt);
 				bookings[i].setDataValue("uniqueBkiDetailIds", uniqueBkiDetailIds.length);
 				bookings[i].setDataValue("buyerContact", cleanNumber);
