@@ -974,6 +974,12 @@ class BookingController {
 						const monthDiff = currentDate.getMonth() - lastDate.getMonth();
 
 						totalMonthsDiff = yearDiff * 12 + monthDiff;
+
+						if (totalMonthsDiff < 0 && paidAmount >= totalAmount) {
+							totalMonthsDiff = 0; // Reset to 0 when advance payments cover future months
+						} else if (paidAmount >= totalAmount) {
+							totalMonthsDiff = -Math.abs(totalMonthsDiff); // Reflect that installments are paid in advance
+						}
 						// console.log("totalMonthsDiff totalMonthsDiff", totalMonthsDiff);
 					}
 					//  else {
