@@ -993,7 +993,10 @@ class BookingController {
 				bookings[i].setDataValue("amountPaid", paidAmount);
 				bookings[i].setDataValue("amountRemaing", totalAmount - (paidAmount + advAmount));
 				bookings[i].setDataValue("InstallmentsUnpaidCount", bkiDetailIds.length - uniqueBkiDetailIds.length);
-				bookings[i].setDataValue("oustadingMonthCount", totalMonthsDiff == 0 ? OSTAmount.count : totalMonthsDiff);
+				bookings[i].setDataValue(
+					"oustadingMonthCount",
+					totalMonthsDiff == 0 && OSTAmount.outstandingAmt != 0 ? OSTAmount.count : totalMonthsDiff
+				);
 				bookings[i].setDataValue("outStandingAmount", OSTAmount.outstandingAmt);
 				bookings[i].setDataValue("uniqueBkiDetailIds", uniqueBkiDetailIds.length);
 				bookings[i].setDataValue("buyerContact", cleanNumber);
@@ -1557,7 +1560,7 @@ class BookingController {
 
 	static searchBookingByPlotNo = async (req, res) => {
 		try {
-			const searchItem = req.body.search.trim().toLowerCase();
+			const searchItem = req.body.search.trim();
 
 			let data = [];
 			let uniqueBkiDetailIds = [];
@@ -1603,8 +1606,9 @@ class BookingController {
 					{
 						as: "Unit",
 						model: Unit,
-						where: { Plot_No: { [Sequelize.Op.like]: `%${searchItem}%` } },
-						include: [{ as: "Block", model: Block }]
+						where: { Plot_No: searchItem },
+						include: [{ as: "Block", model: Block }],
+						required: true
 					}
 				]
 			});
