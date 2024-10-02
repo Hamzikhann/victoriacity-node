@@ -993,7 +993,7 @@ class BookingController {
 				bookings[i].setDataValue("amountPaid", paidAmount);
 				bookings[i].setDataValue("amountRemaing", totalAmount - (paidAmount + advAmount));
 				bookings[i].setDataValue("InstallmentsUnpaidCount", bkiDetailIds.length - uniqueBkiDetailIds.length);
-				bookings[i].setDataValue("oustadingMonthCount", totalMonthsDiff == 0 ? OSTAmount.count : totalMonthsDiff);
+				bookings[i].setDataValue("oustadingMonthCount", totalMonthsDiff);
 				bookings[i].setDataValue("outStandingAmount", OSTAmount.outstandingAmt);
 				bookings[i].setDataValue("uniqueBkiDetailIds", uniqueBkiDetailIds.length);
 				bookings[i].setDataValue("buyerContact", cleanNumber);
@@ -1516,6 +1516,12 @@ class BookingController {
 							const monthDiff = currentDate.getMonth() - lastDate.getMonth();
 
 							totalMonthsDiff = yearDiff * 12 + monthDiff;
+
+							if (totalMonthsDiff < 0 && paidAmount >= totalAmount) {
+								totalMonthsDiff = 0; // Reset to 0 when advance payments cover future months
+							} else if (paidAmount >= totalAmount) {
+								totalMonthsDiff = -Math.abs(totalMonthsDiff); // Reflect that installments are paid in advance
+							}
 						}
 						if (IR[j].RECEIPT_HEAD === "installments" && !uniqueBkiDetailIds.includes(+IR[j].BKI_DETAIL_ID)) {
 							console.log(10);
