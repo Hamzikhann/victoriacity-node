@@ -99,7 +99,7 @@ exports.create = async (req, res) => {
 		console.log("entered");
 
 		let callDisposition = req.body.callDisposition;
-		// let Description = req.body.Description;
+		let reminderDate = req.body.reminderDate;
 		let Reminder_Time = req.body.Reminder_Time;
 		let USER_ID = req.user.id;
 		let BK_ID = req.body.BK_ID;
@@ -136,8 +136,9 @@ exports.create = async (req, res) => {
 		// }
 
 		const reminderData = {
-			Start_Date: Reminder_Time,
-			End_Date: Reminder_Time,
+			Start_Date: reminderDate,
+			End_Date: reminderDate,
+			reminderTime: Reminder_Time,
 			// End_Date: new Date(Reminder_Time.getTime() + 5 * 60 * 1000).toISOString(),
 			USER_ID,
 			BK_ID
@@ -151,13 +152,13 @@ exports.create = async (req, res) => {
 
 		CalenderReminder.findOne({ where: { BK_ID: reminderData.BK_ID } })
 			.then(async (response) => {
-				if (response) {
+				if (response && response.USER_ID == reminderData.USER_ID) {
 					let updatereminder = await CalenderReminder.update(reminderData, {
-						where: { BK_ID: reminderData.BK_ID },
-						returning: true
+						where: { BK_ID: reminderData.BK_ID }
 					});
+					let getUpdatedReminder = await CalenderReminder.findOne({ where: { BK_ID: reminderData.BK_ID } });
 					console.log(updatereminder);
-					commentObj.CR_ID = updatereminder[1];
+					commentObj.CR_ID = getUpdatedReminder.CR_ID;
 
 					let createComment = await CalenderComment.create(commentObj);
 
@@ -216,10 +217,10 @@ exports.create = async (req, res) => {
 exports.getById = async (req, res) => {
 	try {
 		const bkid = req.body.bkid;
-		const crid = req.body.crid;
+		const userid = req.user.id;
 
 		const findEvent = await CalenderReminder.findOne({
-			where: { BK_ID: bkid, CR_ID: crid },
+			where: { BK_ID: bkid, USER_ID: userid },
 			include: [
 				{
 					as: "Comments",
@@ -229,22 +230,15 @@ exports.getById = async (req, res) => {
 		});
 
 		// Fetch the event by its ID
-		const event = await getEvent(findEvent.Event_ID);
+		// const event = await getEvent(findEvent.Event_ID);
 
 		// If event is found, return it
-		if (event) {
-			return res.status(200).send({
-				message: "Event fetched successfully!",
-				data: {
-					Reminder: findEvent,
-					event: event
-				}
-			});
-		} else {
-			return res.status(404).send({
-				message: "Event not found"
-			});
-		}
+		return res.status(200).send({
+			message: "Event fetched successfully!",
+			data: {
+				Reminder: findEvent
+			}
+		});
 	} catch (error) {
 		res.status(500).send({
 			message: `Error fetching event: ${error.message}`

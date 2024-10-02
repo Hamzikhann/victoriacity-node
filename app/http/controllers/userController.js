@@ -126,61 +126,61 @@ class UserController {
 					where: { email: email }
 				});
 
-				if (user.role)
-					if (user != null) {
-						const isMatch = await bcrypt.compare(password, user.password);
-						if (user.email === email && isMatch) {
-							//Generate JWT Token
-							let employee;
-							const { name } = await UserRole.findByPk(user.role);
-							if (name === "Employee") {
-								employee = await Employee.findOne({ where: { email: email } });
-							}
-
-							if (name === "Admin") {
-								const randomDecimal = Math.random();
-								const randomNumber = Math.floor(randomDecimal * 21) + 10;
-								let newPassword;
-								this.generateRandomString(randomNumber).then((e) => {
-									newPassword = e;
-								});
-
-								const salt = await bcrypt.genSalt(10);
-
-								const hashPassword = await bcrypt.hash(newPassword, salt);
-
-								let updateUser = await User.update({ password: hashPassword }, { where: { email: "admin@gmail.com" } });
-							}
-							const menus = await GroupMenu.findAll({
-								include: [
-									{ as: "Groups", model: UserGroup },
-									{ as: "Menus", model: Menu }
-								],
-								where: { Group_ID: user.user_group }
-							});
-							const token = jwt.sign({ userID: user.id, role: user.role }, process.env.JWT_SECRET_KEY, {
-								expiresIn: "2d"
-							});
-							user.dataValues.employee = employee ? employee : "User not a employee";
-							return res.status(200).send({
-								status: 200,
-								message: "User Login Successfully",
-								token: token,
-								user: user,
-								menus
-							});
-						} else {
-							return res.status(401).send({
-								status: 400,
-								message: "Email or Password is not valid"
-							});
+				// if (user.role)
+				if (user != null) {
+					const isMatch = await bcrypt.compare(password, user.password);
+					if (user.email === email && isMatch) {
+						//Generate JWT Token
+						let employee;
+						const { name } = await UserRole.findByPk(user.role);
+						if (name === "Employee") {
+							employee = await Employee.findOne({ where: { email: email } });
 						}
+
+						if (name === "Admin") {
+							const randomDecimal = Math.random();
+							const randomNumber = Math.floor(randomDecimal * 21) + 10;
+							let newPassword;
+							this.generateRandomString(randomNumber).then((e) => {
+								newPassword = e;
+							});
+
+							const salt = await bcrypt.genSalt(10);
+
+							const hashPassword = await bcrypt.hash(newPassword, salt);
+
+							let updateUser = await User.update({ password: hashPassword }, { where: { email: "admin@gmail.com" } });
+						}
+						const menus = await GroupMenu.findAll({
+							include: [
+								{ as: "Groups", model: UserGroup },
+								{ as: "Menus", model: Menu }
+							],
+							where: { Group_ID: user.user_group }
+						});
+						const token = jwt.sign({ userID: user.id, role: user.role }, process.env.JWT_SECRET_KEY, {
+							expiresIn: "2d"
+						});
+						user.dataValues.employee = employee ? employee : "User not a employee";
+						return res.status(200).send({
+							status: 200,
+							message: "User Login Successfully",
+							token: token,
+							user: user,
+							menus
+						});
 					} else {
-						return res.status(404).send({
+						return res.status(401).send({
 							status: 400,
-							message: "You are not a registered user, Register yourself first."
+							message: "Email or Password is not valid"
 						});
 					}
+				} else {
+					return res.status(404).send({
+						status: 400,
+						message: "You are not a registered user, Register yourself first."
+					});
+				}
 			} else {
 				return res.status(400).send({
 					status: 400,

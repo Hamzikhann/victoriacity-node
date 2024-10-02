@@ -974,13 +974,18 @@ class BookingController {
 						const monthDiff = currentDate.getMonth() - lastDate.getMonth();
 
 						totalMonthsDiff = yearDiff * 12 + monthDiff;
+						// console.log("totalMonthsDiff totalMonthsDiff", totalMonthsDiff);
 					}
+					//  else {
+					// 	totalMonthsDiff = 56;
+					// 	console.log("else  totalMonthsDiff totalMonthsDiff", totalMonthsDiff);
+					// }
 					if (IR[j].RECEIPT_HEAD === "installments" && !uniqueBkiDetailIds.includes(+IR[j].BKI_DETAIL_ID)) {
 						// Add only if BKI_DETAIL_ID is not already in the array
 						uniqueBkiDetailIds.push(+IR[j].BKI_DETAIL_ID);
 					}
 				}
-				const OSTAmount = await BookingService.outStandingAmount(bookings[i].BK_ID);
+				const OSTAmount = await BookingService.outStandingAmountforDashboard(bookings[i].BK_ID);
 				let cleanNumber = formatBuyersContact(bookings[i].Member.BuyerContact);
 				bookings[i].setDataValue("BK_ID", bookings[i].BK_ID);
 				bookings[i].setDataValue("advanceAmount", advAmount);
@@ -988,8 +993,8 @@ class BookingController {
 				bookings[i].setDataValue("amountPaid", paidAmount);
 				bookings[i].setDataValue("amountRemaing", totalAmount - (paidAmount + advAmount));
 				bookings[i].setDataValue("InstallmentsUnpaidCount", bkiDetailIds.length - uniqueBkiDetailIds.length);
-				bookings[i].setDataValue("oustadingMonthCount", totalMonthsDiff);
-				bookings[i].setDataValue("outStandingAmount", OSTAmount);
+				bookings[i].setDataValue("oustadingMonthCount", totalMonthsDiff == 0 ? OSTAmount.count : totalMonthsDiff);
+				bookings[i].setDataValue("outStandingAmount", OSTAmount.outstandingAmt);
 				bookings[i].setDataValue("uniqueBkiDetailIds", uniqueBkiDetailIds.length);
 				bookings[i].setDataValue("buyerContact", cleanNumber);
 
@@ -1125,6 +1130,8 @@ class BookingController {
 					bookings[i].setDataValue("InstallmentsUnpaidCount", bkiDetailIds.length - uniqueBkiDetailIds.length);
 					bookings[i].setDataValue("oustadingMonthCount", totalMonthsDiff);
 					bookings[i].setDataValue("outStandingAmount", OSTAmount);
+					bookings[i].setDataValue("uniqueBkiDetailIds", uniqueBkiDetailIds.length);
+
 					bookings[i].setDataValue("buyerContact", cleanNumber);
 
 					data.push({
@@ -1255,6 +1262,8 @@ class BookingController {
 					bookings[i].setDataValue("InstallmentsUnpaidCount", bkiDetailIds.length - uniqueBkiDetailIds.length);
 					bookings[i].setDataValue("oustadingMonthCount", totalMonthsDiff);
 					bookings[i].setDataValue("outStandingAmount", OSTAmount);
+					bookings[i].setDataValue("uniqueBkiDetailIds", uniqueBkiDetailIds.length);
+
 					bookings[i].setDataValue("buyerContact", cleanNumber);
 
 					data.push({
@@ -1393,6 +1402,8 @@ class BookingController {
 					bookings[i].setDataValue("InstallmentsUnpaidCount", bkiDetailIds.length - uniqueBkiDetailIds.length);
 					bookings[i].setDataValue("oustadingMonthCount", totalMonthsDiff);
 					bookings[i].setDataValue("outStandingAmount", OSTAmount);
+					bookings[i].setDataValue("uniqueBkiDetailIds", uniqueBkiDetailIds.length);
+
 					bookings[i].setDataValue("buyerContact", cleanNumber);
 
 					data.push({
@@ -1523,6 +1534,8 @@ class BookingController {
 					bookings[i].setDataValue("InstallmentsUnpaidCount", bkiDetailIds.length - uniqueBkiDetailIds.length);
 					bookings[i].setDataValue("oustadingMonthCount", totalMonthsDiff);
 					bookings[i].setDataValue("outStandingAmount", OSTAmount);
+					bookings[i].setDataValue("uniqueBkiDetailIds", uniqueBkiDetailIds.length);
+
 					bookings[i].setDataValue("buyerContact", cleanNumber);
 
 					data.push({
@@ -1654,6 +1667,8 @@ class BookingController {
 					bookings[i].setDataValue("InstallmentsUnpaidCount", bkiDetailIds.length - uniqueBkiDetailIds.length);
 					bookings[i].setDataValue("oustadingMonthCount", totalMonthsDiff);
 					bookings[i].setDataValue("outStandingAmount", OSTAmount);
+					bookings[i].setDataValue("uniqueBkiDetailIds", uniqueBkiDetailIds.length);
+
 					bookings[i].setDataValue("buyerContact", cleanNumber);
 
 					data.push({
