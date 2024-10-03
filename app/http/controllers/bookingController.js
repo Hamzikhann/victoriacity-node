@@ -51,6 +51,22 @@ function formatBuyersContact(buyersContact) {
 	// If the length is not 12, return the original number
 	return buyersContact;
 }
+function getMonthsDifference(inputDate) {
+	// Convert the input date to a Date object if it's not already
+	const givenDate = new Date(inputDate);
+	const currentDate = new Date();
+
+	// Calculate year and month difference without considering days
+	let yearDiff = currentDate.getFullYear() - givenDate.getFullYear();
+	let monthDiff = currentDate.getMonth() - givenDate.getMonth();
+
+	// Calculate total months difference
+	let totalMonthsDiff = yearDiff * 12 + monthDiff;
+
+	// If totalMonthsDiff is positive, it means the input date is in the past,
+	// if negative, it means the input date is in the future
+	return totalMonthsDiff;
+}
 
 class BookingController {
 	///UPDATE NDC Status
@@ -956,32 +972,45 @@ class BookingController {
 
 				advAmount += +bookings[i].Advance_Amt;
 				const BID = bookings[i].Booking_Installment_Details;
+				let index = bookings[i].Installment_Receipts.length;
+				let lastInstallmentMonth;
+				if (index > 0) {
+					lastInstallmentMonth = bookings[i].Installment_Receipts[index - 1].Installment_Month;
+				}
+				if (lastInstallmentMonth) {
+					totalMonthsDiff = getMonthsDifference(lastInstallmentMonth);
+				} else {
+					lastInstallmentMonth = bookings[i].Booking_Installment_Details[0].Installment_Month;
+					totalMonthsDiff = getMonthsDifference(lastInstallmentMonth);
+				}
+
 				for (let j = 0; j < BID.length; j++) {
 					let installmentDue = +BID[j].Installment_Due;
 					totalAmount += installmentDue;
 					bkiDetailIds.push(+BID[j].BKI_DETAIL_ID);
 				}
 				const IR = bookings[i].Installment_Receipts;
+
 				for (let j = 0; j < IR.length; j++) {
 					paidAmount += +IR[j].Installment_Paid;
-					if (j === IR.length - 1) {
-						const lastInstallmentMonth = IR[j].Installment_Month;
+					// if (j === IR.length - 1) {
+					// 	const lastInstallmentMonth = IR[j].Installment_Month;
 
-						const lastDate = new Date(lastInstallmentMonth);
-						const currentDate = new Date();
+					// 	const lastDate = new Date(lastInstallmentMonth);
+					// 	const currentDate = new Date();
 
-						const yearDiff = currentDate.getFullYear() - lastDate.getFullYear();
-						const monthDiff = currentDate.getMonth() - lastDate.getMonth();
+					// 	const yearDiff = currentDate.getFullYear() - lastDate.getFullYear();
+					// 	const monthDiff = currentDate.getMonth() - lastDate.getMonth();
 
-						totalMonthsDiff = yearDiff * 12 + monthDiff;
+					// 	totalMonthsDiff = yearDiff * 12 + monthDiff;
 
-						if (totalMonthsDiff < 0 && paidAmount >= totalAmount) {
-							totalMonthsDiff = 0; // Reset to 0 when advance payments cover future months
-						} else if (paidAmount >= totalAmount) {
-							totalMonthsDiff = -Math.abs(totalMonthsDiff); // Reflect that installments are paid in advance
-						}
-						// console.log("totalMonthsDiff totalMonthsDiff", totalMonthsDiff);
-					}
+					// 	if (totalMonthsDiff < 0 && paidAmount >= totalAmount) {
+					// 		totalMonthsDiff = 0; // Reset to 0 when advance payments cover future months
+					// 	} else if (paidAmount >= totalAmount) {
+					// 		totalMonthsDiff = -Math.abs(totalMonthsDiff); // Reflect that installments are paid in advance
+					// 	}
+					// 	// console.log("totalMonthsDiff totalMonthsDiff", totalMonthsDiff);
+					// }
 					//  else {
 					// 	totalMonthsDiff = 56;
 					// 	console.log("else  totalMonthsDiff totalMonthsDiff", totalMonthsDiff);
@@ -991,6 +1020,7 @@ class BookingController {
 						uniqueBkiDetailIds.push(+IR[j].BKI_DETAIL_ID);
 					}
 				}
+
 				const OSTAmount = await BookingService.outStandingAmountforDashboard(bookings[i].BK_ID);
 				let cleanNumber = formatBuyersContact(bookings[i].Member.BuyerContact);
 				bookings[i].setDataValue("BK_ID", bookings[i].BK_ID);
