@@ -55,6 +55,7 @@ function getMonthsDifference(inputDate) {
 	// Convert the input date to a Date object if it's not already
 	const givenDate = new Date(inputDate);
 	const currentDate = new Date();
+	console.log("current Datecurrent Datecurrent Datecurrent Datecurrent Datecurrent Date", currentDate);
 
 	// Calculate year and month difference without considering days
 	let yearDiff = currentDate.getFullYear() - givenDate.getFullYear();
