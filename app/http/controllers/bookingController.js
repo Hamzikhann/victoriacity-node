@@ -904,12 +904,12 @@ class BookingController {
 
 			for (let i = 0; i < bookings.length; i++) {
 				totalAmount += JSON.parse(bookings[i]?.Total_Amt);
-				const OSTAmount = await BookingService.outStandingAmountNewDashboard(bookings[i]?.BK_ID);
-				totalOutstandingTillDate += OSTAmount;
+				// const OSTAmount = await BookingService.outStandingAmountNewDashboard(bookings[i]?.BK_ID);
+				// totalOutstandingTillDate += OSTAmount;
 			}
 			data = {
-				totalAmount,
-				totalOutstandingTillDate
+				totalAmount
+				// totalOutstandingTillDate
 			};
 			res.send({ message: "Dashboard Total Counts", data: data });
 		} catch (error) {
