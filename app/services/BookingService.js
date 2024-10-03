@@ -397,6 +397,68 @@ class BookingService {
 		return (outstandingAmt = remainingOst - tillDatePaidAmt);
 	};
 
+	static outStandingAmountNewDashboard = async (bookingId, type = null) => {
+		let outstandingAmt = 0;
+
+		// Fetch installment details in one go
+		const plans = await BookingInstallmentDetails.findAll({
+			order: [["Installment_Code", "ASC"]],
+			where: { BK_ID: bookingId, BKI_TYPE: type }
+		});
+
+		// Fetch all related installment receipts in one go
+		const installmentPaidReceipts = await InstallmentReceipts.findAll({
+			include: [{ as: "Installment_Type", model: InstallmentType }],
+			where: { BK_ID: bookingId }
+		});
+
+		let remainingPaidOstBreak = 0;
+		let remainingOstBreak = 0;
+		let remainingOst = 0;
+		let tillDatePaidAmt = 0;
+
+		// Use a for...of loop to handle async operations properly
+		for (const item of plans) {
+			const instMonth = parseInt(item.Installment_Month ? item.Installment_Month.split("-")[1] : "");
+			const instYear = parseInt(item.Installment_Month ? item.Installment_Month.split("-")[0] : "");
+
+			const IROBJECTS = installmentPaidReceipts.filter((el) => el.BKI_DETAIL_ID === item.BKI_DETAIL_ID);
+
+			// Reset remaining outstanding break if the current month matches the installment
+			if (instMonth === new Date().getMonth() + 1 && new Date().getFullYear() === instYear) {
+				remainingOstBreak = 0;
+			}
+
+			if (remainingOstBreak === 0) {
+				remainingOst += parseFloat(item.Installment_Due);
+
+				for (let k = 0; k < IROBJECTS.length; k++) {
+					if (
+						remainingPaidOstBreak === 1 &&
+						instMonth === new Date().getMonth() + 1 &&
+						new Date().getFullYear() === instYear
+					) {
+						remainingPaidOstBreak = 0;
+					}
+
+					if (remainingPaidOstBreak === 0) {
+						tillDatePaidAmt += +IROBJECTS[k].Installment_Paid;
+					}
+
+					if (instMonth === new Date().getMonth() + 1 && new Date().getFullYear() === instYear) {
+						remainingPaidOstBreak = 1;
+					}
+				}
+			}
+
+			if (instMonth === new Date().getMonth() + 1 && new Date().getFullYear() === instYear) {
+				remainingOstBreak = 1;
+			}
+		}
+
+		return (outstandingAmt = remainingOst - tillDatePaidAmt);
+	};
+
 	static outStandingAmountforDashboard = async (bookingO, type = null) => {
 		let outstandingAmt = 0;
 
