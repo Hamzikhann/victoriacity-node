@@ -69,6 +69,15 @@ function getMonthsDifference(inputDate) {
 	return totalMonthsDiff;
 }
 
+function sortInstallmentsByMonth(installments) {
+	return installments.sort((a, b) => {
+		const dateA = new Date(a.Installment_Month);
+		const dateB = new Date(b.Installment_Month);
+
+		return dateA - dateB; // Sort in ascending order
+	});
+}
+
 class BookingController {
 	///UPDATE NDC Status
 	static updateNdcStatus = async (req, res, next) => {
@@ -946,8 +955,8 @@ class BookingController {
 							"RECEIPT_HEAD",
 							"BKI_DETAIL_ID"
 						],
-						required: false,
-						order: [["Installment_Month", "ASC"]]
+						required: false
+						// order: [["Installment_Month", "ASC"]]
 					},
 					{ as: "Member", model: Member, attributes: ["BuyerName", "BuyerContact", "BuyerCNIC"] },
 					{ as: "Phase", model: Phase, attributes: ["NAME"] },
@@ -965,7 +974,7 @@ class BookingController {
 				offset: offset
 			});
 
-			for (let i = 0; i < 5; i++) {
+			for (let i = 0; i < bookings.length; i++) {
 				let paidAmount = 0;
 				let totalAmount = 0;
 				let advAmount = 0;
@@ -975,6 +984,8 @@ class BookingController {
 				const BID = bookings[i].Booking_Installment_Details;
 				let index = bookings[i].Installment_Receipts.length;
 				let lastInstallmentMonth;
+				const IR = bookings[i].Installment_Receipts;
+				const sortedInstallments = sortInstallmentsByMonth(IR);
 				if (index > 0) {
 					lastInstallmentMonth = bookings[i].Installment_Receipts[index - 1].Installment_Month;
 					totalMonthsDiff = getMonthsDifference(lastInstallmentMonth);
@@ -988,12 +999,11 @@ class BookingController {
 					totalAmount += installmentDue;
 					bkiDetailIds.push(+BID[j].BKI_DETAIL_ID);
 				}
-				const IR = bookings[i].Installment_Receipts;
 
-				for (let j = 0; j < IR.length; j++) {
-					paidAmount += +IR[j].Installment_Paid;
-					// if (j === IR.length - 1) {
-					// 	const lastInstallmentMonth = IR[j].Installment_Month;
+				for (let j = 0; j < sortedInstallments.length; j++) {
+					paidAmount += +sortedInstallments[j].Installment_Paid;
+					// if (j === sortedInstallments.length - 1) {
+					// 	const lastInstallmentMonth = sortedInstallments[j].Installment_Month;
 
 					// 	const lastDate = new Date(lastInstallmentMonth);
 					// 	const currentDate = new Date();
@@ -1014,7 +1024,10 @@ class BookingController {
 					// 	totalMonthsDiff = 56;
 					// 	console.log("else  totalMonthsDiff totalMonthsDiff", totalMonthsDiff);
 					// }
-					if (IR[j].RECEIPT_HEAD === "installments" && !uniqueBkiDetailIds.includes(+IR[j].BKI_DETAIL_ID)) {
+					if (
+						sortedInstallments[j].RECEIPT_HEAD === "installments" &&
+						!uniqueBkiDetailIds.includes(+sortedInstallments[j].BKI_DETAIL_ID)
+					) {
 						// Add only if BKI_DETAIL_ID is not already in the array
 						uniqueBkiDetailIds.push(+IR[j].BKI_DETAIL_ID);
 					}
