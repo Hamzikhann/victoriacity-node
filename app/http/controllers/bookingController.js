@@ -902,7 +902,6 @@ class BookingController {
 			});
 			console.log("hit");
 
-			// bookings.forEach(async (booking) => {
 			for (let i = 0; i < bookings.length; i++) {
 				totalAmount += JSON.parse(bookings[i]?.Total_Amt);
 				const OSTAmount = await BookingService.outStandingAmount(bookings[i]?.BK_ID);
