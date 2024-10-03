@@ -946,7 +946,8 @@ class BookingController {
 							"RECEIPT_HEAD",
 							"BKI_DETAIL_ID"
 						],
-						required: false
+						required: false,
+						order: [["Installment_Month", "ASC"]]
 					},
 					{ as: "Member", model: Member, attributes: ["BuyerName", "BuyerContact", "BuyerCNIC"] },
 					{ as: "Phase", model: Phase, attributes: ["NAME"] },
