@@ -976,8 +976,6 @@ class BookingController {
 				let lastInstallmentMonth;
 				if (index > 0) {
 					lastInstallmentMonth = bookings[i].Installment_Receipts[index - 1].Installment_Month;
-				}
-				if (lastInstallmentMonth) {
 					totalMonthsDiff = getMonthsDifference(lastInstallmentMonth);
 				} else {
 					lastInstallmentMonth = bookings[i].Booking_Installment_Details[0].Installment_Month;
