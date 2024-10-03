@@ -56,7 +56,7 @@ function getMonthsDifference(inputDate) {
 	const givenDate = new Date(inputDate);
 	const currentDate = new Date();
 	console.log("current Datecurrent Datecurrent Datecurrent Datecurrent Datecurrent Date", currentDate);
-
+	console.log("givenDate givenDate givenDate givenDate", givenDate);
 	// Calculate year and month difference without considering days
 	let yearDiff = currentDate.getFullYear() - givenDate.getFullYear();
 	let monthDiff = currentDate.getMonth() - givenDate.getMonth();
@@ -946,7 +946,6 @@ class BookingController {
 							"RECEIPT_HEAD",
 							"BKI_DETAIL_ID"
 						],
-						where: { BK_ID: Sequelize.col("Booking_Mst.BK_ID") }, // Match BK_ID from Booking
 						required: false
 					},
 					{ as: "Member", model: Member, attributes: ["BuyerName", "BuyerContact", "BuyerCNIC"] },
@@ -965,7 +964,7 @@ class BookingController {
 				offset: offset
 			});
 
-			for (let i = 0; i < bookings.length; i++) {
+			for (let i = 0; i < 5; i++) {
 				let paidAmount = 0;
 				let totalAmount = 0;
 				let advAmount = 0;
