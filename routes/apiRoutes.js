@@ -280,6 +280,7 @@ router.put("/file/update", [checkUserAuth], FileIssueController.update); //Searc
 router.delete("/file/delete", [checkUserAuth], FileIssueController.deleteFile); //Search Fileby Id and delete
 
 // Files Submission Routes
+router.post("/booking/update/status/cancel", BookingController.updateStatus);
 router.post("/bookingTransaction/add", [checkUserAuth], BookingController.transactionCreate); //Create and Add new file
 router.get("/ndc/requests/all", [checkUserAuth], BookingController.getAllNDCFees); //Create and Add new file
 router.post("/fileSub/add", [checkUserAuth], FileSubmissionController.create); //Create and Add new file
