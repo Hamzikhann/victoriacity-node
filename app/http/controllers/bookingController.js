@@ -902,6 +902,7 @@ class BookingController {
 			let totalOutstandingTillDate = 0;
 			let data = {};
 			const bookings = await Booking.findAll({
+				where: { Status: "Active" },
 				attributes: ["BK_ID", "Reg_Code_Disply", "SRForm_No", "Form_Code", "Total_Amt", "Advance_Amt", "Status"]
 			});
 			console.log("hit");
@@ -1277,18 +1278,34 @@ class BookingController {
 		];
 
 		try {
-			await Booking.update(
-				{ Status: "Blocked" },
-				{
-					where: { Reg_Code_Disply: canceledData }
+			let array = [];
+			for (let i = 0; i < canceledData.length; i++) {
+				let findBooking = await Booking.findOne({ where: { Reg_Code_Disply: canceledData[i] } });
+				if (findBooking) {
+					let updateBooking = Booking.update(
+						{ Status: "Blocked" },
+						{
+							where: { Reg_Code_Disply: canceledData[i] }
+						}
+					);
+				} else {
+					array.push(canceledData[i]);
 				}
-			)
-				.then((response) => {
-					res.send({ message: "Status updated", data: response });
-				})
-				.catch((err) => {
-					res.send(err);
-				});
+			}
+			res.send({ message: "Status updated", data: array });
+
+			// await Booking.update(
+			// 	{ Status: "Blocked" },
+			// 	{
+			// 		where: { Reg_Code_Disply: canceledData }
+			// 	}
+			// )
+			// 	.then((response) => {
+			// 		res.send({ message: "Status updated", data: response });
+			// 	})
+			// 	.catch((err) => {
+			// 		res.send(err);
+			// 	});
 		} catch (error) {
 			// console.log("error: ", error);
 			return next(error);
