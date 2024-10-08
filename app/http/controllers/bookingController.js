@@ -1792,7 +1792,9 @@ class BookingController {
 				}
 
 				const OSTAmount = await BookingService.outStandingAmountforDashboard(bookings[i].BK_ID);
-				let cleanNumber = formatBuyersContact(bookings[i].Member.BuyerContact);
+				if (bookings[i].Member?.BuyerContact) {
+					var cleanNumber = formatBuyersContact(bookings[i].Member.BuyerContact);
+				}
 				bookings[i].setDataValue("BK_ID", bookings[i].BK_ID);
 				bookings[i].setDataValue("advanceAmount", advAmount);
 				bookings[i].setDataValue("totalAmount", totalAmount);
