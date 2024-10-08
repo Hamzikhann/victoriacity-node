@@ -1687,7 +1687,7 @@ class BookingController {
 			let overAllTotal = 0;
 			const bookings = await Booking.findAll({
 				attributes: ["BK_ID", "Reg_Code_Disply", "SRForm_No", "Form_Code", "Total_Amt", "Advance_Amt", "Status"],
-				where: whereClause,
+				where: { IsDeleted: 0 },
 				include: [
 					{
 						where: { BKI_TYPE: null },
