@@ -29,7 +29,7 @@ const AccountTransaction = require("../../models/AccountTransaction.js");
 const { Op, Sequelize, where } = require("sequelize");
 const BookingService = require("../../services/BookingService.js");
 const Booking_Installment_Details = require("../../models/Booking_Installment_Details.js");
-
+const moment = require("moment");
 function formatBuyersContact(buyersContact) {
 	// Check if the length of the contact with dashes is 12
 	if (buyersContact.length === 12) {
@@ -900,21 +900,79 @@ class BookingController {
 		try {
 			let totalAmount = 0;
 			let totalOutstandingTillDate = 0;
+			let totalOutstandingCurrentDate = 0;
 			let data = {};
+			const currentDate = moment().toDate();
+			let outstandingAmt = 0;
+			let tillDatePaidAmt = 0;
+			let remainingOst = 0;
+
 			const bookings = await Booking.findAll({
 				where: { Status: "Active" },
 				attributes: ["BK_ID", "Reg_Code_Disply", "SRForm_No", "Form_Code", "Total_Amt", "Advance_Amt", "Status"]
 			});
+			const installmentReceipt = await InstallmentReceipts.findAll({ where: { RECEIPT_HEAD: "installments" } });
+
+			// const installmentReceiptsCurrentDate = await InstallmentReceipts.findAll({
+			// 	where: {
+			// 		RECEIPT_HEAD: "installments",
+			// 		Installment_Month: {
+			// 			[Op.lte]: currentDate // Fetch only receipts where the installment date is less than or equal to the current date
+			// 		}
+			// 	}
+			// });
+
 			console.log("hit");
 
 			for (let i = 0; i < bookings.length; i++) {
 				totalAmount += JSON.parse(bookings[i]?.Total_Amt);
-				// const OSTAmount = await BookingService.outStandingAmountNewDashboard(bookings[i]?.BK_ID);
-				// totalOutstandingTillDate += OSTAmount;
 			}
+
+			for (let j = 0; j < installmentReceipt.length; j++) {
+				if (installmentReceipt[j]) {
+					totalOutstandingTillDate += JSON.parse(installmentReceipt[j]?.Installment_Paid);
+				}
+			}
+
+			// Get all installment receipts till the current date
+			const installmentReceiptsCurrentDate = await InstallmentReceipts.findAll({
+				include: [{ as: "Installment_Type", model: InstallmentType }],
+				where: { RECEIPT_HEAD: "installments" }
+			});
+
+			// Iterate over the receipts to calculate outstanding amount
+			for (let k = 0; k < installmentReceiptsCurrentDate.length; k++) {
+				const receiptMonth = parseInt(
+					installmentReceiptsCurrentDate[k]?.Installment_Month
+						? installmentReceiptsCurrentDate[k]?.Installment_Month.split("-")[1]
+						: ""
+				);
+				const receiptYear = parseInt(
+					installmentReceiptsCurrentDate[k]?.Installment_Month
+						? installmentReceiptsCurrentDate[k]?.Installment_Month.split("-")[0]
+						: ""
+				);
+
+				// Check if the installment is due till the current date (month & year)
+				if (
+					receiptYear < new Date().getFullYear() ||
+					(receiptYear === new Date().getFullYear() && receiptMonth <= new Date().getMonth() + 1)
+				) {
+					remainingOst += parseFloat(installmentReceiptsCurrentDate[k]?.Installment_Due); // Add to remaining outstanding
+
+					// Sum the paid amounts for the receipts
+					tillDatePaidAmt += parseFloat(installmentReceiptsCurrentDate[k]?.Installment_Paid);
+				}
+			}
+
+			// Calculate total outstanding amount = total due - total paid
+			outstandingAmt = remainingOst - tillDatePaidAmt;
+
 			data = {
-				totalAmount
-				// totalOutstandingTillDate
+				totalAmount,
+				totalOutstandingTillDate: totalAmount - totalOutstandingTillDate,
+				totalPaidInstallments: totalOutstandingTillDate,
+				outstandingAmt: outstandingAmt
 			};
 			res.send({ message: "Dashboard Total Counts", data: data });
 		} catch (error) {
@@ -2970,7 +3028,6 @@ class BookingController {
 		console.log(vcNo);
 		let booking1 = await Booking.findOne({ where: { Reg_Code_Disply: vcNo } });
 		console.log("BOKINNNGGG", booking1);
-		let ostamount = await BookingService.outStandingAmountofJuly(booking1.BK_ID);
 
 		const createdAt = new Date(booking1.createdAt);
 		const currentDate = new Date();
@@ -2982,7 +3039,6 @@ class BookingController {
 		};
 
 		// Check if the current date is after August 2024 and if ostamount is greater than 0
-		let applySurcharges = currentDate >= august2024 && ostamount > 0;
 		let find = await InstallmentReceipts.findOne({ where: { BK_ID: booking1.BK_ID, Installment_Month: july2024 } });
 		if (find) {
 			console.log("hi");
