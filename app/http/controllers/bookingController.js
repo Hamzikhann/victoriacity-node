@@ -954,6 +954,13 @@ class BookingController {
 				);
 
 				// Check if the installment is due till the current date (month & year)
+				console.log(
+					"true/false",
+					receiptYear < new Date().getFullYear() ||
+						(receiptYear === new Date().getFullYear() && receiptMonth <= new Date().getMonth() + 1)
+				);
+				console.log("receiptMonth receiptMonth", receiptMonth);
+				console.log("receiptYear receiptYear", receiptYear);
 				if (
 					receiptYear < new Date().getFullYear() ||
 					(receiptYear === new Date().getFullYear() && receiptMonth <= new Date().getMonth() + 1)
@@ -972,7 +979,8 @@ class BookingController {
 				totalAmount,
 				totalOutstandingTillDate: totalAmount - totalOutstandingTillDate,
 				totalPaidInstallments: totalOutstandingTillDate,
-				outstandingAmt: outstandingAmt
+				outstandingAmt: outstandingAmt,
+				installmentReceiptsCurrentDate: installmentReceiptsCurrentDate
 			};
 			res.send({ message: "Dashboard Total Counts", data: data });
 		} catch (error) {
@@ -3061,11 +3069,18 @@ class BookingController {
 				}
 			]
 		});
-		console.log("BeFOREeeeeeeeeeeee", before);
+		// const type1Receipts = before.filter((item) => ite/m.Booking_Installment_Details?.InsType_ID === 2);
+
+		// console.log("Receipts with InsType_ID 1:", type1Receipts);
+		// console.log("Receipts with InsType_ID 2:", type2Receipts);
+
+		// console.log("BeFOREeeeeeeeeeeee", before);
 		const surchargeRate = 0.001;
 		let surcharge = 0;
 		let total = 0;
-
+		// Set to track processed dates and types
+		const processedDates = new Set();
+		let datearray = [];
 		for (let i = 0; i < before.length; i++) {
 			const ircDate = new Date(before[i].IRC_Date);
 			const dueDate = new Date(before[i].Booking_Installment_Details.Due_Date);
@@ -3073,36 +3088,39 @@ class BookingController {
 			const differenceInMilliseconds = ircDate - dueDate;
 			const millisecondsInOneDay = 1000 * 60 * 60 * 24;
 			const differenceInDays = differenceInMilliseconds / millisecondsInOneDay;
+			datearray.push(`${i}-${differenceInDays}`);
+			// Create a unique key using the IRC_Date and INS_Type
+			var installmentKey = `${before[i].IRC_Date}-${before[i].BKI_DETAIL_ID}`;
+			// console.log(installmentKey);
 
-			// Check if the installment month is July 2024 and if ostamount was 0 during July
+			// Check if we already processed this date and type
+			if (processedDates.has(installmentKey)) {
+				console.log("true");
+				// Skip this installment if we already processed a surcharge for this date and type
+				continue;
+			}
+			// Apply surcharge logic
 			if (differenceInDays < 0) {
+				console.log("when days are less then 0", differenceInDays);
+
 				await InstallmentReceipts.update({ surCharges: 0 }, { where: { INS_RC_ID: before[i].INS_RC_ID } });
 			} else if (differenceInDays > 0) {
-				surcharge = parseInt(before[i].Installment_Due) * surchargeRate * differenceInDays;
+				console.log(differenceInDays);
+				const surcharge = parseInt(before[i].Installment_Due) * surchargeRate * differenceInDays;
 				total = total + surcharge;
-				await InstallmentReceipts.update(
-					{ surCharges: surcharge },
-					{
-						where: { INS_RC_ID: before[i].INS_RC_ID }
-					}
-				);
+				console.log("updating the sur charge at ", i, surcharge);
+
+				await InstallmentReceipts.update({ surCharges: surcharge }, { where: { INS_RC_ID: before[i].INS_RC_ID } });
 			}
-			// else {
-			// 	await InstallmentReceipts.update({ surCharges: 0 }, { where: { INS_RC_ID: before[i].INS_RC_ID } });
-			// }
+
+			// Mark this date and type as processed
+			processedDates.add(installmentKey);
 		}
 		let lastInstallmentMonth;
 		let lastPaidInstallment = await InstallmentReceipts.findOne({
 			where: { BK_ID: booking1.BK_ID },
 			order: [["Installment_Month", "DESC"]] // Get the most recent payment
 		});
-		console.log(lastInstallmentMonth);
-
-		// if (!lastPaidInstallment) {
-		// 	// lastInstallmentMonth =
-		// 	console.log("No installment records found.");
-		// } else {
-		// }
 
 		if (!lastPaidInstallment) {
 			// lastInstallmentMonth =
