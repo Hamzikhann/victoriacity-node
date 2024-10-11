@@ -4206,7 +4206,7 @@ class BookingController {
 				Reg_Code_Disply: data
 			}
 		});
-		for (let book = 0; booking1[book].length > book; book++) {
+		for (let book = 0; booking1.length > book; book++) {
 			if (booking1[book]) {
 				const createdAt = new Date(booking1[book].createdAt);
 				const currentDate = new Date();
