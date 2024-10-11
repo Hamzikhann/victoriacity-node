@@ -132,6 +132,8 @@ router.post("/pay/surcharges", UserController.paySurcharges);
 router.post("/surcharge/pdf", UserController.downloadSurchargeReport);
 router.post("/search/file", UserController.search);
 router.post("/surcharge", UserController.surcharges);
+router.post("/test", UserController.test);
+
 router.post("/reminder/create", [checkUserAuth], ReminderController.create);
 router.post("/reminder/getbyid", [checkUserAuth], ReminderController.getById);
 router.post("/reminder/getallbyids", ReminderController.getAllByIds);
