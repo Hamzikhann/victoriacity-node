@@ -2597,6 +2597,12 @@ class pdfGenerator {
 		let dcInc = 0;
 		let dcTotalAmounts = 0;
 		let dcOstamtnew = await BookingService.outStandingAmount(bookingData.BK_ID, "DC");
+
+		let updateOutstandingTillDate = await Booking.update(
+			{ outstandingTillDate: ostamtnew },
+			{ where: { BK_ID: bookingData.BK_ID } }
+		);
+
 		insRecpData.map(async (item, i) => {
 			totalAmounts += +item.Installment_Due;
 			const insType = installmentTypes.find((el) => el.InsType_ID === item.InsType_ID);
@@ -12224,20 +12230,43 @@ class pdfGenerator {
 						bold: true
 					},
 					{
-						text: `The Management of Victoria City is pleased to inform you that the Transfer Application of the above-said Booking Application/Plot has been accepted and transferred in your name with all rights, deposits, liabilities as per the existing Rules & Regulations and those which may be enforced in future by the Management of the Victoria City or any authority competent to do so.
+						text: `The Management of Victoria City is pleased to inform you that the Transfer Application of the above-said Booking Application/Plot has been accepted and transferred in your name with all rights, deposits, liabilities as per the existing Rules & Regulations and those which may be enforced in future by the Management of the Victoria City or any authority competent to do so.`,
+						margin: [20, 23, 0, 0],
+						fontSize: 10,
+						lineHeight: 1.5,
+						leadingIndent: 40
+					},
+					{
+						text: `It is intimated that this transfer is also subject to the terms of the Indemnity Bond, Transfer Application Form along with affidavits/undertakings executed by the purchaser/s and the sellers/s of the above said Booking Application/Plot respectively.`,
 
-            It is intimated that this transfer is also subject to the terms of the Indemnity Bond, Transfer Application Form along with affidavits/undertakings executed by the purchaser/s and the sellers/s of the above said Booking Application/Plot respectively.
+						margin: [20, 23, 0, 0],
+						fontSize: 10,
+						lineHeight: 1.5,
+						leadingIndent: 40
+					},
+					{
+						text: `Please keep this Transfer Letter along with Transfer Application form in safe custody and for all future correspondence with the Victoria City.`,
 
-            Please keep this Transfer Letter along with Transfer Application form in safe custody and for all future correspondence with the Victoria City.
+						margin: [20, 23, 0, 0],
+						fontSize: 10,
+						lineHeight: 1.5,
+						leadingIndent: 40
+					},
+					{
+						text: `Assuring you the best services and co-operation.`,
 
-            Assuring you the best services and co-operation.
+						margin: [20, 23, 0, 0],
+						fontSize: 10,
+						lineHeight: 1.5,
+						leadingIndent: 40
+					},
+					{
+						text: `Best Regards.`,
 
-            Best Regards`,
 						margin: [0, 23, 0, 0],
 						fontSize: 10,
 						lineHeight: 1.5
 					},
-
 					{
 						text: "",
 						fit: [180, 180],
@@ -12249,7 +12278,8 @@ class pdfGenerator {
                       (Administrator) `,
 						margin: [0, 5, 0, 0],
 						bold: true,
-						fontSize: 10
+						fontSize: 10,
+						alignment: "right"
 					},
 					{
 						text: [

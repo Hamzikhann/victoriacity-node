@@ -255,6 +255,12 @@ module.exports = (sequelize, Sequelize) => {
 			allowNull: true,
 			notEmpty: false,
 			defaultValue: 0
+		},
+		outstandingTillDate: {
+			type: Sequelize.INTEGER,
+			allowNull: true,
+			notEmpty: false,
+			defaultValue: 0
 		}
 	});
 };

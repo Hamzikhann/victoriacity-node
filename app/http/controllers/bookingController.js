@@ -565,6 +565,12 @@ class BookingController {
 					});
 				}
 			}
+
+			let outStandingAmount = await BookingService.outStandingAmount(BK_ID);
+			let updateBookingOutstandingTillDate = await Booking.update(
+				{ outstandingTillDate: outStandingAmount },
+				{ where: { BK_ID: BK_ID } }
+			);
 			res.status(200).send({
 				status: 200,
 				message: "Installment added successfully"
@@ -928,59 +934,59 @@ class BookingController {
 				totalAmount += JSON.parse(bookings[i]?.Total_Amt);
 			}
 
-			for (let j = 0; j < installmentReceipt.length; j++) {
-				if (installmentReceipt[j]) {
-					totalOutstandingTillDate += JSON.parse(installmentReceipt[j]?.Installment_Paid);
-				}
-			}
+			// for (let j = 0; j < installmentReceipt.length; j++) {
+			// 	if (installmentReceipt[j]) {
+			// 		totalOutstandingTillDate += JSON.parse(installmentReceipt[j]?.Installment_Paid);
+			// 	}
+			// }
 
 			// Get all installment receipts till the current date
-			const installmentReceiptsCurrentDate = await InstallmentReceipts.findAll({
-				include: [{ as: "Installment_Type", model: InstallmentType }],
-				where: { RECEIPT_HEAD: "installments" }
-			});
+			// const installmentReceiptsCurrentDate = await InstallmentReceipts.findAll({
+			// 	include: [{ as: "Installment_Type", model: InstallmentType }],
+			// 	where: { RECEIPT_HEAD: "installments" }
+			// });
 
-			// Iterate over the receipts to calculate outstanding amount
-			for (let k = 0; k < installmentReceiptsCurrentDate.length; k++) {
-				const receiptMonth = parseInt(
-					installmentReceiptsCurrentDate[k]?.Installment_Month
-						? installmentReceiptsCurrentDate[k]?.Installment_Month.split("-")[1]
-						: ""
-				);
-				const receiptYear = parseInt(
-					installmentReceiptsCurrentDate[k]?.Installment_Month
-						? installmentReceiptsCurrentDate[k]?.Installment_Month.split("-")[0]
-						: ""
-				);
+			// // Iterate over the receipts to calculate outstanding amount
+			// for (let k = 0; k < installmentReceiptsCurrentDate.length; k++) {
+			// 	const receiptMonth = parseInt(
+			// 		installmentReceiptsCurrentDate[k]?.Installment_Month
+			// 			? installmentReceiptsCurrentDate[k]?.Installment_Month.split("-")[1]
+			// 			: ""
+			// 	);
+			// 	const receiptYear = parseInt(
+			// 		installmentReceiptsCurrentDate[k]?.Installment_Month
+			// 			? installmentReceiptsCurrentDate[k]?.Installment_Month.split("-")[0]
+			// 			: ""
+			// 	);
 
-				// Check if the installment is due till the current date (month & year)
-				console.log(
-					"true/false",
-					receiptYear < new Date().getFullYear() ||
-						(receiptYear === new Date().getFullYear() && receiptMonth <= new Date().getMonth() + 1)
-				);
-				console.log("receiptMonth receiptMonth", receiptMonth);
-				console.log("receiptYear receiptYear", receiptYear);
-				if (
-					receiptYear < new Date().getFullYear() ||
-					(receiptYear === new Date().getFullYear() && receiptMonth <= new Date().getMonth() + 1)
-				) {
-					remainingOst += parseFloat(installmentReceiptsCurrentDate[k]?.Installment_Due); // Add to remaining outstanding
+			// 	// Check if the installment is due till the current date (month & year)
+			// 	console.log(
+			// 		"true/false",
+			// 		receiptYear < new Date().getFullYear() ||
+			// 			(receiptYear === new Date().getFullYear() && receiptMonth <= new Date().getMonth() + 1)
+			// 	);
+			// 	console.log("receiptMonth receiptMonth", receiptMonth);
+			// 	console.log("receiptYear receiptYear", receiptYear);
+			// 	if (
+			// 		receiptYear < new Date().getFullYear() ||
+			// 		(receiptYear === new Date().getFullYear() && receiptMonth <= new Date().getMonth() + 1)
+			// 	) {
+			// 		remainingOst += parseFloat(installmentReceiptsCurrentDate[k]?.Installment_Due); // Add to remaining outstanding
 
-					// Sum the paid amounts for the receipts
-					tillDatePaidAmt += parseFloat(installmentReceiptsCurrentDate[k]?.Installment_Paid);
-				}
-			}
+			// 		// Sum the paid amounts for the receipts
+			// 		tillDatePaidAmt += parseFloat(installmentReceiptsCurrentDate[k]?.Installment_Paid);
+			// 	}
+			// }
 
-			// Calculate total outstanding amount = total due - total paid
-			outstandingAmt = remainingOst - tillDatePaidAmt;
+			// // Calculate total outstanding amount = total due - total paid
+			// outstandingAmt = remainingOst - tillDatePaidAmt;
 
 			data = {
-				totalAmount,
-				totalOutstandingTillDate: totalAmount - totalOutstandingTillDate,
-				totalPaidInstallments: totalOutstandingTillDate,
-				outstandingAmt: outstandingAmt,
-				installmentReceiptsCurrentDate: installmentReceiptsCurrentDate
+				totalAmount
+				// totalOutstandingTillDate: totalAmount - totalOutstandingTillDate,
+				// totalPaidInstallments: totalOutstandingTillDate,
+				// outstandingAmt: outstandingAmt,
+				// installmentReceiptsCurrentDate: installmentReceiptsCurrentDate
 			};
 			res.send({ message: "Dashboard Total Counts", data: data });
 		} catch (error) {
