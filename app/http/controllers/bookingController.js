@@ -3296,584 +3296,1154 @@ class BookingController {
 		// const vcNo = req.query.vcNo;
 		// // let ser = await BookingService.surcharges(vcNo);
 		let data = [
-			"VC12707",
-			"VC12804",
-			"VC12805",
-			"VC12806",
-			"VC12807",
-			"VC12808",
-			"VC12231",
-			"VC121159",
-			"VC12633",
-			"VC111056",
-			"VC121057",
-			"VC121058",
-			"VC121422",
-			"VC121038",
-			"VC121094",
-			"VC121102",
-			"VC121108",
-			"VC121110",
-			"VC121113",
-			"VC121119",
-			"VC121095",
-			"VC121101",
-			"VC121100",
-			"VC121103",
-			"VC121111",
-			"VC121118",
-			"VC121104",
-			"VC121105",
-			"VC121109",
-			"VC121096",
-			"VC121114",
-			"VC121116",
-			"VC121097",
-			"VC121112",
-			"VC121117",
-			"VC121115",
-			"VC121106",
-			"VC121099",
-			"VC121107",
-			"VC12115",
-			"VC12116",
-			"VC12117",
-			"VC12118",
-			"VC12119",
-			"VC12121",
-			"VC12123",
-			"VC12125",
-			"VC12126",
-			"VC12128",
-			"VC01282",
-			"VC12456",
-			"VC12457",
-			"VC12458",
-			"VC12459",
-			"VC12460",
-			"VC12461",
-			"VC12462",
-			"VC12463",
-			"VC12873",
-			"VC11773",
-			"VC111059",
-			"VC11219",
-			"VC121161",
-			"VC12732",
-			"VC121124",
-			"VC121125",
-			"VC11692",
-			"VC11340",
-			"VC111204",
-			"VC12310",
-			"VC11557",
-			"VC11556",
-			"VC11558",
-			"VC111242",
-			"VC121071",
-			"VC11624",
-			"VC11277",
-			"VC12570",
-			"VC12570",
-			"VC12571",
-			"VC12572",
-			"VC12573",
-			"VC12565",
-			"VC12566",
-			"VC12567",
-			"VC12568",
-			"VC111004",
-			"VC12809",
-			"VC12309",
-			"VC22560",
-			"VC12703",
-			"VC11916",
-			"VC12559",
-			"VC12512",
-			"VC12510",
-			"VC12142",
-			"VC12479",
-			"VC12342",
-			"VC12474",
-			"VC12982",
-			"VC111371",
-			"VC121481",
-			"VC111128",
-			"VC121196",
-			"VC121172",
-			"VC111493",
-			"VC11705",
-			"VC12189",
-			"VC111600",
-			"VC111599",
-			"VC271003",
-			"VC111245",
-			"VC12682",
-			"VC111235",
-			"VC12370",
-			"VC12748",
-			"VC12147",
-			"VC111021",
-			"VC12839",
-			"VC121395",
-			"VC12760",
-			"VC12761",
-			"VC12766",
-			"VC12765",
-			"VC11254",
-			"VC12255",
-			"VC11256",
-			"VC271191",
-			"VC271190",
-			"VC12842",
-			"VC11844",
-			"VC11843",
-			"VC11744",
-			"VC12743",
-			"VC11837",
-			"VC121290",
-			"VC12819",
-			"VC11720",
-			"VC12490",
-			"VC12489",
-			"VC12970",
-			"VC221626",
-			"VC12525",
-			"VC12249",
-			"VC22471",
-			"VC12950",
-			"VC14150",
-			"VC12707",
-			"VC121174",
-			"VC121159",
-			"VC11778",
-			"VC121042",
-			"VC111569",
-			"VC12477",
-			"VC11598",
-			"VC121731",
-			"VC11442",
-			"VC11441",
-			"VC12455",
-			"VC121018",
-			"VC111182",
-			"VC11905",
-			"VC121154",
-			"VC12292",
-			"VC121373",
-			"VC01145",
-			"VC01249",
-			"VC11543",
-			"VC11291",
-			"VC111194",
-			"VC12483",
-			"VC121195",
-			"VC12178",
-			"VC121152",
-			"VC11660",
-			"VC111560",
-			"VC11619",
-			"VC12618",
-			"VC12407",
-			"VC22529",
-			"VC111038",
-			"VC12472",
-			"VC111064",
-			"VC12545",
-			"VC12526",
-			"VC111033",
-			"VC12877",
-			"VC11983",
-			"VC12145",
-			"VC12942",
-			"VC121651",
-			"VC121740",
-			"VC12171",
-			"VC12170",
-			"VC12169",
-			"VC12168",
-			"VC12167",
-			"VC22553",
-			"VC12579",
-			"VC12519",
-			"VC12527",
-			"VC12518",
-			"VC11528",
-			"VC12801",
-			"VC12802",
-			"VC121216",
-			"VC121217",
-			"VC121422",
-			"VC12993",
-			"VC12994",
-			"VC12995",
-			"VC12996",
-			"VC12997",
-			"VC12998",
-			"VC121121",
-			"VC121150",
-			"VC12315",
-			"VC12128",
-			"VC12115",
-			"VC12116",
-			"VC12117",
-			"VC12118",
-			"VC12119",
-			"VC12121",
-			"VC12123",
-			"VC12125",
-			"VC12126",
-			"VC01282",
-			"VC11695",
-			"VC121563",
-			"VC121098",
-			"VC121094",
-			"VC121102",
-			"VC121108",
-			"VC121110",
-			"VC121113",
-			"VC121119",
-			"VC121095",
-			"VC121101",
-			"VC121100",
-			"VC121103",
-			"VC121111",
-			"VC121118",
-			"VC121104",
-			"VC121105",
-			"VC121109",
-			"VC121096",
-			"VC121114",
-			"VC121116",
-			"VC121097",
-			"VC121112",
-			"VC121117",
-			"VC121115",
-			"VC121106",
-			"VC121099",
-			"VC121107",
-			"VC22531",
-			"VC12811",
-			"VC111059",
-			"VC11773",
-			"VC12873",
-			"VC12524",
-			"VC12525",
-			"VC11219",
-			"VC121161",
-			"VC12456",
-			"VC12457",
-			"VC12458",
-			"VC12459",
-			"VC12460",
-			"VC12461",
-			"VC12462",
-			"VC12463",
-			"VC12732",
-			"VC11692",
-			"VC121124",
-			"VC121125",
-			"VC111242",
-			"VC11557",
-			"VC11556",
-			"VC11558",
-			"VC12310",
-			"VC111204",
-			"VC11340",
-			"VC22492",
-			"VC12493",
-			"VC12499",
-			"VC12500",
-			"VC12501",
-			"VC12494",
-			"VC12503",
-			"VC12502",
-			"VC12495",
-			"VC12498",
-			"VC11277",
-			"VC11624",
-			"VC121071",
-			"VC12570",
-			"VC12571",
-			"VC12572",
-			"VC12573",
-			"VC12565",
-			"VC12566",
-			"VC12567",
-			"VC12568",
-			"VC12510",
-			"VC12512",
-			"VC12559",
-			"VC12703",
-			"VC22560",
-			"VC11916",
-			"VC12883",
-			"VC12820",
-			"VC22485",
-			"VC11680",
-			"VC12376",
-			"VC12377",
-			"VC11753",
-			"VC11922",
-			"VC111233",
-			"VC11933",
-			"VC11930",
-			"VC121526",
-			"VC12525",
-			"VC01154",
-			"VC121529",
-			"VC111412",
-			"VC121339",
-			"VC11415",
-			"VC11416",
-			"VC11417",
-			"VC111077",
-			"VC01322",
-			"VC12174",
-			"VC121241"
+			"VC00118",
+			"VC00122",
+			"VC00123",
+			"VC00125",
+			"VC00127",
+			"VC00129",
+			"VC00224",
+			"VC01113",
+			"VC01119",
+			"VC01135",
+			"VC01140",
+			"VC01170",
+			"VC01180",
+			"VC01210",
+			"VC01212",
+			"VC01215",
+			"VC01216",
+			"VC01217",
+			"VC01218",
+			"VC01227",
+			"VC01233",
+			"VC01234",
+			"VC01238",
+			"VC01241",
+			"VC01243",
+			"VC01244",
+			"VC01248",
+			"VC01250",
+			"VC01257",
+			"VC01258",
+			"VC01260",
+			"VC01262",
+			"VC01263",
+			"VC01265",
+			"VC01266",
+			"VC01269",
+			"VC01275",
+			"VC01279",
+			"VC01283",
+			"VC01285",
+			"VC01288",
+			"VC01291",
+			"VC01298",
+			"VC01299",
+			"VC01361",
+			"VC01387",
+			"VC01472",
+			"VC02224",
+			"VC02232",
+			"VC02255",
+			"VC02256",
+			"VC02259",
+			"VC02264",
+			"VC111005",
+			"VC111006",
+			"VC111008",
+			"VC111009",
+			"VC11101",
+			"VC111017",
+			"VC111019",
+			"VC111023",
+			"VC111028",
+			"VC111036",
+			"VC11105",
+			"VC111053",
+			"VC111061",
+			"VC111065",
+			"VC111066",
+			"VC111074",
+			"VC111085",
+			"VC111135",
+			"VC111137",
+			"VC111142",
+			"VC111146",
+			"VC111153",
+			"VC111164",
+			"VC111168",
+			"VC111183",
+			"VC111198",
+			"VC111200",
+			"VC111201",
+			"VC111202",
+			"VC111203",
+			"VC111212",
+			"VC111213",
+			"VC111214",
+			"VC111215",
+			"VC111224",
+			"VC111229",
+			"VC111236",
+			"VC111237",
+			"VC111240",
+			"VC111247",
+			"VC111250",
+			"VC111251",
+			"VC111252",
+			"VC111257",
+			"VC111258",
+			"VC111261",
+			"VC111264",
+			"VC111265",
+			"VC111275",
+			"VC111279",
+			"VC111281",
+			"VC111292",
+			"VC111299",
+			"VC111301",
+			"VC111309",
+			"VC111311",
+			"VC111313",
+			"VC111317",
+			"VC111325",
+			"VC111341",
+			"VC111348",
+			"VC111349",
+			"VC111350",
+			"VC111351",
+			"VC111359",
+			"VC111360",
+			"VC111363",
+			"VC111364",
+			"VC111365",
+			"VC111366",
+			"VC111367",
+			"VC111369",
+			"VC111370",
+			"VC111372",
+			"VC111374",
+			"VC111383",
+			"VC111386",
+			"VC111388",
+			"VC111389",
+			"VC111390",
+			"VC111401",
+			"VC111407",
+			"VC111408",
+			"VC111409",
+			"VC11141",
+			"VC111417",
+			"VC111427",
+			"VC11144",
+			"VC111443",
+			"VC111444",
+			"VC111457",
+			"VC111462",
+			"VC111465",
+			"VC111469",
+			"VC111471",
+			"VC111473",
+			"VC111474",
+			"VC111475",
+			"VC111483",
+			"VC111492",
+			"VC111495",
+			"VC111496",
+			"VC111504",
+			"VC111505",
+			"VC111506",
+			"VC111511",
+			"VC111520",
+			"VC111521",
+			"VC111524",
+			"VC11153",
+			"VC111539",
+			"VC11154",
+			"VC111556",
+			"VC111559",
+			"VC111562",
+			"VC111587",
+			"VC111598",
+			"VC111612",
+			"VC111616",
+			"VC111617",
+			"VC111620",
+			"VC111644",
+			"VC111648",
+			"VC11165",
+			"VC111653",
+			"VC111656",
+			"VC111659",
+			"VC11166",
+			"VC111675",
+			"VC111680",
+			"VC111681",
+			"VC111684",
+			"VC111689",
+			"VC111693",
+			"VC111702",
+			"VC111706",
+			"VC111707",
+			"VC111708",
+			"VC111717",
+			"VC111719",
+			"VC111721",
+			"VC111726",
+			"VC111738",
+			"VC111768",
+			"VC111772",
+			"VC111773",
+			"VC111794",
+			"VC111796",
+			"VC11206",
+			"VC11208",
+			"VC11209",
+			"VC11212",
+			"VC11227",
+			"VC11228",
+			"VC11234",
+			"VC11238",
+			"VC11241",
+			"VC11248",
+			"VC11250",
+			"VC11261",
+			"VC11265",
+			"VC11266",
+			"VC11273",
+			"VC11274",
+			"VC11282",
+			"VC11284",
+			"VC11295",
+			"VC11296",
+			"VC11322",
+			"VC11327",
+			"VC11339",
+			"VC11341",
+			"VC11343",
+			"VC11344",
+			"VC11351",
+			"VC11365",
+			"VC11385",
+			"VC11391",
+			"VC11403",
+			"VC11404",
+			"VC11408",
+			"VC11409",
+			"VC11423",
+			"VC11427",
+			"VC11428",
+			"VC11432",
+			"VC11435",
+			"VC11436",
+			"VC11439",
+			"VC11443",
+			"VC11445",
+			"VC11446",
+			"VC11449",
+			"VC11450",
+			"VC11454",
+			"VC11470",
+			"VC11480",
+			"VC11482",
+			"VC11530",
+			"VC11533",
+			"VC11534",
+			"VC11539",
+			"VC11540",
+			"VC11544",
+			"VC11549",
+			"VC11550",
+			"VC11563",
+			"VC11574",
+			"VC11585",
+			"VC11590",
+			"VC11591",
+			"VC11600",
+			"VC11606",
+			"VC11607",
+			"VC11613",
+			"VC11622",
+			"VC11625",
+			"VC11632",
+			"VC11634",
+			"VC11655",
+			"VC11656",
+			"VC11657",
+			"VC11661",
+			"VC11669",
+			"VC11670",
+			"VC11671",
+			"VC11674",
+			"VC11677",
+			"VC11678",
+			"VC11679",
+			"VC11708",
+			"VC11709",
+			"VC11713",
+			"VC11721",
+			"VC11722",
+			"VC11737",
+			"VC11739",
+			"VC11740",
+			"VC11750",
+			"VC11755",
+			"VC11756",
+			"VC11771",
+			"VC11774",
+			"VC11784",
+			"VC11786",
+			"VC11794",
+			"VC11798",
+			"VC11799",
+			"VC11800",
+			"VC11812",
+			"VC11834",
+			"VC11840",
+			"VC11848",
+			"VC11849",
+			"VC11863",
+			"VC11875",
+			"VC11878",
+			"VC11879",
+			"VC11901",
+			"VC11904",
+			"VC11906",
+			"VC11910",
+			"VC11912",
+			"VC11918",
+			"VC11919",
+			"VC11931",
+			"VC11934",
+			"VC11937",
+			"VC11938",
+			"VC11948",
+			"VC11959",
+			"VC11967",
+			"VC11968",
+			"VC11969",
+			"VC11977",
+			"VC11984",
+			"VC11985",
+			"VC11987",
+			"VC12100",
+			"VC121007",
+			"VC121015",
+			"VC121022",
+			"VC121024",
+			"VC121025",
+			"VC121026",
+			"VC121029",
+			"VC121030",
+			"VC12104",
+			"VC121043",
+			"VC121044",
+			"VC121045",
+			"VC121046",
+			"VC121047",
+			"VC121051",
+			"VC121052",
+			"VC121055",
+			"VC121067",
+			"VC121069",
+			"VC12107",
+			"VC121079",
+			"VC12108",
+			"VC121080",
+			"VC121087",
+			"VC12109",
+			"VC12110",
+			"VC12112",
+			"VC121122",
+			"VC121155",
+			"VC121156",
+			"VC121160",
+			"VC121162",
+			"VC121170",
+			"VC121176",
+			"VC121181",
+			"VC121187",
+			"VC121188",
+			"VC121199",
+			"VC121219",
+			"VC121223",
+			"VC121238",
+			"VC121239",
+			"VC121243",
+			"VC121249",
+			"VC121253",
+			"VC121256",
+			"VC121259",
+			"VC121260",
+			"VC121266",
+			"VC121267",
+			"VC121268",
+			"VC121270",
+			"VC121271",
+			"VC121274",
+			"VC121276",
+			"VC121278",
+			"VC121280",
+			"VC121282",
+			"VC121285",
+			"VC121286",
+			"VC121287",
+			"VC121291",
+			"VC121294",
+			"VC121298",
+			"VC12130",
+			"VC121303",
+			"VC121304",
+			"VC121305",
+			"VC121306",
+			"VC121307",
+			"VC121310",
+			"VC121312",
+			"VC121318",
+			"VC121319",
+			"VC121320",
+			"VC121326",
+			"VC121327",
+			"VC121329",
+			"VC12133",
+			"VC121336",
+			"VC12134",
+			"VC121342",
+			"VC121343",
+			"VC121345",
+			"VC121346",
+			"VC12135",
+			"VC121352",
+			"VC121354",
+			"VC121355",
+			"VC121356",
+			"VC12136",
+			"VC121362",
+			"VC121368",
+			"VC12138",
+			"VC121380",
+			"VC121381",
+			"VC121384",
+			"VC121385",
+			"VC121391",
+			"VC121392",
+			"VC121393",
+			"VC121394",
+			"VC121398",
+			"VC121399",
+			"VC121400",
+			"VC121404",
+			"VC121410",
+			"VC121413",
+			"VC121414",
+			"VC121415",
+			"VC121416",
+			"VC121419",
+			"VC121420",
+			"VC121421",
+			"VC121428",
+			"VC12143",
+			"VC121440",
+			"VC121441",
+			"VC121453",
+			"VC121454",
+			"VC121455",
+			"VC121456",
+			"VC121464",
+			"VC121467",
+			"VC121468",
+			"VC121470",
+			"VC121476",
+			"VC121482",
+			"VC121485",
+			"VC121486",
+			"VC121487",
+			"VC121488",
+			"VC121489",
+			"VC12149",
+			"VC121494",
+			"VC121501",
+			"VC121508",
+			"VC121509",
+			"VC121522",
+			"VC121523",
+			"VC121530",
+			"VC121531",
+			"VC121532",
+			"VC121535",
+			"VC121536",
+			"VC121540",
+			"VC121551",
+			"VC121564",
+			"VC121565",
+			"VC121568",
+			"VC121575",
+			"VC121576",
+			"VC121577",
+			"VC121579",
+			"VC121580",
+			"VC121581",
+			"VC121588",
+			"VC121590",
+			"VC121594",
+			"VC121596",
+			"VC12161",
+			"VC121611",
+			"VC121618",
+			"VC121619",
+			"VC12162",
+			"VC121622",
+			"VC121623",
+			"VC121624",
+			"VC121625",
+			"VC121627",
+			"VC121628",
+			"VC121629",
+			"VC121630",
+			"VC121631",
+			"VC121638",
+			"VC121639",
+			"VC121640",
+			"VC121641",
+			"VC121642",
+			"VC121643",
+			"VC121645",
+			"VC121650",
+			"VC121654",
+			"VC121657",
+			"VC121664",
+			"VC121665",
+			"VC121667",
+			"VC121668",
+			"VC121669",
+			"VC121671",
+			"VC121672",
+			"VC121673",
+			"VC121679",
+			"VC121682",
+			"VC121683",
+			"VC121687",
+			"VC121688",
+			"VC121690",
+			"VC121691",
+			"VC121692",
+			"VC121709",
+			"VC121710",
+			"VC121715",
+			"VC121716",
+			"VC121720",
+			"VC121723",
+			"VC121724",
+			"VC121729",
+			"VC121733",
+			"VC121762",
+			"VC121769",
+			"VC121770",
+			"VC121771",
+			"VC121775",
+			"VC121777",
+			"VC121793",
+			"VC121798",
+			"VC12180",
+			"VC121801",
+			"VC121803",
+			"VC121804",
+			"VC12186",
+			"VC12197",
+			"VC12210",
+			"VC12211",
+			"VC12213",
+			"VC12214",
+			"VC12215",
+			"VC12217",
+			"VC12220",
+			"VC12221",
+			"VC12222",
+			"VC12223",
+			"VC12224",
+			"VC12226",
+			"VC12229",
+			"VC12235",
+			"VC12236",
+			"VC12237",
+			"VC12240",
+			"VC12244",
+			"VC12245",
+			"VC12246",
+			"VC12252",
+			"VC12262",
+			"VC12263",
+			"VC12264",
+			"VC12270",
+			"VC12272",
+			"VC12276",
+			"VC12278",
+			"VC12279",
+			"VC12285",
+			"VC12288",
+			"VC12293",
+			"VC12294",
+			"VC12297",
+			"VC12299",
+			"VC12300",
+			"VC12301",
+			"VC12304",
+			"VC12306",
+			"VC12316",
+			"VC12317",
+			"VC12321",
+			"VC12323",
+			"VC12326",
+			"VC12328",
+			"VC12329",
+			"VC12333",
+			"VC12334",
+			"VC12335",
+			"VC12338",
+			"VC12345",
+			"VC12346",
+			"VC12347",
+			"VC12352",
+			"VC12354",
+			"VC12360",
+			"VC12363",
+			"VC12364",
+			"VC12368",
+			"VC12369",
+			"VC12380",
+			"VC12383",
+			"VC12387",
+			"VC12402",
+			"VC12406",
+			"VC12412",
+			"VC12413",
+			"VC12414",
+			"VC12422",
+			"VC12424",
+			"VC12425",
+			"VC12426",
+			"VC12429",
+			"VC12434",
+			"VC12437",
+			"VC12438",
+			"VC12444",
+			"VC12448",
+			"VC12451",
+			"VC12464",
+			"VC12465",
+			"VC12475",
+			"VC12481",
+			"VC12484",
+			"VC12486",
+			"VC12487",
+			"VC12491",
+			"VC12504",
+			"VC12505",
+			"VC12506",
+			"VC12507",
+			"VC12516",
+			"VC12517",
+			"VC12522",
+			"VC12523",
+			"VC12537",
+			"VC12541",
+			"VC12542",
+			"VC12546",
+			"VC12547",
+			"VC12548",
+			"VC12554",
+			"VC12555",
+			"VC12561",
+			"VC12564",
+			"VC12569",
+			"VC12575",
+			"VC12576",
+			"VC12577",
+			"VC12578",
+			"VC12581",
+			"VC12582",
+			"VC12583",
+			"VC12584",
+			"VC12586",
+			"VC12592",
+			"VC12597",
+			"VC12599",
+			"VC12601",
+			"VC12603",
+			"VC12604",
+			"VC12605",
+			"VC12608",
+			"VC12609",
+			"VC12610",
+			"VC12612",
+			"VC12614",
+			"VC12615",
+			"VC12620",
+			"VC12626",
+			"VC12627",
+			"VC12628",
+			"VC12630",
+			"VC12636",
+			"VC12637",
+			"VC12638",
+			"VC12639",
+			"VC12640",
+			"VC12644",
+			"VC12653",
+			"VC12658",
+			"VC12659",
+			"VC12662",
+			"VC12672",
+			"VC12673",
+			"VC12675",
+			"VC12676",
+			"VC12685",
+			"VC12693",
+			"VC12700",
+			"VC12701",
+			"VC12702",
+			"VC12710",
+			"VC12717",
+			"VC12723",
+			"VC12726",
+			"VC12727",
+			"VC12728",
+			"VC12729",
+			"VC12730",
+			"VC12731",
+			"VC12733",
+			"VC12734",
+			"VC12741",
+			"VC12742",
+			"VC12745",
+			"VC12747",
+			"VC12754",
+			"VC12759",
+			"VC12762",
+			"VC12763",
+			"VC12764",
+			"VC12767",
+			"VC12768",
+			"VC12770",
+			"VC12775",
+			"VC12779",
+			"VC12783",
+			"VC12787",
+			"VC12788",
+			"VC12791",
+			"VC12792",
+			"VC12793",
+			"VC12795",
+			"VC12797",
+			"VC12813",
+			"VC12814",
+			"VC12815",
+			"VC12816",
+			"VC12817",
+			"VC12818",
+			"VC12823",
+			"VC12824",
+			"VC12828",
+			"VC12829",
+			"VC12831",
+			"VC12832",
+			"VC12833",
+			"VC12838",
+			"VC12845",
+			"VC12850",
+			"VC12853",
+			"VC12854",
+			"VC12855",
+			"VC12856",
+			"VC12857",
+			"VC12858",
+			"VC12859",
+			"VC12862",
+			"VC12864",
+			"VC12865",
+			"VC12866",
+			"VC12867",
+			"VC12868",
+			"VC12869",
+			"VC12870",
+			"VC12871",
+			"VC12876",
+			"VC12887",
+			"VC12888",
+			"VC12891",
+			"VC12892",
+			"VC12893",
+			"VC12894",
+			"VC12895",
+			"VC12899",
+			"VC12915",
+			"VC12917",
+			"VC12920",
+			"VC12923",
+			"VC12924",
+			"VC12925",
+			"VC12926",
+			"VC12927",
+			"VC12928",
+			"VC12929",
+			"VC12935",
+			"VC12941",
+			"VC12947",
+			"VC12951",
+			"VC12952",
+			"VC12954",
+			"VC12955",
+			"VC12957",
+			"VC12960",
+			"VC12961",
+			"VC12962",
+			"VC12963",
+			"VC12971",
+			"VC12972",
+			"VC12973",
+			"VC12974",
+			"VC12978",
+			"VC12979",
+			"VC12988",
+			"VC131012",
+			"VC131013",
+			"VC131178",
+			"VC131472",
+			"VC13157",
+			"VC131593",
+			"VC13172",
+			"VC13173",
+			"VC13188",
+			"VC13298",
+			"VC13302",
+			"VC13515",
+			"VC14308",
+			"VC1741",
+			"VC1748",
+			"VC1752",
+			"VC1754",
+			"VC1756",
+			"VC1758",
+			"VC221062",
+			"VC221089",
+			"VC221131",
+			"VC221163",
+			"VC221177",
+			"VC22120",
+			"VC22131",
+			"VC221337",
+			"VC221347",
+			"VC221376",
+			"VC221377",
+			"VC221382",
+			"VC221490",
+			"VC221497",
+			"VC221498",
+			"VC221499",
+			"VC221500",
+			"VC221502",
+			"VC221537",
+			"VC22155",
+			"VC221614",
+			"VC221655",
+			"VC221663",
+			"VC221678",
+			"VC221701",
+			"VC221778",
+			"VC221779",
+			"VC22205",
+			"VC22218",
+			"VC22225",
+			"VC22243",
+			"VC22325",
+			"VC22349",
+			"VC22421",
+			"VC22447",
+			"VC22467",
+			"VC22476",
+			"VC22611",
+			"VC22645",
+			"VC22683",
+			"VC22699",
+			"VC22758",
+			"VC22803",
+			"VC22810",
+			"VC22851",
+			"VC22852",
+			"VC22908",
+			"VC22956",
+			"VC271000",
+			"VC271001",
+			"VC271002",
+			"VC271014",
+			"VC271037",
+			"VC271151",
+			"VC271269",
+			"VC271344",
+			"VC271573",
+			"VC271597",
+			"VC271632",
+			"VC271649",
+			"VC271694",
+			"VC271695",
+			"VC271696",
+			"VC271697",
+			"VC271698",
+			"VC271699",
+			"VC271700",
+			"VC271711",
+			"VC271714",
+			"VC271792",
+			"VC271795",
+			"VC27999"
 		];
-
+		var pdf;
 		// let booking1 = await Booking.findAll({ where: { Reg_Code_Disply: vcNo } });
+		let array = [];
 		let booking1 = await Booking.findAll({
 			where: {
-				Reg_Code_Disply: {
-					[Op.notIn]: data // Exclude bookings with Reg_Code_Disply in the data array
-				}
+				Reg_Code_Disply: data
 			}
 		});
-		for (let book = 0; booking1.length > book; book++) {
-			const createdAt = new Date(booking1[book].createdAt);
-			const currentDate = new Date();
+		for (let book = 0; booking1[book].length > book; book++) {
+			if (booking1[book]) {
+				const createdAt = new Date(booking1[book].createdAt);
+				const currentDate = new Date();
 
-			const july2024 = new Date("2024-07-01");
-			const august2024 = new Date("2024-08-01");
-			let whereClause = {
-				BK_ID: booking1[book].BK_ID
-			};
-
-			// Check if the current date is after August 2024 and if ostamount is greater than 0
-			let find = await InstallmentReceipts.findOne({
-				where: { BK_ID: booking1[book].BK_ID, Installment_Month: july2024 }
-			});
-			if (find) {
-				console.log("hi");
-				whereClause.Installment_Month = {
-					[Op.between]: [august2024, currentDate]
+				const july2024 = new Date("2024-07-01");
+				const august2024 = new Date("2024-08-01");
+				let whereClause = {
+					BK_ID: booking1[book].BK_ID
 				};
-			} else {
-				whereClause.Installment_Month = {
-					[Op.between]: [createdAt, currentDate]
-				};
-			}
-			console.log(whereClause);
-			let before = await InstallmentReceipts.findAll({
-				where: whereClause,
-				include: [
-					{
-						as: "Booking_Installment_Details",
-						model: BookingInstallmentDetails,
-						where: { InsType_ID: [1, 2], BKI_TYPE: null }
-					}
-				]
-			});
-			console.log(before);
-			const surchargeRate = 0.001;
-			let surcharge = 0;
-			let total = 0;
 
-			for (let i = 0; i < before.length; i++) {
-				const ircDate = new Date(before[i].IRC_Date);
-				const dueDate = new Date(before[i].Booking_Installment_Details.Due_Date);
-
-				const differenceInMilliseconds = ircDate - dueDate;
-				const millisecondsInOneDay = 1000 * 60 * 60 * 24;
-				const differenceInDays = differenceInMilliseconds / millisecondsInOneDay;
-
-				// Check if the installment month is July 2024 and if ostamount was 0 during July
-				if (differenceInDays < 0) {
-					await InstallmentReceipts.update({ surCharges: 0 }, { where: { INS_RC_ID: before[i].INS_RC_ID } });
-				} else if (differenceInDays > 0) {
-					surcharge = parseInt(before[i].Installment_Due) * surchargeRate * differenceInDays;
-					total = total + surcharge;
-					await InstallmentReceipts.update(
-						{ surCharges: surcharge },
-						{
-							where: { INS_RC_ID: before[i].INS_RC_ID }
-						}
-					);
-				}
-				// else {
-				// 	await InstallmentReceipts.update({ surCharges: 0 }, { where: { INS_RC_ID: before[i].INS_RC_ID } });
-				// }
-			}
-			let lastInstallmentMonth;
-			let lastPaidInstallment = await InstallmentReceipts.findOne({
-				where: { BK_ID: booking1[book].BK_ID },
-				order: [["Installment_Month", "DESC"]] // Get the most recent payment
-			});
-			console.log(lastInstallmentMonth);
-
-			if (!lastPaidInstallment) {
-				// lastInstallmentMonth =
-				var newLastInstallmentPaid = await BookingInstallmentDetails.findOne({
-					where: { BK_ID: booking1[book].BK_ID, BKI_TYPE: null }
-					// order: [["Installment_Month", "ASE"]]
+				// Check if the current date is after August 2024 and if ostamount is greater than 0
+				let find = await InstallmentReceipts.findOne({
+					where: { BK_ID: booking1[book].BK_ID, Installment_Month: july2024 }
 				});
-				if (!newLastInstallmentPaid) {
-					let id = booking1[book].BK_ID;
-
-					var booking = await Booking.findByPk(id, {
-						include: [
-							{ as: "Member", model: Member },
-							{ as: "Phase", model: Phase },
-							{ as: "Sector", model: Sector },
-							{ as: "MemNominee", model: MemNominee },
-							{ as: "UnitType", model: UnitType },
-							{ as: "PlotSize", model: PlotSize },
-							{ as: "PaymentPlan", model: PaymentPlan },
-							{ as: "UnitNature", model: UnitNature },
-							{ as: "Unit", model: Unit, include: { as: "Block", model: Block } }
-						]
-					});
-
-					if (!booking) {
-						return next(CustomErrorHandler.notFound("Data not found!"));
-					}
-
-					booking.toJSON();
-					// console.log(booking);
-
-					const installmentReceipts = await BookingInstallmentDetails.findAll({
-						order: [["Installment_Code", "ASC"]],
-						where: { BK_ID: booking.BK_ID }
-					});
-
-					// const installmentReceipts= await InstallmentReceipts.findAll({include:[{as:'Installment_Type',model:InstallmentType},{as:'Payment_Mode',model:payment_mode}], where: { BK_ID: booking.BK_ID } });
-
-					var installmentPaidReceipts = await InstallmentReceipts.findAll({
-						where: { BK_ID: booking.BK_ID }
-					});
-					var insRecpData = installmentReceipts.filter((item) => item.BKI_TYPE !== "DC");
-					var dcInsRecpData = installmentReceipts.filter((item) => item.BKI_TYPE == "DC");
-					const pdf = await pdfGenerator.statementGenerator(
-						booking,
-						insRecpData,
-						dcInsRecpData,
-						installmentPaidReceipts
-					);
-					continue;
+				if (find) {
+					console.log("hi");
+					whereClause.Installment_Month = {
+						[Op.between]: [august2024, currentDate]
+					};
 				} else {
-					lastInstallmentMonth = new Date(newLastInstallmentPaid.Installment_Month);
+					whereClause.Installment_Month = {
+						[Op.between]: [createdAt, currentDate]
+					};
 				}
-
-				console.log("No installment records found.");
-			} else {
-				lastInstallmentMonth = new Date(lastPaidInstallment.Installment_Month);
-			}
-
-			// Step 2: Calculate the next installment month
-			let nextInstallmentMonth = new Date(lastInstallmentMonth);
-
-			const currentDate2 = new Date();
-			let surcharge2 = 0;
-
-			// Loop through each month from the last installment month to the current month
-			while (nextInstallmentMonth < currentDate2) {
-				nextInstallmentMonth.setMonth(nextInstallmentMonth.getMonth() + 1); // Move to the next month
-				let nextInstallmentMonthFormatted = `${nextInstallmentMonth.getFullYear()}-${(
-					nextInstallmentMonth.getMonth() + 1
-				)
-					.toString()
-					.padStart(2, "0")}-10`;
-
-				console.log(`Processing month: ${nextInstallmentMonthFormatted}`);
-
-				// Get the due date for the next installment month
-				let nextInstallmentDetails = await BookingInstallmentDetails.findOne({
-					where: {
-						BK_ID: booking1[book].BK_ID,
-						Due_Date: nextInstallmentMonthFormatted
-					}
+				console.log(whereClause);
+				let before = await InstallmentReceipts.findAll({
+					where: whereClause,
+					include: [
+						{
+							as: "Booking_Installment_Details",
+							model: BookingInstallmentDetails,
+							where: { InsType_ID: [1, 2], BKI_TYPE: null }
+						}
+					]
 				});
 
-				if (!nextInstallmentDetails) {
-					console.log(`No installment details found for ${nextInstallmentMonthFormatted}.`);
-					continue;
+				const surchargeRate = 0.001;
+				let surcharge = 0;
+				let total = 0;
+				// Set to track processed dates and types
+				const processedDates = new Set();
+				let datearray = [];
+				for (let i = 0; i < before.length; i++) {
+					const ircDate = new Date(before[i].IRC_Date);
+					const dueDate = new Date(before[i].Booking_Installment_Details.Due_Date);
+
+					const differenceInMilliseconds = ircDate - dueDate;
+					const millisecondsInOneDay = 1000 * 60 * 60 * 24;
+					const differenceInDays = differenceInMilliseconds / millisecondsInOneDay;
+					datearray.push(`${i}-${differenceInDays}`);
+					// Create a unique key using the IRC_Date and INS_Type
+					var installmentKey = `${before[i].IRC_Date}-${before[i].BKI_DETAIL_ID}`;
+
+					// Check if we already processed this date and type
+					if (processedDates.has(installmentKey)) {
+						// Skip this installment if we already processed a surcharge for this date and type
+						continue;
+					}
+					// Apply surcharge logic
+					if (differenceInDays < 0) {
+						console.log("when days are less then 0", differenceInDays);
+
+						await InstallmentReceipts.update({ surCharges: 0 }, { where: { INS_RC_ID: before[i].INS_RC_ID } });
+					} else if (differenceInDays > 0) {
+						const surcharge = parseInt(before[i].Installment_Due) * surchargeRate * differenceInDays;
+						total = total + surcharge;
+						console.log("updating the sur charge at ", i, surcharge);
+
+						await InstallmentReceipts.update({ surCharges: surcharge }, { where: { INS_RC_ID: before[i].INS_RC_ID } });
+					}
+
+					// Mark this date and type as processed
+					processedDates.add(installmentKey);
 				}
+				let lastInstallmentMonth;
+				let lastPaidInstallment = await InstallmentReceipts.findOne({
+					where: { BK_ID: booking1[book].BK_ID },
+					order: [["Installment_Month", "DESC"]] // Get the most recent payment
+				});
 
-				// Step 3: Calculate the surcharge for this installment
-				const dueDate = new Date(nextInstallmentDetails.Due_Date);
-				const differenceInMilliseconds = currentDate2 - dueDate;
-				const millisecondsInOneDay = 1000 * 60 * 60 * 24;
-				const differenceInDays = Math.floor(differenceInMilliseconds / millisecondsInOneDay);
+				if (!lastPaidInstallment) {
+					// lastInstallmentMonth =
+					var newLastInstallmentPaid = await BookingInstallmentDetails.findOne({
+						where: { BK_ID: booking1[book].BK_ID, BKI_TYPE: null }
+						// order: [["Installment_Month", "ASE"]]
+					});
+					if (!newLastInstallmentPaid) {
+						let id = booking1[book].BK_ID;
 
-				if (differenceInDays > 0) {
-					surcharge2 = parseInt(nextInstallmentDetails.Installment_Due) * surchargeRate * differenceInDays;
-					total = total + surcharge2;
-					// Update the installment details with the calculated surcharge
-					await BookingInstallmentDetails.update(
-						{ surCharges: surcharge2 },
-						{
-							where: {
-								BK_ID: booking1[book].BK_ID,
-								Due_Date: nextInstallmentMonthFormatted
-							}
+						var booking = await Booking.findByPk(id, {
+							include: [
+								{ as: "Member", model: Member },
+								{ as: "Phase", model: Phase },
+								{ as: "Sector", model: Sector },
+								{ as: "MemNominee", model: MemNominee },
+								{ as: "UnitType", model: UnitType },
+								{ as: "PlotSize", model: PlotSize },
+								{ as: "PaymentPlan", model: PaymentPlan },
+								{ as: "UnitNature", model: UnitNature },
+								{ as: "Unit", model: Unit, include: { as: "Block", model: Block } }
+							]
+						});
+
+						if (!booking) {
+							return next(CustomErrorHandler.notFound("Data not found!"));
 						}
-					);
 
-					console.log(`Surcharge applied for ${nextInstallmentMonthFormatted}: ${surcharge2}`);
+						booking.toJSON();
+						// console.log(booking);
+
+						const installmentReceipts = await BookingInstallmentDetails.findAll({
+							order: [["Installment_Code", "ASC"]],
+							where: { BK_ID: booking.BK_ID }
+						});
+
+						// const installmentReceipts= await InstallmentReceipts.findAll({include:[{as:'Installment_Type',model:InstallmentType},{as:'Payment_Mode',model:payment_mode}], where: { BK_ID: booking.BK_ID } });
+
+						var installmentPaidReceipts = await InstallmentReceipts.findAll({
+							where: { BK_ID: booking.BK_ID }
+						});
+						var insRecpData = installmentReceipts.filter((item) => item.BKI_TYPE !== "DC");
+						var dcInsRecpData = installmentReceipts.filter((item) => item.BKI_TYPE == "DC");
+						pdf = await pdfGenerator.statementGenerator(booking, insRecpData, dcInsRecpData, installmentPaidReceipts);
+						continue;
+					} else {
+						lastInstallmentMonth = new Date(newLastInstallmentPaid.Installment_Month);
+					}
+
+					console.log("No installment records found.");
+				} else {
+					lastInstallmentMonth = new Date(lastPaidInstallment.Installment_Month);
 				}
+
+				// Step 2: Calculate the next installment month
+				let nextInstallmentMonth = new Date(lastInstallmentMonth);
+
+				const currentDate2 = new Date();
+				let surcharge2 = 0;
+
+				// Loop through each month from the last installment month to the current month
+				while (nextInstallmentMonth < currentDate2) {
+					nextInstallmentMonth.setMonth(nextInstallmentMonth.getMonth() + 1); // Move to the next month
+					let nextInstallmentMonthFormatted = `${nextInstallmentMonth.getFullYear()}-${(
+						nextInstallmentMonth.getMonth() + 1
+					)
+						.toString()
+						.padStart(2, "0")}-10`;
+
+					console.log(`Processing month: ${nextInstallmentMonthFormatted}`);
+
+					// Get the due date for the next installment month
+					let nextInstallmentDetails = await BookingInstallmentDetails.findOne({
+						where: {
+							BK_ID: booking1[book].BK_ID,
+							Due_Date: nextInstallmentMonthFormatted
+						}
+					});
+
+					if (!nextInstallmentDetails) {
+						console.log(`No installment details found for ${nextInstallmentMonthFormatted}.`);
+						continue;
+					}
+
+					// Step 3: Calculate the surcharge for this installment
+					const dueDate = new Date(nextInstallmentDetails.Due_Date);
+					const differenceInMilliseconds = currentDate2 - dueDate;
+					const millisecondsInOneDay = 1000 * 60 * 60 * 24;
+					const differenceInDays = Math.floor(differenceInMilliseconds / millisecondsInOneDay);
+
+					if (differenceInDays > 0) {
+						surcharge2 = parseInt(nextInstallmentDetails.Installment_Due) * surchargeRate * differenceInDays;
+						total = total + surcharge2;
+						// Update the installment details with the calculated surcharge
+						await BookingInstallmentDetails.update(
+							{ surCharges: surcharge2 },
+							{
+								where: {
+									BK_ID: booking1[book].BK_ID,
+									Due_Date: nextInstallmentMonthFormatted
+								}
+							}
+						);
+					}
+				}
+				let remainingsurcharges = parseFloat(booking1[book].remainingSurcharges);
+				let paidSurcharges = parseFloat(booking1[book].paidSurcharges);
+
+				const updateBooking = await Booking.update(
+					{ totalSurcharges: total, remainingSurcharges: total - paidSurcharges },
+					{ where: { Reg_Code_Disply: booking1[book].Reg_Code_Disply } }
+				);
+
+				// try {
+				let id = booking1[book].BK_ID;
+
+				var booking = await Booking.findByPk(id, {
+					include: [
+						{ as: "Member", model: Member },
+						{ as: "Phase", model: Phase },
+						{ as: "Sector", model: Sector },
+						{ as: "MemNominee", model: MemNominee },
+						{ as: "UnitType", model: UnitType },
+						{ as: "PlotSize", model: PlotSize },
+						{ as: "PaymentPlan", model: PaymentPlan },
+						{ as: "UnitNature", model: UnitNature },
+						{ as: "Unit", model: Unit, include: { as: "Block", model: Block } }
+					]
+				});
+
+				if (!booking) {
+					return next(CustomErrorHandler.notFound("Data not found!"));
+				}
+
+				booking.toJSON();
+				// console.log(booking);
+
+				const installmentReceipts = await BookingInstallmentDetails.findAll({
+					order: [["Installment_Code", "ASC"]],
+					where: { BK_ID: booking.BK_ID }
+				});
+
+				// const installmentReceipts= await InstallmentReceipts.findAll({include:[{as:'Installment_Type',model:InstallmentType},{as:'Payment_Mode',model:payment_mode}], where: { BK_ID: booking.BK_ID } });
+
+				var installmentPaidReceipts = await InstallmentReceipts.findAll({
+					where: { BK_ID: booking.BK_ID }
+				});
+				var insRecpData = installmentReceipts.filter((item) => item.BKI_TYPE !== "DC");
+				var dcInsRecpData = installmentReceipts.filter((item) => item.BKI_TYPE == "DC");
+				pdf = await pdfGenerator.statementGenerator(booking, insRecpData, dcInsRecpData, installmentPaidReceipts);
+
+				// }
+				//  catch (error) {
+				// 	return next(error);
+				// }
+			} else {
+				array.push(data[book]);
 			}
-			let remainingsurcharges = parseFloat(booking1[book].remainingSurcharges);
-			let paidSurcharges = parseFloat(booking1[book].paidSurcharges);
-
-			const updateBooking = await Booking.update(
-				{ totalSurcharges: total, remainingSurcharges: total - paidSurcharges },
-				{ where: { Reg_Code_Disply: booking1[book].Reg_Code_Disply } }
-			);
-
-			// try {
-			let id = booking1[book].BK_ID;
-
-			var booking = await Booking.findByPk(id, {
-				include: [
-					{ as: "Member", model: Member },
-					{ as: "Phase", model: Phase },
-					{ as: "Sector", model: Sector },
-					{ as: "MemNominee", model: MemNominee },
-					{ as: "UnitType", model: UnitType },
-					{ as: "PlotSize", model: PlotSize },
-					{ as: "PaymentPlan", model: PaymentPlan },
-					{ as: "UnitNature", model: UnitNature },
-					{ as: "Unit", model: Unit, include: { as: "Block", model: Block } }
-				]
-			});
-
-			if (!booking) {
-				return next(CustomErrorHandler.notFound("Data not found!"));
-			}
-
-			booking.toJSON();
-			// console.log(booking);
-
-			const installmentReceipts = await BookingInstallmentDetails.findAll({
-				order: [["Installment_Code", "ASC"]],
-				where: { BK_ID: booking.BK_ID }
-			});
-
-			// const installmentReceipts= await InstallmentReceipts.findAll({include:[{as:'Installment_Type',model:InstallmentType},{as:'Payment_Mode',model:payment_mode}], where: { BK_ID: booking.BK_ID } });
-
-			var installmentPaidReceipts = await InstallmentReceipts.findAll({
-				where: { BK_ID: booking.BK_ID }
-			});
-			var insRecpData = installmentReceipts.filter((item) => item.BKI_TYPE !== "DC");
-			var dcInsRecpData = installmentReceipts.filter((item) => item.BKI_TYPE == "DC");
-			const pdf = await pdfGenerator.statementGenerator(booking, insRecpData, dcInsRecpData, installmentPaidReceipts);
-
-			// }
-			//  catch (error) {
-			// 	return next(error);
-			// }
 		}
 		res.status(200).json({
 			status: 200,
