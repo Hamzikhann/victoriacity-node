@@ -4135,7 +4135,7 @@ class pdfGenerator {
 
 			const options = {};
 			const pdfDoc = printer.createPdfKitDocument(docDefinition, options);
-			const filePath = "uploads/statement/VC-Statement-" + bookingData.BK_ID + ".pdf";
+			const filePath = "uploads/statement/VC-Statement-" + bookingData.Reg_Code_Disply + ".pdf";
 
 			pdfDoc.pipe(fs.createWriteStream(filePath));
 			pdfDoc.end();
