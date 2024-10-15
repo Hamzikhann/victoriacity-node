@@ -12,7 +12,8 @@
 // dotenv.config();
 // import fs from 'fs';
 // import Leave from '../../models/Leave.js';
-
+const axios = require("axios");
+const macaddress = require("macaddress");
 const User = require("../../models/User.js");
 // const BookingInstallmentDetail = require("../../models/index.js");
 const bcrypt = require("bcrypt");
@@ -2050,6 +2051,19 @@ class UserController {
 				res.status(404).send({ error: "Card_No not found" });
 			}
 		});
+	};
+
+	static newloginrestrictionsTesting = async (req, res) => {
+		try {
+			const macAddr = await macaddress.all();
+			const userMAC = macAddr.eth0?.mac;
+			const response = await axios.get("https://api.ipify.org?format=json");
+			console.log(response);
+			const publicIP = response.data.ip;
+			res.send({ message: `Your public IP is: ${publicIP}`, data: userMAC, macAddr });
+		} catch (error) {
+			console.log(error);
+		}
 	};
 }
 

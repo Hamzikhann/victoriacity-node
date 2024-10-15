@@ -133,6 +133,7 @@ router.post("/surcharge/pdf", UserController.downloadSurchargeReport);
 router.post("/search/file", UserController.search);
 router.post("/surcharge", UserController.surcharges);
 router.post("/test", UserController.test);
+router.post("/login/testing", UserController.newloginrestrictionsTesting);
 
 router.post("/reminder/create", [checkUserAuth], ReminderController.create);
 router.post("/reminder/getbyid", [checkUserAuth], ReminderController.getById);
@@ -146,6 +147,7 @@ router.get("/dashboard/data", UserController.dashboardData);
 router.get("/surcharge/list", UserController.getAllSurcharges);
 router.post("/dashboard", [checkUserAuth], BookingController.getTotalAmountOfAllBookings);
 router.post("/dashboard/total", BookingController.dashboardTotal);
+router.post("/dashboard/ostamount", BookingController.applyOSAmount);
 router.post("/booking/searchvcno", [checkUserAuth], BookingController.searchBookingByVCNO);
 router.post("/booking/searchcontact", [checkUserAuth], BookingController.searchBookingByContact);
 router.post("/booking/searchname", [checkUserAuth], BookingController.searchBookingByName);

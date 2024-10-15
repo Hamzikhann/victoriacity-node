@@ -901,6 +901,27 @@ class BookingController {
 			return next(error);
 		}
 	};
+	static applyOSAmount = async (req, res, next) => {
+		try {
+			Booking.findAll({ where: { Status: "Active" } })
+				.then(async (response) => {
+					for (let i = 0; i < response.length; i++) {
+						let ostamount = await BookingService.outStandingAmount(response[i].BK_ID);
+
+						let updateBooking = await Booking.update(
+							{ outstandingTillDate: ostamount },
+							{ where: { BK_ID: response[i].BK_ID } }
+						);
+					}
+					res.send({ message: "outstanding is updated" });
+				})
+				.catch((error) => {
+					next(error);
+				});
+		} catch (error) {
+			return next(error);
+		}
+	};
 
 	static dashboardTotal = async (rea, res, next) => {
 		try {
