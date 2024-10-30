@@ -4135,7 +4135,7 @@ class pdfGenerator {
 
 			const options = {};
 			const pdfDoc = printer.createPdfKitDocument(docDefinition, options);
-			const filePath = "uploads/statement/VC-Statement-" + bookingData.BK_ID + ".pdf";
+			const filePath = "uploads/statement/VC-Statement-" + bookingData.Reg_Code_Disply + ".pdf";
 
 			pdfDoc.pipe(fs.createWriteStream(filePath));
 			pdfDoc.end();
@@ -12121,7 +12121,7 @@ class pdfGenerator {
 									{
 										text: [
 											{
-												text: `CNIC: ${TRSData?.Member?.BuyerCNIC || ""}`,
+												text: `Member CNIC: ${TRSData?.Member?.BuyerCNIC || ""}`,
 												fontSize: 9,
 												bold: true
 											}
@@ -12132,7 +12132,7 @@ class pdfGenerator {
 									{
 										text: [
 											{
-												text: `Contact: ${TRSData?.Member?.BuyerContact || ""}`,
+												text: `Phone No: ${TRSData?.Member?.BuyerContact || ""}`,
 												fontSize: 9,
 												bold: true
 											}
@@ -12219,25 +12219,25 @@ class pdfGenerator {
 					},
 
 					{
-						text: "Dear Valued Member,",
+						text: "Valued Memeber,",
 						margin: [0, 23, 0, 0],
 						fontSize: 10
 					},
 					{
-						text: "Congratulations!",
+						text: "Aslaam O Alaekum!",
 						margin: [0, 8, 0, 0],
 						fontSize: 10,
 						bold: true
 					},
 					{
-						text: `The Management of Victoria City is pleased to inform you that the Transfer Application of the above-said Booking Application/Plot has been accepted and transferred in your name with all rights, deposits, liabilities as per the existing Rules & Regulations and those which may be enforced in future by the Management of the Victoria City or any authority competent to do so.`,
+						text: `Management Victoria City Lahore, is pleased to inform you that the Transfer Application of the above Booking Application / Plot has been accepted and transferred in your name with all rights, deposits, liabilities as per the existing rules & regulations and those which may be enforced in future by the Management. Transfer is also subject to the terms of the Indemnity Bond, Transfer Application Form along with affidavits / undertakings executed by the purchaser/s and the seller/s of the above said Booking Application / Plot respectively.`,
 						margin: [20, 23, 0, 0],
 						fontSize: 10,
 						lineHeight: 1.5,
 						leadingIndent: 40
 					},
 					{
-						text: `It is intimated that this transfer is also subject to the terms of the Indemnity Bond, Transfer Application Form along with affidavits/undertakings executed by the purchaser/s and the sellers/s of the above said Booking Application/Plot respectively.`,
+						text: `Please keep this Transfer Letter along with Transfer Application Form in safe custody and for all future correspondence with Victoria City, Lahore.`,
 
 						margin: [20, 23, 0, 0],
 						fontSize: 10,
@@ -12245,28 +12245,14 @@ class pdfGenerator {
 						leadingIndent: 40
 					},
 					{
-						text: `Please keep this Transfer Letter along with Transfer Application form in safe custody and for all future correspondence with the Victoria City.`,
+						text: `Assuring you our best services and co-operation.`,
 
 						margin: [20, 23, 0, 0],
 						fontSize: 10,
 						lineHeight: 1.5,
 						leadingIndent: 40
 					},
-					{
-						text: `Assuring you the best services and co-operation.`,
 
-						margin: [20, 23, 0, 0],
-						fontSize: 10,
-						lineHeight: 1.5,
-						leadingIndent: 40
-					},
-					{
-						text: `Best Regards.`,
-
-						margin: [0, 23, 0, 0],
-						fontSize: 10,
-						lineHeight: 1.5
-					},
 					{
 						text: "",
 						fit: [180, 180],
@@ -12274,8 +12260,8 @@ class pdfGenerator {
 					},
 
 					{
-						text: `Col. (R) Anwer Mahmood
-                      (Administrator) `,
+						text: `Administrator
+                      (Lt Col Anwer Mahmood, Retd) `,
 						margin: [0, 5, 0, 0],
 						bold: true,
 						fontSize: 10,
@@ -12284,7 +12270,7 @@ class pdfGenerator {
 					{
 						text: [
 							{
-								text: "For any discrepancy, please contact this office within 15 days from the date of transfer."
+								text: "Note:	For any query / discrepancy, please contact this office within 15 days from the date of transfer."
 							}
 						],
 						margin: [0, 10, 0, 0],
@@ -14240,6 +14226,12 @@ class pdfGenerator {
 							// 		}
 							// 	]
 							// },
+							{
+								text: "",
+								margin: [0, 300, 0, 0],
+								fontSize: 10,
+								bold: true
+							}
 							// {
 							// 	text: "Subject :",
 							// 	margin: [0, 45, 0, 0],
@@ -14253,12 +14245,11 @@ class pdfGenerator {
 							// 	bold: true,
 							// 	decoration: "underline"
 							// },
-							{
-								text: ``,
-								margin: [0, 300, 0, 0],
-								fontSize: 10,
-								font: "NotoNastaliqUrdu"
-							}
+							// {
+							// 	text: "Respected Member,",
+							// 	margin: [0, 23, 0, 0],
+							// 	fontSize: 10
+							// },
 							// {
 							// 	text: "Please find enclosed:",
 							// 	fontSize: 10,
