@@ -14135,6 +14135,7 @@ class pdfGenerator {
 	};
 
 	static async processBookingsInBatches(bookings, batchSize) {
+		console.log(bookings.length)
 		for (let i = 0; i < bookings.length; i += batchSize) {
 			const batch = bookings.slice(i, i + batchSize);
 			await pdfGenerator.processBatch(batch, i); // Pass the start index to generate unique filenames
