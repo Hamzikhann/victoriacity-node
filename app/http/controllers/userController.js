@@ -1423,7 +1423,7 @@ class UserController {
 			];
 			Booking.findAll({
 				where: {
-					Reg_Code_Disply: data
+					Status: "Active"
 				},
 				include: [
 					{
