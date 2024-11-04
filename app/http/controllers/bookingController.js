@@ -1808,28 +1808,7 @@ class BookingController {
 
 				for (let j = 0; j < sortedInstallments.length; j++) {
 					paidAmount += +sortedInstallments[j].Installment_Paid;
-					// if (j === sortedInstallments.length - 1) {
-					// 	const lastInstallmentMonth = sortedInstallments[j].Installment_Month;
-
-					// 	const lastDate = new Date(lastInstallmentMonth);
-					// 	const currentDate = new Date();
-
-					// 	const yearDiff = currentDate.getFullYear() - lastDate.getFullYear();
-					// 	const monthDiff = currentDate.getMonth() - lastDate.getMonth();
-
-					// 	totalMonthsDiff = yearDiff * 12 + monthDiff;
-
-					// 	if (totalMonthsDiff < 0 && paidAmount >= totalAmount) {
-					// 		totalMonthsDiff = 0; // Reset to 0 when advance payments cover future months
-					// 	} else if (paidAmount >= totalAmount) {
-					// 		totalMonthsDiff = -Math.abs(totalMonthsDiff); // Reflect that installments are paid in advance
-					// 	}
-					// 	// console.log("totalMonthsDiff totalMonthsDiff", totalMonthsDiff);
-					// }
-					//  else {
-					// 	totalMonthsDiff = 56;
-					// 	console.log("else  totalMonthsDiff totalMonthsDiff", totalMonthsDiff);
-					// }
+					
 					if (
 						sortedInstallments[j].RECEIPT_HEAD === "installments" &&
 						!uniqueBkiDetailIds.includes(+sortedInstallments[j].BKI_DETAIL_ID)
@@ -1877,84 +1856,84 @@ class BookingController {
 			
 console.log("called")
 
-			let data = [];
-			let uniqueBkiDetailIds = [];
-			const bookings = await Booking.findAll({ 
-				attributes: ["BK_ID", "Reg_Code_Disply", "SRForm_No", "Form_Code", "Total_Amt", "Advance_Amt", "Status"],
-				where: { [Op.and]: [
-					{ IsDeleted: 0 },
-					{ Status: { [Op.ne]: "Merged" } } // Status is not "Merged"
-				  ] },
-				include: [
-					// {
-					// 	where: { BKI_TYPE: null },
-					// 	attributes: [
-					// 		"BKI_DETAIL_ID",
-					// 		"Installment_Month",
-					// 		"Installment_Due",
-					// 		"Installment_Paid",
-					// 		"Remaining_Amount",
-					// 		"BKI_TYPE"
-					// 	],
-					// 	as: "Booking_Installment_Details",
-					// 	model: BookingInstallmentDetails
-					// },
-					{
-						as: "Installment_Receipts",
-						model: InstallmentReceipts,
-						attributes: [
-							"INS_RC_ID",
-							"BK_ID",
-							"Installment_Month",
-							"Installment_Paid",
-							"RECEIPT_HEAD",
-							"BKI_DETAIL_ID"
-						],
-						required: false
-						// order: [["Installment_Month", "ASC"]]
-					},
-				
-				],
-				
-			});
-console.log("bookings length",bookings.length)
-			for (let i = 0; i < bookings.length; i++) {
-				let paidAmount = 0;
-console.log(bookings[i].BK_ID)
-				const IR = bookings[i].Installment_Receipts;
-				const sortedInstallments = sortInstallmentsByMonth(IR);
-			
 
-				for (let j = 0; j < sortedInstallments.length; j++) {
-					paidAmount += +sortedInstallments[j].Installment_Paid;
-					if (
-						sortedInstallments[j].RECEIPT_HEAD === "installments" &&
-						!uniqueBkiDetailIds.includes(+sortedInstallments[j].BKI_DETAIL_ID)
-					) {
-						// Add only if BKI_DETAIL_ID is not already in the array
-						uniqueBkiDetailIds.push(+IR[j].BKI_DETAIL_ID);
-					}
-				}
+let data = [];
+let bkiDetailIds = [];
+const bookings = await Booking.findAll({
+	attributes: ["BK_ID", "Reg_Code_Disply", "SRForm_No", "Form_Code", "Total_Amt", "Advance_Amt", "Status"],
+	where: { [Op.and]: [
+		{ IsDeleted: 0 },
+		{ Status: { [Op.ne]: "Merged" } } // Status is not "Merged"
+	  ] },
 
-				if(uniqueBkiDetailIds.length >=6 && uniqueBkiDetailIds.length<12){
-					let updateStatus=await Booking.update({ Status: "Blocked" },
-						{
-							where: { Reg_Code_Disply: bookings[i].Reg_Code_Disply }
-						})
-				}else if(uniqueBkiDetailIds.length >=12 ){
-					let updateStatus=await Booking.update({ Status: "Cancled" },
-						{
-							where: { Reg_Code_Disply: bookings[i].Reg_Code_Disply }
-						})
-				}
-				// bookings[i].setDataValue("uniqueBkiDetailIds", uniqueBkiDetailIds.length);
+	include: [
+		{
+			where: { BKI_TYPE: null },
+			attributes: [
+				"BKI_DETAIL_ID",
+				"Installment_Month",
+				"Installment_Due",
+				"Installment_Paid",
+				"Remaining_Amount",
+				"BKI_TYPE"
+			],
+			as: "Booking_Installment_Details",
+			model: BookingInstallmentDetails
+		},
+		{
+			as: "Installment_Receipts",
+			model: InstallmentReceipts,
+			attributes: [
+				"INS_RC_ID",
+				"BK_ID",
+				"Installment_Month",
+				"Installment_Paid",
+				"RECEIPT_HEAD",
+				"BKI_DETAIL_ID"
+			],
+			required: false
+			// order: [["Installment_Month", "ASC"]]
+		},
+		
+	],
+});
 
-				uniqueBkiDetailIds = [];
-			}
+for (let i = 0; i < bookings.length; i++) {
+	console.log("Loop called")
+	let totalMonthsDiff = 0;
+
+	let index = bookings[i].Installment_Receipts.length;
+	let lastInstallmentMonth;
+	if (index > 0) {
+		lastInstallmentMonth = bookings[i].Installment_Receipts[index - 1].Installment_Month;
+		totalMonthsDiff = getMonthsDifference(lastInstallmentMonth);
+	} else {
+		lastInstallmentMonth = bookings[i].Booking_Installment_Details[0].Installment_Month;
+		totalMonthsDiff = getMonthsDifference(lastInstallmentMonth);
+	}
+console.log("Months difference",totalMonthsDiff)
+if(totalMonthsDiff >=6 && totalMonthsDiff<12){
+	let updateBooking=await Booking.update({ Status: "Blocked" },
+		{
+			where: { Reg_Code_Disply: bookings[i].Reg_Code_Disply }
+		})
+}
+else if(totalMonthsDiff>=12){
+	let updateBooking=await Booking.update({ Status: "Cancalled" },
+		{
+			where: { Reg_Code_Disply: bookings[i].Reg_Code_Disply }
+		})
+}
+
+	// bookings[i].setDataValue("oustadingMonthCount", totalMonthsDiff);
+
+	// bkiDetailIds = [];
+}
 
 			return res.send({
 				mesasge: "Bookings Status Updated Successfully!",
 				data: data,
+				bookings:bookings
 			});
 		} catch (error) {
 			return next(error);
