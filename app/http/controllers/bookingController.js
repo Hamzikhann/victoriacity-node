@@ -1901,7 +1901,7 @@ const bookings = await Booking.findAll({
 
 for (let i = 0; i < bookings.length; i++) {
 	console.log("Loop called")
-	console.log(bookings.Reg_Code_Disply)
+	console.log(bookings[i].Reg_Code_Disply)
 	let totalMonthsDiff = 0;
 
 	let index = bookings[i].Installment_Receipts.length;
