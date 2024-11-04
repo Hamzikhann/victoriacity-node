@@ -1952,6 +1952,7 @@ else if(totalMonthsDiff>=12){
 
 			return res.send({
 				mesasge: "Bookings Status Updated Successfully!",
+				legth:sortedBookings.length,
 				data: data,
 				bookings:sortedBookings
 			});
