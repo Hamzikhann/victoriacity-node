@@ -1862,6 +1862,7 @@ let bkiDetailIds = [];
 const bookings = await Booking.findAll({
 	attributes: ["BK_ID", "Reg_Code_Disply", "SRForm_No", "Form_Code", "Total_Amt", "Advance_Amt", "Status"],
 	where: { [Op.and]: [
+		
 		{ IsDeleted: 0 },
 		{ Status: { [Op.ne]: "Merged" } } // Status is not "Merged"
 	  ] },
@@ -1920,6 +1921,11 @@ if(totalMonthsDiff >=6 && totalMonthsDiff<12){
 }
 else if(totalMonthsDiff>=12){
 	let updateBooking=await Booking.update({ Status: "Cancalled" },
+		{
+			where: { Reg_Code_Disply: bookings[i].Reg_Code_Disply }
+		})
+}else if(totalMonthsDiff<6){
+	let updateBooking=await Booking.update({ Status: "Active" },
 		{
 			where: { Reg_Code_Disply: bookings[i].Reg_Code_Disply }
 		})
