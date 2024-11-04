@@ -1856,7 +1856,9 @@ class BookingController {
 			
 console.log("called")
 
-
+// const page = req.body.page || 1; // Get the page from request query or default to 1
+// 			const limit = req.body.limit || 5; // Limit the number of documents to 25 per page
+// 			const offset = (page - 1) * limit; 
 let data = [];
 let bkiDetailIds = [];
 const bookings = await Booking.findAll({
@@ -1890,45 +1892,56 @@ const bookings = await Booking.findAll({
 				"Installment_Month",
 				"Installment_Paid",
 				"RECEIPT_HEAD",
-				"BKI_DETAIL_ID"
+				"BKI_DETAIL_ID",
+				"IRC_Date"
+			
 			],
 			required: false
 			// order: [["Installment_Month", "ASC"]]
 		},
 		
 	],
+	// limit: limit,
+	// 			offset: offset
 });
 
-for (let i = 0; i < bookings.length; i++) {
+const sortedBookings = bookings.map(booking => {
+    const sortedReceipts = booking.Installment_Receipts.sort((a, b) => new Date(a.IRC_Date) - new Date(b.IRC_Date));
+    return {
+      ...booking.toJSON(),
+      Installment_Receipts: sortedReceipts
+    };
+  });
+for (let i = 0; i < sortedBookings.length; i++) {
 	console.log("Loop called")
-	console.log(bookings[i].Reg_Code_Disply)
+	console.log(sortedBookings[i].Reg_Code_Disply)
 	let totalMonthsDiff = 0;
 
-	let index = bookings[i].Installment_Receipts.length;
+	let index = sortedBookings[i].Installment_Receipts.length;
 	let lastInstallmentMonth;
 	if (index > 0) {
-		lastInstallmentMonth = bookings[i].Installment_Receipts[index - 1].Installment_Month;
+		lastInstallmentMonth = sortedBookings[i].Installment_Receipts[index - 1].Installment_Month;
 		totalMonthsDiff = getMonthsDifference(lastInstallmentMonth);
 	} else {
-		lastInstallmentMonth = bookings[i].Booking_Installment_Details[0].Installment_Month;
+		lastInstallmentMonth = sortedBookings[i].Booking_Installment_Details[0].Installment_Month;
 		totalMonthsDiff = getMonthsDifference(lastInstallmentMonth);
 	}
 console.log("Months difference",totalMonthsDiff)
 if(totalMonthsDiff >=6 && totalMonthsDiff<12){
 	let updateBooking=await Booking.update({ Status: "Blocked" },
 		{
-			where: { Reg_Code_Disply: bookings[i].Reg_Code_Disply }
+			where: { Reg_Code_Disply: sortedBookings[i].Reg_Code_Disply }
 		})
 }
 else if(totalMonthsDiff>=12){
 	let updateBooking=await Booking.update({ Status: "Cancalled" },
 		{
-			where: { Reg_Code_Disply: bookings[i].Reg_Code_Disply }
+			where: { Reg_Code_Disply: sortedBookings[i].Reg_Code_Disply }
 		})
 }else if(totalMonthsDiff<6){
 	let updateBooking=await Booking.update({ Status: "Active" },
 		{
-			where: { Reg_Code_Disply: bookings[i].Reg_Code_Disply }
+			where: { Reg_Code_Disply: sortedBookings[i].Reg_Code_Disply }
 		})
 }
 
