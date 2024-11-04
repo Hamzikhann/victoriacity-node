@@ -1906,7 +1906,7 @@ const bookings = await Booking.findAll({
 });
 
 const sortedBookings = bookings.map(booking => {
-    const sortedReceipts = booking.Installment_Receipts.sort((a, b) => new Date(a.IRC_Date) - new Date(b.IRC_Date));
+    const sortedReceipts = booking.Installment_Receipts.sort((a, b) => new Date(a.Installment_Month) - new Date(b.Installment_Month));
     return {
       ...booking.toJSON(),
       Installment_Receipts: sortedReceipts
