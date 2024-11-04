@@ -1331,7 +1331,7 @@ class BookingController {
 				let findBooking = await Booking.findOne({ where: { Reg_Code_Disply: canceledData[i] } });
 				if (findBooking) {
 					let updateBooking = Booking.update(
-						{ Status: "Blocked" },
+						{ Status: "Merged" },
 						{
 							where: { Reg_Code_Disply: canceledData[i] }
 						}
@@ -1866,6 +1866,95 @@ class BookingController {
 				mesasge: "Bookings Retrieved Successfully!",
 				data: data,
 				overAllTotal
+			});
+		} catch (error) {
+			return next(error);
+		}
+	};
+
+	static changeBookingStatus = async (req, res, next) => {
+		try {
+			
+console.log("called")
+
+			let data = [];
+			let uniqueBkiDetailIds = [];
+			const bookings = await Booking.findAll({ 
+				attributes: ["BK_ID", "Reg_Code_Disply", "SRForm_No", "Form_Code", "Total_Amt", "Advance_Amt", "Status"],
+				where: { [Op.and]: [
+					{ IsDeleted: 0 },
+					{ Status: { [Op.ne]: "Merged" } } // Status is not "Merged"
+				  ] },
+				include: [
+					// {
+					// 	where: { BKI_TYPE: null },
+					// 	attributes: [
+					// 		"BKI_DETAIL_ID",
+					// 		"Installment_Month",
+					// 		"Installment_Due",
+					// 		"Installment_Paid",
+					// 		"Remaining_Amount",
+					// 		"BKI_TYPE"
+					// 	],
+					// 	as: "Booking_Installment_Details",
+					// 	model: BookingInstallmentDetails
+					// },
+					{
+						as: "Installment_Receipts",
+						model: InstallmentReceipts,
+						attributes: [
+							"INS_RC_ID",
+							"BK_ID",
+							"Installment_Month",
+							"Installment_Paid",
+							"RECEIPT_HEAD",
+							"BKI_DETAIL_ID"
+						],
+						required: false
+						// order: [["Installment_Month", "ASC"]]
+					},
+				
+				],
+				
+			});
+console.log("bookings length",bookings.length)
+			for (let i = 0; i < bookings.length; i++) {
+				let paidAmount = 0;
+console.log(bookings[i].BK_ID)
+				const IR = bookings[i].Installment_Receipts;
+				const sortedInstallments = sortInstallmentsByMonth(IR);
+			
+
+				for (let j = 0; j < sortedInstallments.length; j++) {
+					paidAmount += +sortedInstallments[j].Installment_Paid;
+					if (
+						sortedInstallments[j].RECEIPT_HEAD === "installments" &&
+						!uniqueBkiDetailIds.includes(+sortedInstallments[j].BKI_DETAIL_ID)
+					) {
+						// Add only if BKI_DETAIL_ID is not already in the array
+						uniqueBkiDetailIds.push(+IR[j].BKI_DETAIL_ID);
+					}
+				}
+
+				if(uniqueBkiDetailIds.length >=6 && uniqueBkiDetailIds.length<12){
+					let updateStatus=await Booking.update({ Status: "Blocked" },
+						{
+							where: { Reg_Code_Disply: bookings[i].Reg_Code_Disply }
+						})
+				}else if(uniqueBkiDetailIds.length >=12 ){
+					let updateStatus=await Booking.update({ Status: "Cancled" },
+						{
+							where: { Reg_Code_Disply: bookings[i].Reg_Code_Disply }
+						})
+				}
+				// bookings[i].setDataValue("uniqueBkiDetailIds", uniqueBkiDetailIds.length);
+
+				uniqueBkiDetailIds = [];
+			}
+
+			return res.send({
+				mesasge: "Bookings Status Updated Successfully!",
+				data: data,
 			});
 		} catch (error) {
 			return next(error);

@@ -146,6 +146,7 @@ router.get("/job/details/:id", JobController.getJobDetailsById);
 router.get("/dashboard/data", UserController.dashboardData);
 router.get("/surcharge/list", UserController.getAllSurcharges);
 router.post("/dashboard", [checkUserAuth], BookingController.getTotalAmountOfAllBookings);
+router.post("/changestatus/files",BookingController.changeBookingStatus)
 router.post("/dashboard/total", BookingController.dashboardTotal);
 router.post("/dashboard/ostamount", BookingController.applyOSAmount);
 router.post("/booking/searchvcno", [checkUserAuth], BookingController.searchBookingByVCNO);

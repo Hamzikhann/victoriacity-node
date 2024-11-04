@@ -117,11 +117,7 @@ class UserController {
 	static Login = async (req, res, next) => {
 		try {
 			// console.log(req.body);
-			const response = await axios.get("https://api.ipify.org?format=json");
-			const publicIP = response.data.ip;
-			console.log(publicIP);
-			console.log(typeof publicIP);
-			if (publicIP == "139.59.61.58") {
+			
 				const { email, password } = req.body;
 				if (email && password) {
 					let user = await User.findOne({
@@ -193,9 +189,7 @@ class UserController {
 						message: "All fields are required"
 					});
 				}
-			} else {
-				res.status(403).send({ message: "Access denied: Unauthorized IP address" });
-			}
+
 		} catch (error) {
 			return next(error);
 		}
