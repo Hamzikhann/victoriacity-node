@@ -1779,24 +1779,31 @@ class BookingController {
 				limit: limit,
 				offset: offset
 			});
+			const sortedBookings = bookings.map(booking => {
+				const sortedReceipts = booking.Installment_Receipts.sort((a, b) => new Date(a.Installment_Month) - new Date(b.Installment_Month));
+				return {
+				  ...booking.toJSON(),
+				  Installment_Receipts: sortedReceipts
+				};
+			  });
 
-			for (let i = 0; i < bookings.length; i++) {
+			for (let i = 0; i < sortedBookings.length; i++) {
 				let paidAmount = 0;
 				let totalAmount = 0;
 				let advAmount = 0;
 				let totalMonthsDiff = 0;
 
-				advAmount += +bookings[i].Advance_Amt;
-				const BID = bookings[i].Booking_Installment_Details;
-				let index = bookings[i].Installment_Receipts.length;
+				advAmount += +sortedBookings[i].Advance_Amt;
+				const BID = sortedBookings[i].Booking_Installment_Details;
+				let index = sortedBookings[i].Installment_Receipts.length;
 				let lastInstallmentMonth;
-				const IR = bookings[i].Installment_Receipts;
+				const IR = sortedBookings[i].Installment_Receipts;
 				const sortedInstallments = sortInstallmentsByMonth(IR);
 				if (index > 0) {
-					lastInstallmentMonth = bookings[i].Installment_Receipts[index - 1].Installment_Month;
+					lastInstallmentMonth = sortedBookings[i].Installment_Receipts[index - 1].Installment_Month;
 					totalMonthsDiff = getMonthsDifference(lastInstallmentMonth);
 				} else {
-					lastInstallmentMonth = bookings[i].Booking_Installment_Details[0].Installment_Month;
+					lastInstallmentMonth = sortedBookings[i].Booking_Installment_Details[0].Installment_Month;
 					totalMonthsDiff = getMonthsDifference(lastInstallmentMonth);
 				}
 
@@ -1818,24 +1825,24 @@ class BookingController {
 					}
 				}
 
-				const OSTAmount = await BookingService.outStandingAmountforDashboard(bookings[i].BK_ID);
-				if (bookings[i].Member?.BuyerContact) {
-					var cleanNumber = formatBuyersContact(bookings[i].Member.BuyerContact);
+				const OSTAmount = await BookingService.outStandingAmountforDashboard(sortedBookings[i].BK_ID);
+				if (sortedBookings[i].Member?.BuyerContact) {
+					var cleanNumber = formatBuyersContact(sortedBookings[i].Member.BuyerContact);
 				}
-				bookings[i].setDataValue("BK_ID", bookings[i].BK_ID);
-				bookings[i].setDataValue("advanceAmount", advAmount);
-				bookings[i].setDataValue("totalAmount", totalAmount);
-				bookings[i].setDataValue("amountPaid", paidAmount);
-				bookings[i].setDataValue("amountRemaing", totalAmount - (paidAmount + advAmount));
-				bookings[i].setDataValue("InstallmentsUnpaidCount", bkiDetailIds.length - uniqueBkiDetailIds.length);
-				bookings[i].setDataValue("oustadingMonthCount", totalMonthsDiff);
-				bookings[i].setDataValue("outStandingAmount", OSTAmount.outstandingAmt);
-				bookings[i].setDataValue("uniqueBkiDetailIds", uniqueBkiDetailIds.length);
-				bookings[i].setDataValue("buyerContact", cleanNumber);
+				sortedBookings[i].setDataValue("BK_ID", sortedBookings[i].BK_ID);
+				sortedBookings[i].setDataValue("advanceAmount", advAmount);
+				sortedBookings[i].setDataValue("totalAmount", totalAmount);
+				sortedBookings[i].setDataValue("amountPaid", paidAmount);
+				sortedBookings[i].setDataValue("amountRemaing", totalAmount - (paidAmount + advAmount));
+				sortedBookings[i].setDataValue("InstallmentsUnpaidCount", bkiDetailIds.length - uniqueBkiDetailIds.length);
+				sortedBookings[i].setDataValue("oustadingMonthCount", totalMonthsDiff);
+				sortedBookings[i].setDataValue("outStandingAmount", OSTAmount.outstandingAmt);
+				sortedBookings[i].setDataValue("uniqueBkiDetailIds", uniqueBkiDetailIds.length);
+				sortedBookings[i].setDataValue("buyerContact", cleanNumber);
 
 				overAllTotal += totalAmount;
 				data.push({
-					booking: bookings[i]
+					booking: sortedBookings[i]
 				});
 				bkiDetailIds = [];
 				uniqueBkiDetailIds = [];
