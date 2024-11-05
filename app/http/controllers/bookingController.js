@@ -1829,17 +1829,26 @@ class BookingController {
 				if (sortedBookings[i].Member?.BuyerContact) {
 					var cleanNumber = formatBuyersContact(sortedBookings[i].Member.BuyerContact);
 				}
-				sortedBookings[i].setDataValue("BK_ID", sortedBookings[i].BK_ID);
-				sortedBookings[i].setDataValue("advanceAmount", advAmount);
-				sortedBookings[i].setDataValue("totalAmount", totalAmount);
-				sortedBookings[i].setDataValue("amountPaid", paidAmount);
-				sortedBookings[i].setDataValue("amountRemaing", totalAmount - (paidAmount + advAmount));
-				sortedBookings[i].setDataValue("InstallmentsUnpaidCount", bkiDetailIds.length - uniqueBkiDetailIds.length);
-				sortedBookings[i].setDataValue("oustadingMonthCount", totalMonthsDiff);
-				sortedBookings[i].setDataValue("outStandingAmount", OSTAmount.outstandingAmt);
-				sortedBookings[i].setDataValue("uniqueBkiDetailIds", uniqueBkiDetailIds.length);
-				sortedBookings[i].setDataValue("buyerContact", cleanNumber);
-
+				// sortedBookings[i].setDataValue("BK_ID", sortedBookings[i].BK_ID);
+				// sortedBookings[i].setDataValue("advanceAmount", advAmount);
+				// sortedBookings[i].setDataValue("totalAmount", totalAmount);
+				// sortedBookings[i].setDataValue("amountPaid", paidAmount);
+				// sortedBookings[i].setDataValue("amountRemaing", totalAmount - (paidAmount + advAmount));
+				// sortedBookings[i].setDataValue("InstallmentsUnpaidCount", bkiDetailIds.length - uniqueBkiDetailIds.length);
+				// sortedBookings[i].setDataValue("oustadingMonthCount", totalMonthsDiff);
+				// sortedBookings[i].setDataValue("outStandingAmount", OSTAmount.outstandingAmt);
+				// sortedBookings[i].setDataValue("uniqueBkiDetailIds", uniqueBkiDetailIds.length);
+				// sortedBookings[i].setDataValue("buyerContact", cleanNumber);
+sortedBookings[i].BK_ID = sortedBookings[i].BK_ID;
+sortedBookings[i].advanceAmount = advAmount;
+sortedBookings[i].totalAmount = totalAmount;
+sortedBookings[i].amountPaid = paidAmount;
+sortedBookings[i].amountRemaining = totalAmount - (paidAmount + advAmount);
+sortedBookings[i].InstallmentsUnpaidCount = bkiDetailIds.length - uniqueBkiDetailIds.length;
+sortedBookings[i].outstandingMonthCount = totalMonthsDiff;
+sortedBookings[i].outstandingAmount = OSTAmount.outstandingAmt;
+sortedBookings[i].uniqueBkiDetailIds = uniqueBkiDetailIds.length;
+sortedBookings[i].buyerContact = cleanNumber;
 				overAllTotal += totalAmount;
 				data.push({
 					booking: sortedBookings[i]
