@@ -4714,10 +4714,10 @@ else if(totalMonthsDiff>=12){
 				// }
 			}
 
-			if (bkObj.Status === "Blocked") {
-				return next(CustomErrorHandler.notFound("File is blocked"));
-				// return next(CustomErrorHandler.unavailable('File is blocked'))
-			}
+			// if (bkObj.Status === "Blocked") {
+			// 	return next(CustomErrorHandler.notFound("File is blocked"));
+			// 	// return next(CustomErrorHandler.unavailable('File is blocked'))
+			// }
 			if (bkObj.Status === "Merged") {
 				return next(CustomErrorHandler.notFound("File is Merged"));
 			}
