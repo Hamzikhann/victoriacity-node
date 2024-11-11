@@ -14,6 +14,11 @@ module.exports = (sequelize, Sequelize) => {
 			type: Sequelize.INTEGER(11),
 			allowNull: true,
 			notEmpty: true
-		}
+		},
+		USER_ID: {
+			type: Sequelize.INTEGER(11),
+			allowNull: true,
+			notEmpty: true
+		},
 	});
 };

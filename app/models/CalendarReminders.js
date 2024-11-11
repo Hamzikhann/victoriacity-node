@@ -5,16 +5,7 @@ module.exports = (sequelize, Sequelize) => {
 			autoIncrement: true,
 			primaryKey: true
 		},
-		Summary: {
-			type: Sequelize.STRING,
-			allowNull: true,
-			notEmpty: true
-		},
-		Description: {
-			type: Sequelize.STRING,
-			allowNull: true,
-			notEmpty: true
-		},
+		
 		Start_Date: {
 			type: Sequelize.STRING,
 			allowNull: true,
@@ -30,11 +21,11 @@ module.exports = (sequelize, Sequelize) => {
 			allowNull: true,
 			notEmpty: true
 		},
-		USER_ID: {
-			type: Sequelize.INTEGER(11),
-			allowNull: true,
-			notEmpty: true
-		},
+		// USER_ID: {
+		// 	type: Sequelize.INTEGER(11),
+		// 	allowNull: true,
+		// 	notEmpty: true
+		// },
 		BK_ID: {
 			type: Sequelize.INTEGER(11),
 			allowNull: true,

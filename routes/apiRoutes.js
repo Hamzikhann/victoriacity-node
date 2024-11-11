@@ -116,9 +116,15 @@ const PayOffController = require("../app/http/controllers/payOffController.js");
 const WithdrawalController = require("../app/http/controllers/withdrawalController.js");
 const WithdrawController = require("../app/http/controllers/withdrawController.js");
 const ReminderController = require("../app/http/controllers/CalendarReminder.js");
+const RestorationFeeController = require("../app/http/controllers/restorationfeeController.js");
 
 const upload = multer({ dest: "uploads/" });
 const router = express.Router();
+
+//restoration fee routes
+router.post("/restoration/create", RestorationFeeController.create);
+router.post("/restoration/list", RestorationFeeController.list);
+router.post("/restoration/pdf", RestorationFeeController.genratePdf);
 
 //public routes
 router.post("/register", UserController.Register);
@@ -146,7 +152,7 @@ router.get("/job/details/:id", JobController.getJobDetailsById);
 router.get("/dashboard/data", UserController.dashboardData);
 router.get("/surcharge/list", UserController.getAllSurcharges);
 router.post("/dashboard", [checkUserAuth], BookingController.getTotalAmountOfAllBookings);
-router.post("/changestatus/files",BookingController.changeBookingStatus)
+router.post("/changestatus/files", BookingController.changeBookingStatus);
 router.post("/dashboard/total", BookingController.dashboardTotal);
 router.post("/dashboard/ostamount", BookingController.applyOSAmount);
 router.post("/booking/searchvcno", [checkUserAuth], BookingController.searchBookingByVCNO);

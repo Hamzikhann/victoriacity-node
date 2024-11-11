@@ -190,5 +190,30 @@ module.exports = (sequelize, Sequelize) => {
 			//   },
 			// },
 		}
+		// {
+		// 	indexes: [
+		// 		{
+		// 			fields: ["INS_RC_ID"] // Primary Key index is created by default
+		// 		},
+		// 		{
+		// 			fields: ["IRC_NO"] // For quick lookups by receipt number
+		// 		},
+		// 		{
+		// 			fields: ["BK_ID"] // Often queried by booking ID
+		// 		},
+		// 		{
+		// 			fields: ["BKI_DETAIL_ID"] // For queries involving installment details
+		// 		},
+		// 		{
+		// 			fields: ["Installment_Code"] // For lookups by installment code
+		// 		},
+		// 		{
+		// 			fields: ["Installment_Due", "Installment_Paid"] // For filtering by payment amounts
+		// 		},
+		// 		{
+		// 			fields: ["surCharges"] // For filtering or aggregating surcharge data
+		// 		}
+		// 	]
+		// }
 	);
 };

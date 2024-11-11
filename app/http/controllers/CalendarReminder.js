@@ -104,7 +104,6 @@ exports.create = async (req, res) => {
 		let USER_ID = req.user.id;
 		let BK_ID = req.body.BK_ID;
 		let Comment = req.body.Comment ? req.body.Comment : null;
-		console.log(45);
 
 		// Parse the Reminder_Time from the body (user's specified time)
 		// let reminderTime = new Date(Date.parse(Reminder_Time));
@@ -140,29 +139,32 @@ exports.create = async (req, res) => {
 			End_Date: reminderDate,
 			reminderTime: Reminder_Time,
 			// End_Date: new Date(Reminder_Time.getTime() + 5 * 60 * 1000).toISOString(),
-			USER_ID,
 			BK_ID
 			// Event_ID: eventId,
 		};
 		let commentObj = {
 			callDisposition,
-			Comment
+			Comment,
+			USER_ID,
+
 		};
-		console.log(6);
 
-		CalenderReminder.findOne({ where: { BK_ID: reminderData.BK_ID } })
-			.then(async (response) => {
-				if (response && response.USER_ID == reminderData.USER_ID) {
-					let updatereminder = await CalenderReminder.update(reminderData, {
-						where: { BK_ID: reminderData.BK_ID }
-					});
-					let getUpdatedReminder = await CalenderReminder.findOne({ where: { BK_ID: reminderData.BK_ID } });
-					console.log(updatereminder);
-					commentObj.CR_ID = getUpdatedReminder.CR_ID;
+		console.log(reminderData.USER_ID)
+		let findReminder =await CalenderReminder.findOne({ where: { BK_ID: reminderData.BK_ID } })
+			// .then(async (response) => {
+				console.log(findReminder)
+				if (findReminder) {
 
-					let createComment = await CalenderComment.create(commentObj);
-
-					res.send({ message: "Reminder Created" });
+						let updatereminder = await CalenderReminder.update(reminderData, {
+							where: { BK_ID: reminderData.BK_ID }
+						});
+						let getUpdatedReminder = await CalenderReminder.findOne({ where: { BK_ID: reminderData.BK_ID } });
+						console.log(updatereminder);
+						commentObj.CR_ID = getUpdatedReminder.CR_ID;
+	
+						let createComment = await CalenderComment.create(commentObj);
+	
+						res.send({ message: "Reminder Created" });
 				} else {
 					console.log("in else");
 					let createReminder = await CalenderReminder.create(reminderData);
@@ -173,10 +175,10 @@ exports.create = async (req, res) => {
 
 					res.send({ message: "Reminder Created" });
 				}
-			})
-			.catch((err) => {
-				res.status(500).send(err);
-			});
+			// })
+			// .catch((err) => {
+				// res.status(500).send(err);
+			// });
 
 		// const booking = await Booking.findOne({ where: { BK_ID: reminder.BK_ID } });
 
@@ -210,6 +212,7 @@ exports.create = async (req, res) => {
 		// 	// data: reminder
 		// });
 	} catch (error) {
+		console.log(error)
 		res.status(500).send(error);
 	}
 };
@@ -220,11 +223,14 @@ exports.getById = async (req, res) => {
 		const userid = req.user.id;
 
 		const findEvent = await CalenderReminder.findOne({
-			where: { BK_ID: bkid, USER_ID: userid },
+			where: { BK_ID: bkid,  },
 			include: [
 				{
 					as: "Comments",
-					model: CalenderComment
+					model: CalenderComment,
+					where:{
+						USER_ID: userid
+					}
 				}
 			]
 		});

@@ -930,7 +930,7 @@ class BookingController {
 			let outstandingAmt = 0;
 
 			const bookings = await Booking.findAll({
-				where: { Status: "Active" },
+				where: { Status: ["Active", "Clancalled", "Blocked"] },
 				attributes: [
 					"BK_ID",
 					"Reg_Code_Disply",
@@ -958,402 +958,40 @@ class BookingController {
 		}
 	};
 	static updateStatus = async (req, res, next) => {
-		let canceledData = ["VC12707", 
-"VC12804", 
-"VC12805", 
-"VC12806", 
-"VC12807", 
-"VC12808", 
-"VC12231", 
-"VC121159", 
-"VC12633", 
-"VC111056", 
-"VC121057", 
-"VC121058", 
-"VC121422", 
-"VC121038", 
-"VC121094", 
-"VC121102", 
-"VC121108", 
-"VC121110", 
-"VC121113", 
-"VC121119", 
-"VC121095", 
-"VC121101", 
-"VC121100", 
-"VC121103", 
-"VC121111", 
-"VC121118", 
-"VC121104", 
-"VC121105", 
-"VC121109", 
-"VC121096", 
-"VC121114", 
-"VC121116", 
-"VC121097", 
-"VC121112", 
-"VC121117", 
-"VC121115", 
-"VC121106", 
-"VC121099", 
-"VC121107", 
-"VC12115", 
-"VC12116", 
-"VC12117", 
-"VC12118", 
-"VC12119", 
-"VC12121", 
-"VC12123", 
-"VC12125", 
-"VC12126", 
-"VC12128", 
-"VC01282", 
-"VC12456", 
-"VC12457", 
-"VC12458", 
-"VC12459", 
-"VC12460", 
-"VC12461", 
-"VC12462", 
-"VC12463", 
-"VC12873", 
-"VC11773", 
-"VC111059", 
-"VC11219", 
-"VC121161", 
-"VC12732", 
-"VC121124", 
-"VC121125", 
-"VC11692", 
-"VC11340", 
-"VC111204", 
-"VC12310", 
-"VC11557", 
-"VC11556", 
-"VC11558", 
-"VC111242", 
-"VC121071", 
-"VC11624", 
-"VC11277", 
-"VC12570", 
-"VC12570", 
-"VC12571", 
-"VC12572", 
-"VC12573", 
-"VC12565", 
-"VC12566", 
-"VC12567", 
-"VC12568", 
-"VC111004", 
-"VC12809", 
-"VC12309", 
-"VC22560", 
-"VC12703", 
-"VC11916", 
-"VC12559", 
-"VC12512", 
-"VC12510", 
-"VC12142", 
-"VC12479", 
-"VC12342", 
-"VC12474", 
-"VC12982", 
-"VC111371", 
-"VC121481", 
-"VC111128", 
-"VC121196", 
-"VC121172", 
-"VC111493", 
-"VC11705", 
-"VC12189", 
-"VC111600", 
-"VC111599", 
-"VC271003", 
-"VC111245", 
-"VC12682", 
-"VC111235", 
-"VC12370", 
-"VC12748", 
-"VC12147", 
-"VC111021", 
-"VC12839", 
-"VC121395", 
-"VC12760", 
-"VC12761", 
-"VC12766", 
-"VC12765", 
-"VC11254", 
-"VC12255", 
-"VC11256", 
-"VC271191", 
-"VC271190", 
-"VC12842", 
-"VC11844", 
-"VC11843", 
-"VC11744", 
-"VC12743", 
-"VC11837", 
-"VC121290", 
-"VC12819", 
-"VC11720", 
-"VC12490", 
-"VC12489", 
-"VC12970", 
-"VC221626", 
-"VC12525", 
-"VC12249", 
-"VC22471", 
-"VC12950", 
-"VC14150", 
-"VC12707", 
-"VC121174", 
-"VC121159", 
-"VC11778", 
-"VC121042", 
-"VC111569", 
-"VC12477", 
-"VC11598", 
-"VC121731", 
-"VC11442", 
-"VC11441", 
-"VC12455", 
-"VC121018", 
-"VC111182", 
-"VC11905", 
-"VC121154", 
-"VC12292", 
-"VC121373", 
-"VC01145", 
-"VC01249", 
-"VC11543", 
-"VC11291", 
-"VC111194", 
-"VC12483", 
-"VC121195", 
-"VC12178", 
-"VC121152", 
-"VC11660", 
-"VC111560", 
-"VC11619", 
-"VC12618", 
-"VC12407", 
-"VC22529", 
-"VC111038", 
-"VC12472", 
-"VC111064", 
-"VC12545", 
-"VC12526", 
-"VC111033", 
-"VC12877", 
-"VC11983", 
-"VC12145", 
-"VC12942", 
-"VC121651", 
-"VC121740", 
-"VC12171", 
-"VC12170", 
-"VC12169", 
-"VC12168", 
-"VC12167", 
-"VC22553", 
-"VC12579", 
-"VC12519", 
-"VC12527", 
-"VC12518", 
-"VC11528", 
-"VC12801", 
-"VC12802", 
-"VC121216", 
-"VC121217", 
-"VC121422", 
-"VC12993", 
-"VC12994", 
-"VC12995", 
-"VC12996", 
-"VC12997", 
-"VC12998", 
-"VC121121", 
-"VC121150", 
-"VC12315", 
-"VC12128", 
-"VC12115", 
-"VC12116", 
-"VC12117", 
-"VC12118", 
-"VC12119", 
-"VC12121", 
-"VC12123", 
-"VC12125", 
-"VC12126", 
-"VC01282", 
-"VC11695", 
-"VC121563", 
-"VC121098", 
-"VC121094", 
-"VC121102", 
-"VC121108", 
-"VC121110", 
-"VC121113", 
-"VC121119", 
-"VC121095", 
-"VC121101", 
-"VC121100", 
-"VC121103", 
-"VC121111", 
-"VC121118", 
-"VC121104", 
-"VC121105", 
-"VC121109", 
-"VC121096", 
-"VC121114", 
-"VC121116", 
-"VC121097", 
-"VC121112", 
-"VC121117", 
-"VC121115", 
-"VC121106", 
-"VC121099", 
-"VC121107", 
-"VC22531", 
-"VC12811", 
-"VC111059", 
-"VC11773", 
-"VC12873", 
-"VC12524", 
-"VC12525", 
-"VC11219", 
-"VC121161", 
-"VC12456", 
-"VC12457", 
-"VC12458", 
-"VC12459", 
-"VC12460", 
-"VC12461", 
-"VC12462", 
-"VC12463", 
-"VC12732", 
-"VC11692", 
-"VC121124", 
-"VC121125", 
-"VC111242", 
-"VC11557", 
-"VC11556", 
-"VC11558", 
-"VC12310", 
-"VC111204", 
-"VC11340", 
-"VC22492", 
-"VC12493", 
-"VC12499", 
-"VC12500", 
-"VC12501", 
-"VC12494", 
-"VC12503", 
-"VC12502", 
-"VC12495", 
-"VC12498", 
-"VC11277", 
-"VC11624", 
-"VC121071", 
-"VC12570", 
-"VC12571", 
-"VC12572", 
-"VC12573", 
-"VC12565", 
-"VC12566", 
-"VC12567", 
-"VC12568", 
-"VC12510", 
-"VC12512", 
-"VC12559", 
-"VC12703", 
-"VC22560", 
-"VC11916", 
-"VC12883", 
-"VC12820", 
-"VC22485", 
-"VC11680", 
-"VC12376", 
-"VC12377", 
-"VC11753", 
-"VC11922", 
-"VC111233", 
-"VC11933", 
-"VC11930", 
-"VC121526", 
-"VC12525", 
-"VC01154", 
-"VC121529", 
-"VC111412", 
-"VC121339", 
-"VC11415", 
-"VC11416", 
-"VC11417", 
-"VC111077", 
-"VC01322", 
-"VC12174", 
-"VC121241", 
-"VC121322", 
-"VC12488", 
-"VC11872", 
-"VC12319", 
-"VC111035", 
-"VC12124", 
-"VC12509", 
-"VC111032", 
-"VC121300", 
-"VC131284", 
-"VC02228", 
-"VC121592", 
-"VC111333", 
-"VC111334", 
-"VC111335", 
-"VC121331", 
-"VC111332", 
-"VC111587", 
-"VC12451", 
-"VC12300", 
-"VC12301", 
-"VC12302", 
-"VC11669", 
-"VC11678", 
-"VC11679", 
-"VC111364", 
-"VC11794", 
-"VC12960", 
-"VC22131", 
-"VC12733"
-]
-
 		try {
 			let array = [];
-			for (let i = 0; i < canceledData.length; i++) {
-				let findBooking = await Booking.findOne({ where: { Reg_Code_Disply: canceledData[i] } });
-				if (findBooking) {
-					let updateBooking = Booking.update(
-						{ Status: "Merged" },
-						{
-							where: { Reg_Code_Disply: canceledData[i] }
-						}
-					);
-				} else {
-					array.push(canceledData[i]);
+			let canceledData = [];
+			let status = req.body.status;
+			let bkid = req.body.bkid;
+			if (canceledData.length > 0) {
+				for (let i = 0; i < canceledData.length; i++) {
+					let findBooking = await Booking.findOne({ where: { Reg_Code_Disply: canceledData[i] } });
+					if (findBooking) {
+						let updateBooking = Booking.update(
+							{ Status: "Merged" },
+							{
+								where: { Reg_Code_Disply: canceledData[i] }
+							}
+						);
+					} else {
+						array.push(canceledData[i]);
+					}
 				}
+				res.send({ message: "Status updated", data: array });
+			} else {
+				await Booking.update(
+					{ Status: status },
+					{
+						where: { BK_ID: bkid }
+					}
+				)
+					.then((response) => {
+						res.send({ message: "Status updated", data: response });
+					})
+					.catch((err) => {
+						res.send(err);
+					});
 			}
-			res.send({ message: "Status updated", data: array });
-
-			// await Booking.update(
-			// 	{ Status: "Blocked" },
-			// 	{
-			// 		where: { Reg_Code_Disply: canceledData }
-			// 	}
-			// )
-			// 	.then((response) => {
-			// 		res.send({ message: "Status updated", data: response });
-			// 	})
-			// 	.catch((err) => {
-			// 		res.send(err);
-			// 	});
 		} catch (error) {
 			// console.log("error: ", error);
 			return next(error);
@@ -1361,378 +999,15 @@ class BookingController {
 	};
 	static getTotalAmountOfAllBookings = async (req, res, next) => {
 		try {
-			let canceledData = [
-				"VC12707",
-				"VC12804",
-				"VC12805",
-				"VC12806",
-				"VC12807",
-				"VC12808",
-				"VC12231",
-				"VC121159",
-				"VC12633",
-				"VC111056",
-				"VC121057",
-				"VC121058",
-				"VC121422",
-				"VC121038",
-				"VC121094",
-				"VC121102",
-				"VC121108",
-				"VC121110",
-				"VC121113",
-				"VC121119",
-				"VC121095",
-				"VC121101",
-				"VC121100",
-				"VC121103",
-				"VC121111",
-				"VC121118",
-				"VC121104",
-				"VC121105",
-				"VC121109",
-				"VC121096",
-				"VC121114",
-				"VC121116",
-				"VC121097",
-				"VC121112",
-				"VC121117",
-				"VC121115",
-				"VC121106",
-				"VC121099",
-				"VC121107",
-				"VC12115",
-				"VC12116",
-				"VC12117",
-				"VC12118",
-				"VC12119",
-				"VC12121",
-				"VC12123",
-				"VC12125",
-				"VC12126",
-				"VC12128",
-				"VC01282",
-				"VC12456",
-				"VC12457",
-				"VC12458",
-				"VC12459",
-				"VC12460",
-				"VC12461",
-				"VC12462",
-				"VC12463",
-				"VC12873",
-				"VC11773",
-				"VC111059",
-				"VC11219",
-				"VC121161",
-				"VC12732",
-				"VC121124",
-				"VC121125",
-				"VC11692",
-				"VC11340",
-				"VC111204",
-				"VC12310",
-				"VC11557",
-				"VC11556",
-				"VC11558",
-				"VC111242",
-				"VC121071",
-				"VC11624",
-				"VC11277",
-				"VC12570",
-				"VC12570",
-				"VC12571",
-				"VC12572",
-				"VC12573",
-				"VC12565",
-				"VC12566",
-				"VC12567",
-				"VC12568",
-				"VC111004",
-				"VC12809",
-				"VC12309",
-				"VC22560",
-				"VC12703",
-				"VC11916",
-				"VC12559",
-				"VC12512",
-				"VC12510",
-				"VC12142",
-				"VC12479",
-				"VC12342",
-				"VC12474",
-				"VC12982",
-				"VC111371",
-				"VC121481",
-				"VC111128",
-				"VC121196",
-				"VC121172",
-				"VC111493",
-				"VC11705",
-				"VC12189",
-				"VC111600",
-				"VC111599",
-				"VC271003",
-				"VC111245",
-				"VC12682",
-				"VC111235",
-				"VC12370",
-				"VC12748",
-				"VC12147",
-				"VC111021",
-				"VC12839",
-				"VC121395",
-				"VC12760",
-				"VC12761",
-				"VC12766",
-				"VC12765",
-				"VC11254",
-				"VC12255",
-				"VC11256",
-				"VC271191",
-				"VC271190",
-				"VC12842",
-				"VC11844",
-				"VC11843",
-				"VC11744",
-				"VC12743",
-				"VC11837",
-				"VC121290",
-				"VC12819",
-				"VC11720",
-				"VC12490",
-				"VC12489",
-				"VC12970",
-				"VC221626",
-				"VC12525",
-				"VC12249",
-				"VC22471",
-				"VC12950",
-				"VC14150",
-				"VC12707",
-				"VC121174",
-				"VC121159",
-				"VC11778",
-				"VC121042",
-				"VC111569",
-				"VC12477",
-				"VC11598",
-				"VC121731",
-				"VC11442",
-				"VC11441",
-				"VC12455",
-				"VC121018",
-				"VC111182",
-				"VC11905",
-				"VC121154",
-				"VC12292",
-				"VC121373",
-				"VC01145",
-				"VC01249",
-				"VC11543",
-				"VC11291",
-				"VC111194",
-				"VC12483",
-				"VC121195",
-				"VC12178",
-				"VC121152",
-				"VC11660",
-				"VC111560",
-				"VC11619",
-				"VC12618",
-				"VC12407",
-				"VC22529",
-				"VC111038",
-				"VC12472",
-				"VC111064",
-				"VC12545",
-				"VC12526",
-				"VC111033",
-				"VC12877",
-				"VC11983",
-				"VC12145",
-				"VC12942",
-				"VC121651",
-				"VC121740",
-				"VC12171",
-				"VC12170",
-				"VC12169",
-				"VC12168",
-				"VC12167",
-				"VC22553",
-				"VC12579",
-				"VC12519",
-				"VC12527",
-				"VC12518",
-				"VC11528",
-				"VC12801",
-				"VC12802",
-				"VC121216",
-				"VC121217",
-				"VC121422",
-				"VC12993",
-				"VC12994",
-				"VC12995",
-				"VC12996",
-				"VC12997",
-				"VC12998",
-				"VC121121",
-				"VC121150",
-				"VC12315",
-				"VC12128",
-				"VC12115",
-				"VC12116",
-				"VC12117",
-				"VC12118",
-				"VC12119",
-				"VC12121",
-				"VC12123",
-				"VC12125",
-				"VC12126",
-				"VC01282",
-				"VC11695",
-				"VC121563",
-				"VC121098",
-				"VC121094",
-				"VC121102",
-				"VC121108",
-				"VC121110",
-				"VC121113",
-				"VC121119",
-				"VC121095",
-				"VC121101",
-				"VC121100",
-				"VC121103",
-				"VC121111",
-				"VC121118",
-				"VC121104",
-				"VC121105",
-				"VC121109",
-				"VC121096",
-				"VC121114",
-				"VC121116",
-				"VC121097",
-				"VC121112",
-				"VC121117",
-				"VC121115",
-				"VC121106",
-				"VC121099",
-				"VC121107",
-				"VC22531",
-				"VC12811",
-				"VC111059",
-				"VC11773",
-				"VC12873",
-				"VC12524",
-				"VC12525",
-				"VC11219",
-				"VC121161",
-				"VC12456",
-				"VC12457",
-				"VC12458",
-				"VC12459",
-				"VC12460",
-				"VC12461",
-				"VC12462",
-				"VC12463",
-				"VC12732",
-				"VC11692",
-				"VC121124",
-				"VC121125",
-				"VC111242",
-				"VC11557",
-				"VC11556",
-				"VC11558",
-				"VC12310",
-				"VC111204",
-				"VC11340",
-				"VC22492",
-				"VC12493",
-				"VC12499",
-				"VC12500",
-				"VC12501",
-				"VC12494",
-				"VC12503",
-				"VC12502",
-				"VC12495",
-				"VC12498",
-				"VC11277",
-				"VC11624",
-				"VC121071",
-				"VC12570",
-				"VC12571",
-				"VC12572",
-				"VC12573",
-				"VC12565",
-				"VC12566",
-				"VC12567",
-				"VC12568",
-				"VC12510",
-				"VC12512",
-				"VC12559",
-				"VC12703",
-				"VC22560",
-				"VC11916",
-				"VC12883",
-				"VC12820",
-				"VC22485",
-				"VC11680",
-				"VC12376",
-				"VC12377",
-				"VC11753",
-				"VC11922",
-				"VC111233",
-				"VC11933",
-				"VC11930",
-				"VC121526",
-				"VC12525",
-				"VC01154",
-				"VC121529",
-				"VC111412",
-				"VC121339",
-				"VC11415",
-				"VC11416",
-				"VC11417",
-				"VC111077",
-				"VC01322",
-				"VC12174",
-				"VC121241",
-				"VC121322",
-				"VC12488",
-				"VC11872",
-				"VC12319",
-				"VC111035",
-				"VC12124",
-				"VC12509",
-				"VC111032",
-				"VC121300",
-				"VC131284",
-				"VC02228",
-				"VC121592",
-				"VC111333",
-				"VC111334",
-				"VC111335",
-				"VC121331",
-				"VC111332"
-			];
-
 			const page = req.body.page || 1; // Get the page from request query or default to 1
 			const limit = req.body.limit || 5; // Limit the number of documents to 25 per page
 			const offset = (page - 1) * limit; // Calculate the offset based on the current page
-			const canceledFlaged = req.body.flag || 0;
-			let whereClause = {};
-			if (canceledFlaged == 1) {
-				whereClause = {
-					Reg_Code_Disply: {
-						[Op.notIn]: canceledData // Exclude bookings with Reg_Code_Disply in the data array
-					}
-				};
-			}
 
 			let data = [];
 			let uniqueBkiDetailIds = [];
 			let bkiDetailIds = [];
 			let overAllTotal = 0;
+
 			const bookings = await Booking.findAll({
 				attributes: ["BK_ID", "Reg_Code_Disply", "SRForm_No", "Form_Code", "Total_Amt", "Advance_Amt", "Status"],
 				where: { IsDeleted: 0 },
@@ -1779,13 +1054,15 @@ class BookingController {
 				limit: limit,
 				offset: offset
 			});
-			const sortedBookings = bookings.map(booking => {
-				const sortedReceipts = booking.Installment_Receipts.sort((a, b) => new Date(a.Installment_Month) - new Date(b.Installment_Month));
+			const sortedBookings = bookings.map((booking) => {
+				const sortedReceipts = booking.Installment_Receipts.sort(
+					(a, b) => new Date(a.Installment_Month) - new Date(b.Installment_Month)
+				);
 				return {
-				  ...booking.toJSON(),
-				  Installment_Receipts: sortedReceipts
+					...booking.toJSON(),
+					Installment_Receipts: sortedReceipts
 				};
-			  });
+			});
 
 			for (let i = 0; i < sortedBookings.length; i++) {
 				let paidAmount = 0;
@@ -1815,7 +1092,7 @@ class BookingController {
 
 				for (let j = 0; j < sortedInstallments.length; j++) {
 					paidAmount += +sortedInstallments[j].Installment_Paid;
-					
+
 					if (
 						sortedInstallments[j].RECEIPT_HEAD === "installments" &&
 						!uniqueBkiDetailIds.includes(+sortedInstallments[j].BKI_DETAIL_ID)
@@ -1829,26 +1106,18 @@ class BookingController {
 				if (sortedBookings[i].Member?.BuyerContact) {
 					var cleanNumber = formatBuyersContact(sortedBookings[i].Member.BuyerContact);
 				}
-				// sortedBookings[i].setDataValue("BK_ID", sortedBookings[i].BK_ID);
-				// sortedBookings[i].setDataValue("advanceAmount", advAmount);
-				// sortedBookings[i].setDataValue("totalAmount", totalAmount);
-				// sortedBookings[i].setDataValue("amountPaid", paidAmount);
-				// sortedBookings[i].setDataValue("amountRemaing", totalAmount - (paidAmount + advAmount));
-				// sortedBookings[i].setDataValue("InstallmentsUnpaidCount", bkiDetailIds.length - uniqueBkiDetailIds.length);
-				// sortedBookings[i].setDataValue("oustadingMonthCount", totalMonthsDiff);
-				// sortedBookings[i].setDataValue("outStandingAmount", OSTAmount.outstandingAmt);
-				// sortedBookings[i].setDataValue("uniqueBkiDetailIds", uniqueBkiDetailIds.length);
-				// sortedBookings[i].setDataValue("buyerContact", cleanNumber);
-sortedBookings[i].BK_ID = sortedBookings[i].BK_ID;
-sortedBookings[i].advanceAmount = advAmount;
-sortedBookings[i].totalAmount = totalAmount;
-sortedBookings[i].amountPaid = paidAmount;
-sortedBookings[i].amountRemaing = totalAmount - (paidAmount + advAmount);
-sortedBookings[i].InstallmentsUnpaidCount = bkiDetailIds.length - uniqueBkiDetailIds.length;
-sortedBookings[i].oustadingMonthCount = totalMonthsDiff;
-sortedBookings[i].outStandingAmount = OSTAmount.outstandingAmt;
-sortedBookings[i].uniqueBkiDetailIds = uniqueBkiDetailIds.length;
-sortedBookings[i].buyerContact = cleanNumber;
+
+				sortedBookings[i].BK_ID = sortedBookings[i].BK_ID;
+				sortedBookings[i].advanceAmount = advAmount;
+
+				sortedBookings[i].totalAmount = totalAmount;
+				sortedBookings[i].amountPaid = paidAmount;
+				sortedBookings[i].amountRemaing = totalAmount - (paidAmount + advAmount);
+				sortedBookings[i].InstallmentsUnpaidCount = bkiDetailIds.length - uniqueBkiDetailIds.length;
+				sortedBookings[i].oustadingMonthCount = totalMonthsDiff;
+				sortedBookings[i].outStandingAmount = OSTAmount.outstandingAmt;
+				sortedBookings[i].uniqueBkiDetailIds = uniqueBkiDetailIds.length;
+				sortedBookings[i].buyerContact = cleanNumber;
 				overAllTotal += totalAmount;
 				data.push({
 					booking: sortedBookings[i]
@@ -1869,108 +1138,113 @@ sortedBookings[i].buyerContact = cleanNumber;
 
 	static changeBookingStatus = async (req, res, next) => {
 		try {
-			
-console.log("called")
+			console.log("called");
 
-// const page = req.body.page || 1; // Get the page from request query or default to 1
-// 			const limit = req.body.limit || 5; // Limit the number of documents to 25 per page
-// 			const offset = (page - 1) * limit; 
-let data = [];
-let bkiDetailIds = [];
-const bookings = await Booking.findAll({
-	attributes: ["BK_ID", "Reg_Code_Disply", "SRForm_No", "Form_Code", "Total_Amt", "Advance_Amt", "Status"],
-	where: { [Op.and]: [
-		
-		{ IsDeleted: 0 },
-		{ Status: { [Op.ne]: "Merged" } } // Status is not "Merged"
-	  ] },
+			// const page = req.body.page || 1; // Get the page from request query or default to 1
+			// 			const limit = req.body.limit || 5; // Limit the number of documents to 25 per page
+			// 			const offset = (page - 1) * limit;
+			let data = [];
+			let bkiDetailIds = [];
+			const bookings = await Booking.findAll({
+				attributes: ["BK_ID", "Reg_Code_Disply", "SRForm_No", "Form_Code", "Total_Amt", "Advance_Amt", "Status"],
+				where: {
+					[Op.and]: [
+						{ IsDeleted: 0 },
+						{ Status: { [Op.ne]: "Merged" } } // Status is not "Merged"
+					]
+				},
 
-	include: [
-		{
-			where: { BKI_TYPE: null },
-			attributes: [
-				"BKI_DETAIL_ID",
-				"Installment_Month",
-				"Installment_Due",
-				"Installment_Paid",
-				"Remaining_Amount",
-				"BKI_TYPE"
-			],
-			as: "Booking_Installment_Details",
-			model: BookingInstallmentDetails
-		},
-		{
-			as: "Installment_Receipts",
-			model: InstallmentReceipts,
-			attributes: [
-				"INS_RC_ID",
-				"BK_ID",
-				"Installment_Month",
-				"Installment_Paid",
-				"RECEIPT_HEAD",
-				"BKI_DETAIL_ID",
-				"IRC_Date"
-			
-			],
-			required: false
-			// order: [["Installment_Month", "ASC"]]
-		},
-		
-	],
-	// limit: limit,
-	// 			offset: offset
-});
+				include: [
+					{
+						where: { BKI_TYPE: null },
+						attributes: [
+							"BKI_DETAIL_ID",
+							"Installment_Month",
+							"Installment_Due",
+							"Installment_Paid",
+							"Remaining_Amount",
+							"BKI_TYPE"
+						],
+						as: "Booking_Installment_Details",
+						model: BookingInstallmentDetails
+					},
+					{
+						as: "Installment_Receipts",
+						model: InstallmentReceipts,
+						attributes: [
+							"INS_RC_ID",
+							"BK_ID",
+							"Installment_Month",
+							"Installment_Paid",
+							"RECEIPT_HEAD",
+							"BKI_DETAIL_ID",
+							"IRC_Date"
+						],
+						required: false
+						// order: [["Installment_Month", "ASC"]]
+					}
+				]
+				// limit: limit,
+				// 			offset: offset
+			});
 
-const sortedBookings = bookings.map(booking => {
-    const sortedReceipts = booking.Installment_Receipts.sort((a, b) => new Date(a.Installment_Month) - new Date(b.Installment_Month));
-    return {
-      ...booking.toJSON(),
-      Installment_Receipts: sortedReceipts
-    };
-  });
-for (let i = 0; i < sortedBookings.length; i++) {
-	console.log("Loop called")
-	console.log(sortedBookings[i].Reg_Code_Disply)
-	let totalMonthsDiff = 0;
+			const sortedBookings = bookings.map((booking) => {
+				const sortedReceipts = booking.Installment_Receipts.sort(
+					(a, b) => new Date(a.Installment_Month) - new Date(b.Installment_Month)
+				);
+				return {
+					...booking.toJSON(),
+					Installment_Receipts: sortedReceipts
+				};
+			});
+			for (let i = 0; i < sortedBookings.length; i++) {
+				console.log("Loop called");
+				console.log(sortedBookings[i].Reg_Code_Disply);
+				let totalMonthsDiff = 0;
 
-	let index = sortedBookings[i].Installment_Receipts.length;
-	let lastInstallmentMonth;
-	if (index > 0) {
-		lastInstallmentMonth = sortedBookings[i].Installment_Receipts[index - 1].Installment_Month;
-		totalMonthsDiff = getMonthsDifference(lastInstallmentMonth);
-	} else {
-		lastInstallmentMonth = sortedBookings[i].Booking_Installment_Details[0].Installment_Month;
-		totalMonthsDiff = getMonthsDifference(lastInstallmentMonth);
-	}
-console.log("Months difference",totalMonthsDiff)
-if(totalMonthsDiff >=6 && totalMonthsDiff<12){
-	let updateBooking=await Booking.update({ Status: "Blocked" },
-		{
-			where: { Reg_Code_Disply: sortedBookings[i].Reg_Code_Disply }
-		})
-}
-else if(totalMonthsDiff>=12){
-	let updateBooking=await Booking.update({ Status: "Cancalled" },
-		{
-			where: { Reg_Code_Disply: sortedBookings[i].Reg_Code_Disply }
-		})
-}else if(totalMonthsDiff<6){
-	let updateBooking=await Booking.update({ Status: "Active" },
-		{
-			where: { Reg_Code_Disply: sortedBookings[i].Reg_Code_Disply }
-		})
-}
+				let index = sortedBookings[i].Installment_Receipts.length;
+				let lastInstallmentMonth;
+				if (index > 0) {
+					lastInstallmentMonth = sortedBookings[i].Installment_Receipts[index - 1].Installment_Month;
+					totalMonthsDiff = getMonthsDifference(lastInstallmentMonth);
+				} else {
+					lastInstallmentMonth = sortedBookings[i].Booking_Installment_Details[0].Installment_Month;
+					totalMonthsDiff = getMonthsDifference(lastInstallmentMonth);
+				}
+				console.log("Months difference", totalMonthsDiff);
+				if (totalMonthsDiff >= 6 && totalMonthsDiff < 12) {
+					let updateBooking = await Booking.update(
+						{ Status: "Blocked" },
+						{
+							where: { Reg_Code_Disply: sortedBookings[i].Reg_Code_Disply }
+						}
+					);
+				} else if (totalMonthsDiff >= 12) {
+					let updateBooking = await Booking.update(
+						{ Status: "Cancalled" },
+						{
+							where: { Reg_Code_Disply: sortedBookings[i].Reg_Code_Disply }
+						}
+					);
+				} else if (totalMonthsDiff < 6) {
+					let updateBooking = await Booking.update(
+						{ Status: "Active" },
+						{
+							where: { Reg_Code_Disply: sortedBookings[i].Reg_Code_Disply }
+						}
+					);
+				}
 
-	// bookings[i].setDataValue("oustadingMonthCount", totalMonthsDiff);
+				// bookings[i].setDataValue("oustadingMonthCount", totalMonthsDiff);
 
-	// bkiDetailIds = [];
-}
+				// bkiDetailIds = [];
+			}
 
 			return res.send({
 				mesasge: "Bookings Status Updated Successfully!",
-				legth:sortedBookings.length,
+				legth: sortedBookings.length,
 				data: data,
-				bookings:sortedBookings
+				bookings: sortedBookings
 			});
 		} catch (error) {
 			return next(error);
