@@ -773,56 +773,110 @@ class BookingController {
 					await BookingInstallmentDetailsO.save();
 				}
 				let status = false;
-				for (let i = 1; i <= No_Of_Installments + 4 + ByAnnual_TimePeriod; i++) {
-					if (i == No_Of_Installments + 4 + ByAnnual_TimePeriod) {
-						type = "Possession";
-						instType = 4;
-						amount = Possession_Amt;
-						status = true;
-					} else if (i == No_Of_Installments + 3 + ByAnnual_TimePeriod) {
-						type = "Ballot";
-						amount = Ballot_Amt;
-						instType = 3;
-						status = true;
-					} else if (i != 0 && i % (ByAnnual_TimePeriod + 1) == 0) {
-						type = "By Annual";
-						amount = ByAnnual_Charges;
-						instType = 2;
-						status = true;
-					} else {
-						type = "Installment";
-						amount = InstallmentAmount;
-						instType = 1;
-						status = true;
+				if (ppObj.Plan_Years == 3) {
+					for (let i = 1; i <= No_Of_Installments + 2 + ByAnnual_TimePeriod; i++) {
+						if (i == No_Of_Installments + 2 + ByAnnual_TimePeriod) {
+							type = "Possession";
+							instType = 4;
+							amount = Possession_Amt;
+							status = true;
+						} else if (i == No_Of_Installments + 1 + ByAnnual_TimePeriod) {
+							type = "Ballot";
+							amount = Ballot_Amt;
+							instType = 3;
+							status = true;
+						} else if (i != 0 && i % (ByAnnual_TimePeriod + 1) == 0) {
+							type = "By Annual";
+							amount = ByAnnual_Charges;
+							instType = 2;
+							status = true;
+						} else {
+							type = "Installment";
+							amount = InstallmentAmount;
+							instType = 1;
+							status = true;
+						}
+
+						if (type !== "By Annual") {
+							var dueDate = myDate.addMonths(1, i);
+						}
+						// console.log("Dueeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee DATEEEEEEEEEEE", dueDate);
+						let maxInstallment_Code = await BookingInstallmentDetails.max("Installment_Code");
+						maxInstallment_Code = maxInstallment_Code + 1;
+
+						const BookingInstallmentDetailsO = new BookingInstallmentDetails({
+							Due_Date: getDateOfEveryTenth(dueDate, 10),
+							Installment_Month: getDateOfEveryTenth(dueDate, 1),
+							Installment_Code: maxInstallment_Code,
+							BK_ID: row.BK_ID,
+							BK_Reg_Code: row.BK_ID,
+							InsType_ID: instType,
+							Installment_Due: amount,
+							Installment_Paid: 0,
+							Remaining_Amount: amount,
+							IsCompleted: null,
+							USER_ID: USER_ID,
+							TIME_STAMP: new Date(),
+							LAST_UPDATE: new Date(),
+							Status: status,
+							IsDeleted: 0
+						});
+
+						await BookingInstallmentDetailsO.save();
 					}
+				} else {
+					for (let i = 1; i <= No_Of_Installments + 4 + ByAnnual_TimePeriod; i++) {
+						if (i == No_Of_Installments + 4 + ByAnnual_TimePeriod) {
+							type = "Possession";
+							instType = 4;
+							amount = Possession_Amt;
+							status = true;
+						} else if (i == No_Of_Installments + 3 + ByAnnual_TimePeriod) {
+							type = "Ballot";
+							amount = Ballot_Amt;
+							instType = 3;
+							status = true;
+						} else if (i != 0 && i % (ByAnnual_TimePeriod + 1) == 0) {
+							type = "By Annual";
+							amount = ByAnnual_Charges;
+							instType = 2;
+							status = true;
+						} else {
+							type = "Installment";
+							amount = InstallmentAmount;
+							instType = 1;
+							status = true;
+						}
 
-					if (type !== "By Annual") {
-						var dueDate = myDate.addMonths(1, i);
+						if (type !== "By Annual") {
+							var dueDate = myDate.addMonths(1, i);
+						}
+						// console.log("Dueeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee DATEEEEEEEEEEE", dueDate);
+						let maxInstallment_Code = await BookingInstallmentDetails.max("Installment_Code");
+						maxInstallment_Code = maxInstallment_Code + 1;
+
+						const BookingInstallmentDetailsO = new BookingInstallmentDetails({
+							Due_Date: getDateOfEveryTenth(dueDate, 10),
+							Installment_Month: getDateOfEveryTenth(dueDate, 1),
+							Installment_Code: maxInstallment_Code,
+							BK_ID: row.BK_ID,
+							BK_Reg_Code: row.BK_ID,
+							InsType_ID: instType,
+							Installment_Due: amount,
+							Installment_Paid: 0,
+							Remaining_Amount: amount,
+							IsCompleted: null,
+							USER_ID: USER_ID,
+							TIME_STAMP: new Date(),
+							LAST_UPDATE: new Date(),
+							Status: status,
+							IsDeleted: 0
+						});
+
+						await BookingInstallmentDetailsO.save();
 					}
-					// console.log("Dueeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee DATEEEEEEEEEEE", dueDate);
-					let maxInstallment_Code = await BookingInstallmentDetails.max("Installment_Code");
-					maxInstallment_Code = maxInstallment_Code + 1;
-
-					const BookingInstallmentDetailsO = new BookingInstallmentDetails({
-						Due_Date: getDateOfEveryTenth(dueDate, 10),
-						Installment_Month: getDateOfEveryTenth(dueDate, 1),
-						Installment_Code: maxInstallment_Code,
-						BK_ID: row.BK_ID,
-						BK_Reg_Code: row.BK_ID,
-						InsType_ID: instType,
-						Installment_Due: amount,
-						Installment_Paid: 0,
-						Remaining_Amount: amount,
-						IsCompleted: null,
-						USER_ID: USER_ID,
-						TIME_STAMP: new Date(),
-						LAST_UPDATE: new Date(),
-						Status: status,
-						IsDeleted: 0
-					});
-
-					await BookingInstallmentDetailsO.save();
 				}
+
 				if (ppObj && ppObj.DC_START_DATE && ppObj.IncludeDC == 1) {
 					const myDate = new Date(ppObj.DC_START_DATE);
 					let totalAmount = 0;

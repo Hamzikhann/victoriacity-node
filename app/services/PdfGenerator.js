@@ -1852,7 +1852,7 @@ class pdfGenerator {
 					array6,
 					[
 						{
-							text: "Development Charges Are Inclusive of Cost of Land",
+							text: "Development Charges To Be Decided and Imposed later",
 							alignment: "center",
 							fontSize: 9,
 							border: [true, true, true, true],
@@ -2137,7 +2137,7 @@ class pdfGenerator {
 					{
 						text: "Location Charges",
 						alignment: "center",
-						fontSize: 14,
+						fontSize: 12,
 						bold: true,
 						margin: !bookingData.PaymentPlan.IncludeDC ? [20, 20, 0, 0] : [-120, 20, 0, 0]
 					},
@@ -2164,7 +2164,7 @@ class pdfGenerator {
 							headerRows: 1,
 
 							widths: !bookingData.PaymentPlan.IncludeDC
-								? ["25%", "25%", "30%", "25%", "25%"]
+								? ["8%", "25%", "25%", "20%", "20%"]
 								: ["8%", "25%", "25%", "20%", "20%"],
 							body: arr2
 						},
