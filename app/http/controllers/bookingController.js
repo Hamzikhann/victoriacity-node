@@ -4058,10 +4058,14 @@ class BookingController {
 				// }
 			}
 
-			// if (bkObj.Status === "Blocked") {
-			// 	return next(CustomErrorHandler.notFound("File is blocked"));
-			// 	// return next(CustomErrorHandler.unavailable('File is blocked'))
-			// }
+			if (bkObj.Status === "Blocked") {
+				return next(CustomErrorHandler.notFound("File is Blocked"));
+				// return next(CustomErrorHandler.unavailable('File is blocked'))
+			}
+			if (bkObj.Status === "Cancalled") {
+				return next(CustomErrorHandler.notFound("File is Cancalled"));
+				// return next(CustomErrorHandler.unavailable('File is blocked'))
+			}
 			if (bkObj.Status === "Merged") {
 				return next(CustomErrorHandler.notFound("File is Merged"));
 			}
