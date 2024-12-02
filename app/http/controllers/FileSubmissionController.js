@@ -414,7 +414,7 @@ class FileSubmissionController {
 		const id = req.query.id;
 
 		const userId = req.user.id;
-
+		console.log(id);
 		try {
 			const { count, rows } = await FileSubmissionDetail.findAndCountAll({
 				include: [
