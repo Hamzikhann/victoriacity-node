@@ -984,7 +984,7 @@ class BookingController {
 			let outstandingAmt = 0;
 
 			const bookings = await Booking.findAll({
-				where: { Status: ["Active", "Clancalled", "Blocked"] },
+				where: { Status: ["Active", "Cancalled", "Blocked"] },
 				attributes: [
 					"BK_ID",
 					"Reg_Code_Disply",
@@ -2684,6 +2684,7 @@ class BookingController {
 			});
 			const insRecpData = installmentReceipts.filter((item) => item.BKI_TYPE !== "DC");
 			const dcInsRecpData = installmentReceipts.filter((item) => item.BKI_TYPE == "DC");
+			console.log("length dc", dcInsRecpData.length);
 			const pdf = await pdfGenerator.statementGenerator(booking, insRecpData, dcInsRecpData, installmentPaidReceipts);
 
 			return res.status(200).json({

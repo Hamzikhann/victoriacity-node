@@ -437,12 +437,13 @@ class FileSubmissionController {
 				where: { FSRC_ID: id },
 				row: true
 			});
-
+			console.log(rows.length);
 			if (rows.length == 0) {
 				return next(CustomErrorHandler.notFound("Data not found!"));
 			}
 
 			const file = rows[0];
+			console.log(file);
 
 			if (!file) {
 				return next(CustomErrorHandler.notFound("Data not found!"));
