@@ -270,7 +270,36 @@ class BookingController {
 		if (!(BKI_DETAIL_IDS && Member_id && BK_ID && amount && receipt_head && payment_mode)) {
 			return next(CustomErrorHandler.wrongCredentials("All fields are required!"));
 		}
+		let bookingNew = await Booking.findOne({ where: { BK_ID: BK_ID } });
 
+		let installmentAmount = parseInt(bookingNew.InstallmentAmount);
+
+		let limit = amount / +installmentAmount;
+
+		limit = Math.ceil(limit);
+		console.log(limit, typeof limit);
+		console.log(installmentAmount, typeof installmentAmount);
+
+		let whereclause = { BK_ID: BK_ID, IsCompleted: null, InsType_ID: [1, 2], Installment_Paid: 0 };
+
+		if (receipt_head == "development_charges") {
+			whereclause.BKI_TYPE = "DC";
+		} else {
+			whereclause.BKI_TYPE = null;
+		}
+
+		let bookingInstallmentDetailsnew = await BookingInstallmentDetails.findAll({
+			where: whereclause,
+			order: [["Installment_Month", "ASC"]],
+			limit: limit
+		});
+
+		console.log(bookingInstallmentDetailsnew);
+
+		let bkDetailIds = bookingInstallmentDetailsnew
+			.map((detail) => detail.BKI_DETAIL_ID)
+			.filter((id) => id !== undefined);
+		console.log(bkDetailIds);
 		let userId = req.user.id;
 		if (receipt_head == "ndc_fee") {
 			const responce = await BookingService.ndcFee({
@@ -327,11 +356,11 @@ class BookingController {
 
 		// USER_ID = req.user.id;
 		try {
-			for (let i = 0; i < BKI_DETAIL_IDS.length; i++) {
+			for (let i = 0; i < bkDetailIds.length; i++) {
 				let maxId = await InstallmentReceipts.max("IRC_NO");
 
 				const BookingInstallmentDetailO = await BookingInstallmentDetails.findOne({
-					where: { BKI_DETAIL_ID: BKI_DETAIL_IDS[i] }
+					where: { BKI_DETAIL_ID: bkDetailIds[i] }
 				});
 				const BookingO = await Booking.findOne({ where: { BK_ID: BK_ID } });
 
@@ -343,7 +372,7 @@ class BookingController {
 				maxInstallment_Code = maxInstallment_Code + 1;
 
 				const BookingInstallmentReceiptsO = await InstallmentReceipts.findAll({
-					where: { BKI_DETAIL_ID: BKI_DETAIL_IDS[i] }
+					where: { BKI_DETAIL_ID: bkDetailIds[i] }
 				});
 
 				var installmentDue = parseFloat(BookingInstallmentDetailO.Installment_Due);
@@ -409,30 +438,26 @@ class BookingController {
 
 				installmentDue = installmentDue - installmentPaid;
 
-				installmentRemaining = installmentDue - amount / BKI_DETAIL_IDS.length;
-				var payAmt = amount / BKI_DETAIL_IDS.length;
+				installmentRemaining = installmentDue - amount / bkDetailIds.length;
+				var payAmt = amount / bkDetailIds.length;
 
-				if (BKI_DETAIL_IDS.length > 1) {
+				if (bkDetailIds.length > 1) {
 					installmentRemaining = 0;
 					payAmt = installmentDue;
 				}
 
-				if (installmentRemaining < 0 && BKI_DETAIL_IDS.length == 1) {
+				if (installmentRemaining < 0 && bkDetailIds.length == 1) {
 					payAmt = installmentDue;
 				}
 
-				if (parseInt(amount) > totalAmount && BKI_DETAIL_IDS.length == 1) {
+				if (parseInt(amount) > totalAmount && bkDetailIds.length == 1) {
 					return res.status(400).json({
 						status: 400,
 						Message: "YOU ARE NOT ALLOWED TO ENTER AMOUNT GREATER THAN 2 Months",
 						Allowed_Amount: totalAmount
 					});
 				}
-				if (
-					parseInt(amount) > totalRemaining &&
-					BKI_DETAIL_IDS.length == 1 &&
-					BookingInstallmentDetailO.InsType_ID != 3
-				) {
+				if (parseInt(amount) > totalRemaining && bkDetailIds.length == 1 && BookingInstallmentDetailO.InsType_ID != 3) {
 					return res.status(400).json({
 						status: 400,
 						Message: "YOU ARE NOT ALLOWED TO ENTER AMOUNT GREATER THAN THE TOTAL REMAINING",
@@ -447,7 +472,7 @@ class BookingController {
 						IRC_Date: formattedDate,
 						BK_ID: BK_ID,
 						BK_Reg_Code: BookingO.BK_Reg_Code,
-						BKI_DETAIL_ID: BKI_DETAIL_IDS[i],
+						BKI_DETAIL_ID: bkDetailIds[i],
 						Installment_Code: maxInstallment_Code,
 						Installment_Month: BookingInstallmentDetailO.Installment_Month,
 						InsType_ID: BookingInstallmentDetailO.InsType_ID,
@@ -470,7 +495,7 @@ class BookingController {
 					}
 				});
 
-				if (installmentRemaining < 0 && BKI_DETAIL_IDS.length == 1) {
+				if (installmentRemaining < 0 && bkDetailIds.length == 1) {
 					const BookingInstallmentDetailNextO = await BookingInstallmentDetails.findOne({
 						where: {
 							Installment_Code: {
